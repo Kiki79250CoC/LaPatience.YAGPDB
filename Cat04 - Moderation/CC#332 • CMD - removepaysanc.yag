@@ -1,0 +1,27 @@
+{{$args := parseArgs 2 "`-removepaysanc ‹@UserOrID› ‹[Pay8/Pay16]›`" (carg "userid" "sancUsr") (carg "string" "payToRemove")}}
+
+{{if or (eq ($args.Get 1) "Pay8") (eq ($args.Get 1) "pay8")}}
+    {{$GoulagCount := 0}}
+    {{$dbGoulagCT := dbGet ($args.Get 0) "GoulagCount"}}
+    {{if $dbGoulagCT}}
+        {{$GoulagCount = (index $dbGoulagCT.Value 0)}}
+    {{end}}
+
+    {{dbSet ($args.Get 0) "GoulagCount" (cslice (sub $GoulagCount 1) .Message.Timestamp.Parse.Unix)}}
+    {{dbDel ($args.Get 0) "LastSanc"}}
+
+    {{sendMessage nil "L'entrée de Goulag correspondant au Pay 8 a été retiré"}}
+{{else if or (eq ($args.Get 1) "Pay16") (eq ($args.Get 1) "pay16")}}
+    {{$banCount := 0}}
+    {{$dbBanCT := dbGet ($args.Get 0) "BanCount"}}
+    {{if $dbBanCT}}
+        {{$banCount = (index $dbBanCT.Value 0)}}
+    {{end}}
+
+    {{dbSet ($args.Get 0) "BanCount" (cslice (sub $banCount 1) .Message.Timestamp.Parse.Unix)}}
+    {{dbDel ($args.Get 0) "LastSanc"}}
+
+    {{sendMessage nil "L'entrée de Ban correspondant au Pay 6 a été retiré"}}
+{{else}}
+    {{sendMessage nil "**Erreur :**\nEspèce de gros débile, c'est soit \"Pay8\", soit \"Pay16\"."}}
+{{end}}

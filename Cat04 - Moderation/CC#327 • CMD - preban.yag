@@ -1,0 +1,11 @@
+{{$args :=  parseArgs 2 "`-preban ‹@UserOrID› \"‹Reason›\"`" (carg "userid" "avpbUID") (carg "string" "avpbRes") (carg "duration" "avpbExpiry")}}
+{{$avpbExp := 0}}
+{{if $args.IsSet 2}}{{$avpbExp = $args.Get 2}}{{end}}
+
+{{if eq $avpbExp 0}}
+  {{dbSet ($args.Get 0) "AvPreBan" (joinStr "➷" ($args.Get 1) .User.ID)}}
+  {{sendMessage nil (print "✅ L'avertissement Pré-ban à l'encontre de <@" ($args.Get 0) "> est désormais actif.")}}
+{{else}}
+  {{dbSetExpire ($args.Get 0) "AvPreBan" (joinStr "➷" ($args.Get 1) .User.ID) (toInt (fdiv ($args.Get 2) 1000000000))}}
+  {{sendMessage nil (print "✅ L'avertissement Pré-ban à l'encontre de <@" ($args.Get 0) "> est désormais actif.\nCet avertissement est programmé pour expirer le <t:" (add currentTime.Unix (toInt (fdiv ($args.Get 2) 1000000000))) ":f>.")}}
+{{end}}

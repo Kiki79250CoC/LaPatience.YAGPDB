@@ -1,0 +1,12 @@
+{{$args := parseArgs 2 "`-lkick ‹@UserOrID› ‹Reason›`" (carg "user" "user") (carg "string" "reason")}}
+{{$kickUsr := ($args.Get 0)}}
+{{$kickRes := "Non spécifiée"}}
+{{if ($args.IsSet 1)}}
+  {{$kickRes = $args.Get 1}}
+{{end}}
+{{if and (not (targetHasRoleID $kickUsr.ID 931351059455164477)) (not (targetHasRoleID $kickUsr.ID 496010603601854464)) (not (targetHasRoleID $kickUsr.ID 507301458853625879)) (not (eq $kickUsr.ID 223894107016134656))}}
+  {{sendMessage 515972308645707777 (print "> **Pseudo :** " $kickUsr.Mention "\n> **Sanction :** 🚪 Expulsion\n> **Raison :** " $kickRes "\n> \n> **Sanctionné par** " .User.Mention)}}
+  {{execAdmin "kick" $kickUsr $kickRes}}
+{{else}}
+  {{sendMessage nil "<:jawad:586317220490248222>"}}
+{{end}}

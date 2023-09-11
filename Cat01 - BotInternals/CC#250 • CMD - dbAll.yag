@@ -1,0 +1,33 @@
+{{$args := parseArgs 0 (print "`-dbAll ‹Page›`") (carg "int" "page")}}
+{{$page := 0}}
+{{if ($args.Get 0)}}
+  {{$page = mult (add ($args.Get 0) -1) 10}}
+{{end}}
+
+{{$count := 0}}
+{{$x := sendMessageRetID nil (cembed "author" (sdict "name" "Chargement..."))}}
+{{$total := dbCount}}
+
+{{$resultText := ""}}
+{{if eq $total 0}}
+  {{$resultText = "Aucun résultat"}}
+{{else if eq $total 1}}
+  {{$resultText = "1 résultat"}}
+{{else}}
+  {{$resultText = print $total " résultats"}}
+{{end}}
+
+{{$count := add $page 1}}
+{{$fields := cslice (sdict "name" (print "• " $resultText) "value" " " "inline" false)}}
+
+{{- range (dbTopEntries "%" 10 $page)}}
+{{- $value := json .Value}}
+{{- if gt (len $value) 30}}{{$value = print (slice $value 0 30) "..."}}{{end}}
+{{- $userm := .UserID}}
+{{- with (getMember .UserID)}}{{$userm = print .User.Mention " `" .User.String "`"}}{{end}}
+{{- $fields = $fields.Append (sdict "name" (print "• Résultat de la recherche " $count " :") "value" (print "`Utilisateur    :` " $userm "\n`Nom de la Clé  :` " .Key "\n`ID de la Clé   :` " .ID "\n`Type           :` " (printf "%T" .Value) "\n`Nb. Caractères :` " (len (json .Value)) "/100000\n`Taille         :` " (printf "%.2f" (fdiv (len (json .Value)) 1000)) " Ko\n`Valeur         :`\n```json\n" (reReplace `\\\\` $value `\`) "```") "inline" false)}}
+{{- $count = add $count 1}}
+{{- end}}
+
+{{$embed := sdict "title" "📄 Entrées de la base de données" "color" 0x00D66C "fields" $fields}}
+{{editMessage nil $x (complexMessageEdit "embed" (cembed $embed))}}

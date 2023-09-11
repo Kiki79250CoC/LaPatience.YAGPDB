@@ -1,0 +1,14 @@
+{{$args := parseArgs 2 "-retrieve @User#1234 points" (carg "userid" "userid") (carg "int" "int")}}
+{{$userid := $args.Get 0}}
+{{$toRetrieve := $args.Get 1}}
+{{$entry := dbGet $userid "points"}}
+{{$toSet := cslice (sub 0 $toRetrieve) .Message.Timestamp.Parse.Unix}}
+{{$oldPoints := 0}}
+{{if $entry}}
+  {{$pointos := (index ($entry.Value) 0)}}
+  {{$oldPoints = $pointos}}
+  {{$newPointos := sub $pointos $toRetrieve}}
+  {{$toSet = cslice $newPointos .Message.Timestamp.Parse.Unix}}
+{{end}}
+{{dbSet $userid "points" $toSet}}
+{{sendMessage nil (joinStr "" (getMember $userid).User.Username " : " $oldPoints " -> " (sub $oldPoints $toRetrieve))}}

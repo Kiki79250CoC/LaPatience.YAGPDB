@@ -1,0 +1,70 @@
+{{$args := parseArgs 2 "`-transfer ‹@UserOrID› ‹Amount›`" (carg "userid" "user") (carg "int" "int")}}
+{{$CanBypass := cslice 369101917659332611 531170764183830528}}
+
+{{$plafPremLvl := 0}}
+{{if targetHasRoleID ($args.Get 0) 1079418386511040572}} {{$plafPremLvl = 2}}
+{{else if targetHasRoleID ($args.Get 0) 967188575005315132}} {{$plafPremLvl = 1}} {{end}}
+{{$plaf := toInt (dbGet $plafPremLvl "points").Value}}
+
+{{$ptsFromUsr := dbGet .User.ID "points"}}
+{{$ptsDestUsr := dbGet ($args.Get 0) "points"}}
+
+{{if and (not (eq ($args.Get 0) .User.ID)) (gt ($args.Get 1) 0) (ge (index $ptsFromUsr.Value 0) ($args.Get 1))}}
+  {{$destUsrSld := 0}}
+  {{if $ptsDestUsr}}
+    {{$destUsrSld = index $ptsDestUsr.Value 0}}
+  {{end}}
+
+  {{$newAmount := ($args.Get 1)}}
+  {{if and (ge (add $destUsrSld $newAmount) $plaf) (not (getMember ($args.Get 0)).User.Bot)}}
+    {{$OvrfAmnt := (sub (add $destUsrSld $newAmount) $plaf)}}
+    {{$newAmount = (sub $newAmount $OvrfAmnt)}}
+  {{end}}
+  {{if lt $newAmount 1}} {{$newAmount = 0}} {{end}}
+  {{if in $CanBypass ($args.Get 0)}} {{$newAmount = ($args.Get 1)}} {{end}}
+
+  {{if eq $newAmount 0}}
+    {{sendDM ">>> **Erreur :**\nImpossible d'effectuer la transaction car la cible a atteint son plafond de points."}}
+
+  {{else}}
+    {{dbSet .User.ID "points" (cslice (sub (index $ptsFromUsr.Value 0) $newAmount) .Message.Timestamp.Parse.Unix)}}
+    {{dbSet ($args.Get 0) "points" (cslice (add $destUsrSld $newAmount) .Message.Timestamp.Parse.Unix)}}
+
+    {{$embed := cembed
+      "title" (print "✓ Le transfert a été effectué avec succès")
+      "color" 0x00b04f
+      "fields" (cslice
+        (sdict "name" (or .User.Globalname .User.Username) "value" (print "> ~~" (reReplace "," (humanizeThousands (index $ptsFromUsr.Value 0)) " ") "~~ › **" (reReplace "," (humanizeThousands (sub (index $ptsFromUsr.Value 0) $newAmount)) " ") "**") "inline" true)
+        (sdict "name" "** › **" "value" " " "inline" true)
+        (sdict "name" (or (getMember ($args.Get 0)).User.Globalname (getMember ($args.Get 0)).User.Username) "value" (print "> ~~" (reReplace "," (humanizeThousands $destUsrSld) " ") "~~ › **" (reReplace "," (humanizeThousands (add $destUsrSld $newAmount)) " ") "**") "inline" true)
+    )}}
+    {{$embed2 := cembed "color" 0xda373c
+        "title" "Attention !"
+        "footer" (sdict "text" (print "Le plafond du destinataire a été atteint. Le montant de la transaction a donc été tronqué à " $newAmount " Points pour ne pas dépasser le plafond."))
+    }}
+
+    {{sendMessage nil $embed}}
+  
+    {{if and (ge (add $destUsrSld $newAmount) $plaf) (not (getMember ($args.Get 0)).User.Bot) (not (in $CanBypass ($args.Get 0)))}}
+      {{sendMessage nil $embed2}}
+    {{end}}
+
+    {{$plural := ""}} {{if gt $newAmount 1}} {{$plural = "s"}} {{end}}
+    {{sendMessage 1135570896959066112 (print .User.Mention " a transféré **" $newAmount " Point" $plural "** à " (getMember ($args.Get 0)).User.Mention ".")}}
+
+  {{end}}
+
+{{else}}
+  {{$err := ">>> **Erreur :**\n"}}
+  {{if (eq ($args.Get 0) .User.ID)}}
+    {{$err = (print $err "Vous ne pouvez pas vous envoyer des points à vous-même.")}}
+  {{else if (le ($args.Get 1) 0)}}
+    {{$err = (print $err "Le montant du transfert est invalide.")}}
+  {{else if (lt (index $ptsFromUsr.Value 0) ($args.Get 1))}}
+    {{$err = (print $err "Votre solde de Points est insuffisant pour le transfert.")}}
+  {{else}}
+    {{$err = (print $err "Une erreur inconnue est survenue.")}}
+  {{end}}
+  {{sendDM $err}}
+  
+{{end}}

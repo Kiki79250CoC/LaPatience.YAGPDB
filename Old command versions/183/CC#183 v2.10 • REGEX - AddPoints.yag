@@ -1,0 +1,18 @@
+{{$toIncrease := 1}}
+{{$bankSolde := 0}}
+
+{{$userPts := dbGet .User.ID "points"}}
+{{if $userPts}}
+  {{$bankSolde = (index ($userPts.Value) 0)}}
+  {{if (ge (sub .Message.Timestamp.Parse.Unix (index ($userPts.Value) 1)) 120)}}
+    {{dbSet .User.ID "points" (cslice (add $bankSolde $toIncrease) .Message.Timestamp.Parse.Unix)}}
+  {{end}}
+{{else}}
+  {{$legacyPtsSystem := dbGet 0 "points"}}
+  {{$legacyBankSolde := (sdict ($legacyPtsSystem.Value)).Get (toString .User.ID)}}
+  {{if $legacyBankSolde}}
+    {{dbSet .User.ID "points" (cslice (add (index $legacyBankSolde 0) $toIncrease) .Message.Timestamp.Parse.Unix)}}
+  {{else}}
+    {{dbSet .User.ID "points" (cslice (add $bankSolde $toIncrease) .Message.Timestamp.Parse.Unix)}}
+  {{end}}
+{{end}}

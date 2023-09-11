@@ -1,0 +1,2 @@
+{{$args := parseArgs 1 "`-necromancien \"‹Text›\"`" (carg "string" "text")}}
+{{sendMessage 1098377860730855464 ($args.Get 0)}}

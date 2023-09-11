@@ -1,0 +1,30 @@
+{{$args := parseArgs 1 "`-banword ‹[ListAll|Add|Remove]› \"‹BanWord›\"`" (carg "string" "Action") (carg "string" "BannedWord")}}
+{{$banWordList := (dbGet 0 "bannedwords").Value}}
+
+{{if eq (lower ($args.Get 0)) "listall"}}
+  {{sendMessage nil (print "**Liste des mots bannis actuellement actifs :**\n\n>>> • " (title (reReplace "¿" $banWordList "\n• ")))}}
+
+{{else if eq (lower ($args.Get 0)) "add"}}
+  {{if ($args.IsSet 1)}}
+    {{if eq $banWordList ""}}
+      {{$banWordList = $args.Get 1}}
+    {{else}}
+      {{$banWordList = print $banWordList "¿" ($args.Get 1)}}
+    {{end}}
+    {{dbSet 0 "bannedwords" $banWordList}} 
+    {{sendMessage nil (print "> `" ($args.Get 1) "` a bien été ajouté dans la liste des mots interdits.")}}
+  {{else}}
+    {{sendMessage nil ">>> **Erreur :**\nVous devez définir le mot à ajouter dans la liste."}}
+  {{end}}
+
+{{else if eq (lower ($args.Get 0)) "remove"}}
+  {{if ($args.IsSet 1)}}
+    {{dbSet 0 "bannedwords" (reReplace (joinStr "" "¿" ($args.Get 1)) (reReplace (joinStr "" ($args.Get 1) "¿") $banWordList "") "")}}
+    {{sendMessage nil (print "> `" ($args.Get 1) "` a bien été retiré de la liste des mots interdits.")}}
+  {{else}}
+    {{sendMessage nil ">>> **Erreur :**\nVous devez définir le mot à retirer de la liste."}}
+  {{end}}
+
+{{else}}
+  {{sendMessage nil ">>> **Erreur :**\nArgument de commande invalide.\n`-banword ‹[listall|add|remove]› \"‹BanWord›\"`"}}
+{{end}}

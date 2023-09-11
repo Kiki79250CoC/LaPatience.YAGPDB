@@ -1,0 +1,3 @@
+{{sendMessage nil (print "DailyGoulag : " (dbDelMultiple (sdict "pattern" "DailyGoulag") 100 0))}}
+{{sendMessage nil (print "DailyKick : " (dbDelMultiple (sdict "pattern" "DailyKick") 100 0))}}
+{{execCC 294 nil 0 (sdict "key" "DailyBan")}}

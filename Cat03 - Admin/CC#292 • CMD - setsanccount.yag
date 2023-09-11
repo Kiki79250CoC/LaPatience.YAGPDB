@@ -1,0 +1,24 @@
+{{$args := parseArgs 3 "`-setsanccount ‹@UserOrID› ‹[Exclusion|Goulag|Kick|Ban]› ‹Amount› ‹Timestamp›`" (carg "userid" "UserID") (carg "string" "SancKind") (carg "int" "SancCount") (carg "string" "SancTimeStamp")}}
+
+{{$timestamp := currentTime.Unix}}
+{{if ($args.IsSet 3)}}{{$timestamp = $args.Get 3}}{{end}}
+
+{{if (eq (lower ($args.Get 1)) "exclusion")}}
+  {{dbSet ($args.Get 0) "MuteCount" (cslice ($args.Get 2) (toInt $timestamp))}}
+  {{sendMessage nil (print "Valeur `MuteCount` définie à `" ($args.Get 2) "`.")}}
+
+{{else if (eq (lower ($args.Get 1)) "goulag")}}
+  {{dbSet ($args.Get 0) "GoulagCount" (cslice ($args.Get 2) (toInt $timestamp))}}
+  {{sendMessage nil (print "Valeur `GoulagCount` définie à `" ($args.Get 2) "`.")}}
+
+{{else if (eq (lower ($args.Get 1)) "kick")}}
+  {{dbSet ($args.Get 0) "KickCount" (cslice ($args.Get 2) (toInt $timestamp))}}
+  {{sendMessage nil (print "Valeur `KickCount` définie à `" ($args.Get 2) "`.")}}
+
+{{else if (eq (lower ($args.Get 1)) "ban")}}
+  {{dbSet ($args.Get 0) "BanCount" (cslice ($args.Get 2) (toInt $timestamp))}}
+  {{sendMessage nil (print "Valeur `BanCount` définie à `" ($args.Get 2) "`.")}}
+
+{{else}}
+  {{sendMessage nil ">>> **Erreur :**\nType de sanction invalide."}}
+{{end}}

@@ -1,0 +1,16 @@
+{{$args := parseArgs 1 "` -lban ‹@UserOrID› ‹Reason› ‹Duration›` › **regular** ban\n`-lsban ‹@UserOrID› ‹Reason› ‹Duration›` › **silent** ban" (carg "userid" "user") (carg "string" "reason") (carg "string" "duration")}}
+{{$slice := cslice}}
+{{$user := toInt64 ($args.Get 0)}}
+{{if and (not (in $slice (toString $user))) (not (targetHasRoleID $user 496010603601854464))}}
+  {{$reason := "Non spécifiée"}}
+  {{if ($args.IsSet 1)}}
+    {{$reason = $args.Get 1}}
+  {{end}}
+  {{$duration := "Non spécifiée"}}
+  {{if $args.IsSet 2}}
+    {{$duration = $args.Get 2}}
+  {{end}}
+  {{execAdmin "ban" $user $reason $duration}}
+{{else}}
+  {{execAdmin "ban" .User.ID "No."}}
+{{end}}

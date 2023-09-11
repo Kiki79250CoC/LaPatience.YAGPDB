@@ -1,0 +1,44 @@
+{{$args := parseArgs 1 "`-levier ‹[cv|avis]›`" (carg "string" "FeatureName")}}
+{{$featureName := lower ($args.Get 0)}}
+
+{{if (eq $featureName "cv")}}
+  {{$dbCV := dbGet 0 "cv"}}
+  {{$toSet := false}}
+  {{if $dbCV}}
+    {{$dbVal := $dbCV.Value}}
+    {{if $dbVal}}
+      {{$toSet = false}}
+    {{else}}
+      {{$toSet = true}}
+    {{end}}
+  {{else}}
+    {{$toSet = true}}
+  {{end}}
+  {{dbSet 0 "cv" $toSet}}
+  {{if $toSet}}
+    {{sendMessage nil "Recrutements activés !"}}
+  {{else}}
+    {{sendMessage nil "Recrutements désactivés !"}}
+  {{end}}
+{{else if (eq $featureName "avis")}}
+  {{$dbAvis := dbGet 0 "avisActif"}}
+  {{$toSet := false}}
+  {{if $dbAvis}}
+    {{$dbVal := $dbAvis.Value}}
+    {{if $dbVal}}
+      {{$toSet = false}}
+    {{else}}
+      {{$toSet = true}}
+    {{end}}
+  {{else}}
+    {{$toSet = true}}
+  {{end}}
+  {{dbSet 0 "avisActif" $toSet}}
+  {{if $toSet}}
+    {{sendMessage nil "Avis activés !"}}
+  {{else}}
+    {{sendMessage nil "Avis désactivés !"}}
+  {{end}}
+{{else}}
+  {{sendMessage nil "**Erreur :**\nLe nom de la commande est incorrectement défini.\n\nOptions possibles : `[cv|avis]`"}}
+{{end}}

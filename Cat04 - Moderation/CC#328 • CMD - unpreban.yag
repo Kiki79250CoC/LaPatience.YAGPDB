@@ -1,0 +1,9 @@
+{{$args := parseArgs 1 "`-unpreban ‹@UserOrID›`" (carg "userid" "sancUsr")}}
+{{$verify := dbGet ($args.Get 0) "AvPreBan"}}
+
+{{if $verify}}
+  {{dbDel ($args.Get 0) "AvPreBan"}}
+  {{sendMessage nil (print "✅ L'avertissement Pré-ban à l'encontre de <@" ($args.Get 0) "> a été retiré.")}}
+{{else}}
+  {{sendMessage nil ">>> **Erreur :**\nL'élément recherché n'existe pas."}}
+{{end}}

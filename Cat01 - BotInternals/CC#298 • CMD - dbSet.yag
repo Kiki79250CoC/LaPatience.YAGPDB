@@ -1,0 +1,13 @@
+{{$args := parseArgs 3 (print "`-dbSet ‹@UserOrID› \"‹Key›\" <Value>`") (carg "userid" "id") (carg "string" "key") (carg "string" "value")}}
+{{$user := userArg ($args.Get 0)}}
+{{$userm := print "`" ($args.Get 0) "`"}}
+{{with $user}}{{$userm = .Mention}}{{end}}
+{{dbSet ($args.Get 0) ($args.Get 1) ($args.Get 2)}}
+{{$embed := sdict "color" 0x00D66C 
+  "title" "✏️ Entrée de la base de donnée créée"
+  "description" (print "📜 Entrée de la base de données : `" ($args.Get 1) "`\nID : " $userm "\nValeur : `" ($args.Get 2) "`")
+}}
+{{if $user}}
+  {{$embed.Set "thumbnail" (sdict "url" (print "https://cdn.discordapp.com/avatars/" ($args.Get 0) "/" $user.Avatar ".png?size=256"))}}
+{{end}}
+{{sendMessage nil (cembed $embed)}}

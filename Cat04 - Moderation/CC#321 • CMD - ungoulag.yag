@@ -1,0 +1,40 @@
+{{$args := parseArgs 1 "`-ungoulag ‹@UserOrID› ‹\"Reason\"›`" (carg "userid" "sancUsr") (carg "string" "ungRes") (carg "string" "OptArg")}}
+{{$chnSanc := 515972308645707777}}
+{{$sancUID := $args.Get 0}}
+{{$optArgs := or ($args.Get 2) ($args.Get 1) " "}}
+{{$rMbr := "496010501990645799"}}
+
+{{if .ExecData}}
+  {{$sancUID = .ExecData.sancUsr}}
+  {{$rMbr = print $rMbr "-" (toString (dbGet $sancUID "SancRoles").Value)}}
+{{else}}
+  {{if targetHasRoleID $sancUID 506417754878902272}}
+    {{$rMbr = print $rMbr "-" (toString (dbGet $sancUID "SancRoles").Value)}}
+    {{$ungoulagRes := "Aucune raison fournie"}}
+    {{if $args.IsSet 1}}{{$ungoulagRes = $args.Get 1}}{{end}}
+
+    {{if not (eq (lower (toString $optArgs)) "--no-logs")}}
+      {{$lastSanc := ""}}
+      {{$dbLastSanc := dbGet $sancUID "LastSanc"}}
+      {{if $dbLastSanc}}
+        {{$lastSanc = index $dbLastSanc.Value 0}}
+        {{dbSet $sancUID "LastSanc" (cslice (print $lastSanc "\n\n> **Dégoulag manuel** le <t:" currentTime.Unix ":f> par <@" .User.ID "> \n> **Raison :** " $ungoulagRes) (index $dbLastSanc.Value 1) (index $dbLastSanc.Value 2))}}
+      {{end}}
+
+      {{$embed := cembed "color" 0x7dffb7
+        "fields" (cslice
+          (sdict "name" " " "value" (print (getMember $sancUID).User.Mention "\n*ID : `" $sancUID "`*\n\n> **Dégoulag manuel** par <@" .User.ID "> \n> **Raison :** " $ungoulagRes) "inline" false)
+          (sdict "name" " " "value" " " "inline" false)
+        ) "timestamp" currentTime}}
+      {{sendMessage $chnSanc $embed}}
+
+    {{end}}
+    {{cancelScheduledUniqueCC 321 $sancUID}}
+  {{else}}
+    {{sendMessage nil (print "**Erreur :**\nPTDR, il est pas au goulag ton pelo de **" (getMember $sancUID).User.String "** là ...")}}
+  {{end}}
+{{end}}
+{{range $k,$v := (split $rMbr "-")}}{{giveRoleID $sancUID (toInt $v)}}{{end}}
+{{takeRoleID $sancUID 506417754878902272}}
+{{takeRoleID $sancUID 657981836412321842}}
+{{dbDel $sancUID "SancRoles"}}

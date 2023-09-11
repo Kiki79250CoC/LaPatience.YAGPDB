@@ -1,0 +1,12 @@
+{{$args := parseArgs 1 "`-anniv ‹@user›`" (carg "user" "user")}}
+{{$user := ($args.Get 0).ID}}
+{{if (targetHasRoleID $user 496010603601854464)}}
+  {{sendMessage nil "Denied fdp t'essaies de rank up ton pote ?"}} 
+{{else}} 
+  {{if (targetHasRoleID $user 617348857302351925)}} 
+    {{takeRoleID $user 617348857302351925}} 
+  {{else}} 
+    {{giveRoleID $user 617348857302351925}} 
+    {{sendMessage 550368344545558538 (joinStr "" "[ANNIV] " ($args.Get 0).Mention " : " (currentTime.Format "02/01/2006"))}}
+  {{end}} 
+{{end}} 

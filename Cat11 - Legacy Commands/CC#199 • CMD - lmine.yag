@@ -1,0 +1,19 @@
+{{$args := parseArgs 3 "`-lmine ‹@UserOrID› \"‹Reason›\" \"‹Duration›\"`" (carg "userid" "minedID") (carg "string" "mineRes") (carg "string" "mineDur")}}
+{{$minedID := ($args.Get 0)}}
+{{$mineDur := ($args.Get 2)}}
+{{$mineRes := ($args.Get 1)}}
+{{$isFromBoutique := 0}}
+{{if or (eq $mineDur "1min") (eq $mineDur "1mn") (eq $mineDur "1m")}}
+  {{$isFromBoutique = 1}}
+{{end}}
+{{if and (eq $isFromBoutique 1) (targetHasRoleID $minedID 1079418386511040572)}}
+  {{sendMessage nil "**Erreur :**\nCette personne est **VIP niveau 2**, par conséquent il n'est pas possible de le miner dans ces circonstances."}}
+{{else}}
+  {{if and (reFind `^(\d\d?)s(ec)?|1m(in)?` $mineDur ) (and (not (eq $mineRes "Dégoulag")) false)}}
+    {{$mineDur = "1min"}}
+    {{$mineRes = "Troll mine"}}
+    {{takeRoleID $minedID 496010603601854464}}
+  {{end}}
+  {{$value := (joinStr "™" (toString $minedID) $mineRes $mineDur (toString .User.ID))}}
+  {{dbSet (toInt64 $minedID) "gulag" $value}}
+{{end}}

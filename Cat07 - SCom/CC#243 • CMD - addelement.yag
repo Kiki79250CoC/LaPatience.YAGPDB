@@ -1,0 +1,12 @@
+{{$entry := dbGet 0 "dictPing"}}
+{{$args := parseArgs 2 "-addElement [code] [id]" (carg "string" "string") (carg "string" "string")}}
+{{$key := $args.Get 0}}
+{{$id := $args.Get 1}}
+{{$dict := sdict}}
+{{if not $entry}}
+  {{$dict.Set $key $id}}
+{{else}}
+  {{$dict = sdict $entry.Value}}
+  {{$dict.Set $key $id}}
+{{end}}
+{{dbSet 0 "dictPing" $dict}}

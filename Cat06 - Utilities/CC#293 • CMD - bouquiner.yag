@@ -1,0 +1,7 @@
+{{if (targetHasRoleID .User.ID 972161636125270086)}}
+  {{takeRoleID .User.ID 972161636125270086}}
+  {{sendDM "Le rôle vous a été retiré."}}
+{{else}}
+  {{giveRoleID .User.ID 972161636125270086}}
+  {{sendDM "Le rôle vous a été attribué."}}
+{{end}}

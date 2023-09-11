@@ -1,0 +1,7 @@
+{{$args := parseArgs 2 (print "`-dbDel ‹@UserOrID› \"‹Key›\"`") (carg "userid" "UserID") (carg "string" "Key")}}
+{{if (dbGet ($args.Get 0) ($args.Get 1))}}
+  {{dbDel ($args.Get 0) ($args.Get 1)}}
+  {{sendMessage nil (print "L'entrée de la base de donnée correspondante a été supprimée.\n\n>>> **\"" ($args.Get 1) "\"**\n**ID : `" ($args.Get 0) "`**")}}
+{{else}}
+  {{sendMessage nil ">>> **Erreur :**\nL'élément recherchée n'existe pas dans la base de données."}}
+{{end}}

@@ -1,0 +1,3 @@
+{{$args := parseArgs 1 "`-getout ‹@userOrID›`" (carg "userid" "sancUsr")}}
+{{addReactions "✅"}}
+{{takeRoleID ($args.Get 0) 657981836412321842}}

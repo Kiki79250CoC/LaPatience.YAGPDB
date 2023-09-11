@@ -1,0 +1,30 @@
+{{$roles := ""}}
+{{$user := ""}}
+{{if .ExecData}}
+  {{$roles = .ExecData.roles}}
+  {{$user = .ExecData.userid}}
+{{else}}
+  {{$args := parseArgs 4 "-lungoulag @user [isJusticier] [isLeader] [R/H/P/T]" (carg "user" "user") (carg "string" "isJusticier") (carg "string" "isLeader") (carg "string" "team")}}
+  {{$user = ($args.Get 0).ID}}
+  {{$roles = "496010501990645799"}}
+  {{if eq ($args.Get 1) "true"}}
+    {{$roles = (joinStr "" $roles "-507301458853625879")}}
+  {{end}}
+  {{if eq ($args.Get 2) "true"}}
+    {{$roles = (joinStr "" $roles "-596344192603521035")}}
+  {{end}}
+  {{$team := ($args.Get 3)}}
+  {{if eq $team "R"}}
+    {{$roles = (joinStr "" $roles "-669333038068662285")}}
+  {{else if ( eq $team "H" )}}
+    {{$roles = (joinStr "" $roles "-669333046759129119")}}
+  {{else if (eq $team "P")}}
+    {{$roles = (joinStr "" $roles "-669333044842332171")}}
+  {{else if (eq $team "T")}}
+    {{$roles = (joinStr "" $roles "-669333046025256965")}}
+  {{end}}
+  {{cancelScheduledUniqueCC 78 $user}}
+{{end}}
+{{range $k,$v := (split $roles "-")}}{{giveRoleID $user (toInt64 $v)}}{{end}}
+{{takeRoleID $user 506417754878902272}}
+{{takeRoleID $user 657981836412321842}}

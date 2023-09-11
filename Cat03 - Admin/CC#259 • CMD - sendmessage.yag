@@ -1,0 +1,2 @@
+{{$args := parseArgs 2 "`-sendmessage ‹#ChannelOrID› ‹Message›`" (carg "channel" "channel") (carg "string" "string")}}
+{{sendMessage ($args.Get 0).ID ($args.Get 1)}}

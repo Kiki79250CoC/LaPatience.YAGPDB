@@ -1,0 +1,57 @@
+{{$args := parseArgs 2 "-mise [mise] [nombre]" (carg "int" "int") (carg "int" "int")}}
+{{$id := toInt64 .User.ID}}
+{{$sendDM := ""}}
+{{$paried := $args.Get 1}}
+{{$points := dbGet $id "points"}}
+{{$pronos := dbGet 0 "cotes"}}
+{{if or (not $points) (not $pronos)}}
+  {{$sendDM = "Pas de pronos en cours AAYAAAAA"}} 
+{{else}}
+  {{$value := $points.Value}} 
+  {{$value2 := $pronos.Value}}
+  {{if or (not $value) (eq $value2 "")}} 
+    {{$sendDM = "La BDD est vide ayaaa"}} 
+  {{else}} 
+    {{$pronaw := (split ($value2) "-")}}
+    {{$max := toInt (index $pronaw 1)}}
+    {{$true := eq (index $pronaw 0) "true"}}
+    {{$parieurs := dbGet 0 "parieurs"}}
+    {{if $parieurs}}
+     {{if (reFind (toString .User.ID) $parieurs.Value)}}
+      {{$true = false}}
+     {{end}}
+    {{end}}
+    {{$pronawListIndex := len (split (index $pronaw 2) ",")}}
+    {{if or (gt $paried $pronawListIndex) (not $true)}}
+      {{$sendDM = "Impossible de parier !"}}
+    {{else}}
+      {{$ptime := $value}}
+      {{$uToSet := $value}}
+      {{if not $ptime}}
+        {{$sendDM = "Tu n'es pas enregistré dans la base de données ! Parle dans le général pour le devenir !"}} 
+      {{else}}
+       {{$userPoints := (index $ptime 0)}}
+       {{$newTimestamp := (index $ptime 1)}}
+       {{$price := $args.Get 0}}
+       {{if or (gt $price $userPoints) (gt $price $max) (lt $price 100)}} 
+         {{$sendDM = "Soit tu n'as pas assez pour miser, soit ta mise dépasse le maximum, soit tu es stupide et tu as désigné un nombre négatif !"}} 
+       {{else}}
+         {{$userPoints = (sub $userPoints $price)}} 
+         {{$uToSet = (cslice $userPoints $newTimestamp)}}
+         {{dbSet $id "points" $uToSet}}
+         {{$sendDM = "Mise effectué avec succès !"}} 
+         {{sendMessage 808035430410092544 (joinStr "" .User.Mention " vient de miser " $price " points sur le " $paried "!\n-----")}} 
+         {{$toSetVal := joinStr "" (toString .User.ID) ":" (toString $paried) ";" (toString $price)}}
+	 {{if $parieurs}}
+	   {{$value3 := $parieurs.Value}}
+           {{if ne $value3 ""}}
+             {{$toSetVal = (joinStr "" ($value3) "," (toString .User.ID) ":" (toString $paried) ";" (toString $price))}}
+           {{end}}
+         {{end}}
+         {{dbSet 0 "parieurs" $toSetVal}}
+       {{end}}
+     {{end}}
+   {{end}}
+ {{end}}
+{{end}}
+{{sendDM $sendDM}}

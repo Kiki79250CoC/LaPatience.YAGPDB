@@ -1,0 +1,9 @@
+{{$args := parseArgs 1 "`-rank ‹@userOrID›`" (carg "userid" "user")}}
+{{$id := ($args.Get 0)}}
+{{if and (not (targetHasRoleID $id 506417754878902272)) (targetHasRoleID $id 735813110224388118) }} 
+  {{giveRoleID $id 496010501990645799}}
+  {{takeRoleID $id 735813110224388118}} 
+  {{sendMessage nil "Personne rankée avec succès !"}}
+{{else}}
+  {{sendMessage nil (print "Dis " .User.Mention "...\nT'essaierais pas un peu de niquer le système là par hasard ?! <:jawad:1054718732620009512>")}}
+{{end}}

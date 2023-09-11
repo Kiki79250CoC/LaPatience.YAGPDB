@@ -1,0 +1,27 @@
+{{deleteTrigger 0}}
+{{$args := parseArgs 1 "`-plainte \"‹ContentInQuotes›\"`" (carg "string" "plainte")}}
+
+{{$reportNbr := dbGet 0 "PlainteCount"}}
+{{$contentPart1 := " "}}
+{{$contentPart2 := " "}}
+
+{{if lt (len ($args.Get 0)) 1024}}
+  {{$contentPart1 = $args.Get 0}}
+{{else}}
+  {{$list := split ($args.Get 0) " "}}
+  {{range $k,$v := $list}}{{$index := (roundFloor (div (len $list) 2))}}{{if le (toInt $k) (toInt $index)}}{{$contentPart1 = joinStr " " $contentPart1 $v}}{{else}}{{$contentPart2 = joinStr " " $contentPart2 $v}}{{end}}{{end}}
+{{end}}
+
+{{$embed := sdict "color" 0x69ed74 "fields" (cslice (sdict "name" "Contenu de la plainte :" "value" $contentPart1 "inline" false)) "footer" (sdict "text" (print "ID de la plainte : " (add $reportNbr.Value 1)))}}
+{{$fields := $embed.fields}}
+
+{{if (ne $contentPart2 " ")}}
+  {{$fields = $fields.Append (sdict "name" " " "value" $contentPart2 "inline" false)}}
+{{end}}
+{{$embed.Set "fields" $fields}}
+
+{{$msgID := sendMessageNoEscapeRetID 691741487213445231 (complexMessage "content" (print (mentionRoleID 1078386211472805998) "\nVous avez reçu une nouvelle plainte.") "embed" (cembed $embed))}}
+{{sendMessageNoEscape 693795482639794276 (complexMessage "content" (print "__Logging de Plainte :__\n\n> **Utilisateur :** " .User.Mention " (" .User.String ")\n> **ID :** `" .User.ID "`") "embed" (cembed $embed))}}
+{{sendMessage 618851288825856010 (print "#" (add $reportNbr.Value 1) "." currentTime.Unix "." $msgID "." .User.ID)}}
+
+{{dbSet 0 "PlainteCount" (add $reportNbr.Value 1)}}

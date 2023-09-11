@@ -1,0 +1,10 @@
+{{$args := parseArgs 6 "`-setlastsanc ‹@UserOrID› ‹SancTimestamp› ‹ModeratorID› ‹[Exclusion|Goulag|Kick|Ban]› \"‹Reason›\" ‹Duration›`" (carg "userid" "SancUsr") (carg "string" "SancTimestamp") (carg "userid" "ModID") (carg "string" "SancKind") (carg "string" "SancReason") (carg "string" "SancDuration")}}
+
+{{$readableSancDur := (reReplace "second" (reReplace "hour" (reReplace "day" (reReplace "week" (reReplace "month" (reReplace "year" (reReplace "and" (humanizeDurationSeconds ($args.Get 5)) "et") "an") "mois") "semaine") "jour") "heure") "seconde")}}
+
+{{if (in (cslice "exclusion" "goulag" "kick" "ban") (lower ($args.Get 3)))}}
+  {{dbSet ($args.Get 0) "LastSanc" (cslice (print "**Date :** <t:" ($args.Get 1) ":f> par <@" ($args.Get 2) ">\n> **Sanction :** " (title (lower ($args.Get 3))) "\n> **Durée :** " $readableSancDur " (" ($args.Get 5) ")\n> **Raison :** " ($args.Get 4)) ($args.Get 1))}}
+  {{sendMessage nil (print "> **Date :** <t:" ($args.Get 1) ":f> par <@" ($args.Get 2) ">\n> **Sanction :** " (title (lower ($args.Get 3))) "\n> **Durée :** " $readableSancDur " (" ($args.Get 5) ")\n> **Raison :** " ($args.Get 4))}}
+{{else}}
+  {{sendMessage nil ">>> **Erreur :**\nType de sanction inconnu."}}
+{{end}}

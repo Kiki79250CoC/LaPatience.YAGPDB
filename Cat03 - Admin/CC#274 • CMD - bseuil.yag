@@ -1,0 +1,27 @@
+{{$args := parseArgs 0 "`-bseuil ‹[Add|Remove]› ‹Amount›`" (carg "string" "Action") (carg "int" "Amount")}}
+{{$bSCnt := (index (dbGet 0 "Buy").Value 0)}}
+{{$bSMax := (index (dbGet 0 "Buy").Value 1)}}
+
+{{if $args.IsSet 0}}
+  {{if eq (lower ($args.Get 0)) "add"}}
+    {{if $args.IsSet 1}}
+      {{dbSet 0 "Buy" (cslice (add $bSCnt ($args.Get 1)) $bSMax)}}
+      {{sendMessage nil (print ">>> **Nombre de points cotisés mis à jour**\n# " (reReplace "," (humanizeThousands $bSCnt) " ") " **›** " (reReplace "," (humanizeThousands (add $bSCnt ($args.Get 1))) " "))}}
+    {{else}}
+      {{sendMessage nil (print ">>> **Erreur :**\nAucun montant n'est spécifié.")}}
+    {{end}}
+
+  {{else if eq (lower ($args.Get 0)) "remove"}}
+    {{if $args.IsSet 1}}
+      {{dbSet 0 "Buy" (cslice (sub $bSCnt ($args.Get 1)) $bSMax)}}
+      {{sendMessage nil (print ">>> **Nombre de points cotisés mis à jour**\n# " (reReplace "," (humanizeThousands $bSCnt) " ") " **›** " (reReplace "," (humanizeThousands (sub $bSCnt ($args.Get 1))) " "))}}
+    {{else}}
+      {{sendMessage nil (print ">>> **Erreur :**\nAucun montant n'est spécifié.")}}
+    {{end}}
+
+  {{else}}
+    {{sendMessage nil (print ">>> **Erreur :**\nArgument invalide.\n`-bseuil ‹[Add|Remove]› ‹Amount›`")}}
+  {{end}}
+{{else}}
+  {{sendMessage nil (print ">>> **État de l'accumulation de points du Buy 21 :**\n# " (reReplace "," (humanizeThousands $bSCnt) " ") " **/ " (reReplace "," (humanizeThousands $bSMax) " ") "** (" (printf "%.2f" (mult (fdiv $bSCnt $bSMax) 100)) " %)")}}
+{{end}}

@@ -1,0 +1,39 @@
+{{$sancUID1 := (toInt .ExecData.sancUsr1)}}
+{{$sancUID2 := (toInt .ExecData.sancUsr2)}}
+{{$sancUID3 := (toInt .ExecData.sancUsr3)}}
+{{$rMbr1 := ""}}{{$rMbr2 := ""}}{{$rMbr3 := ""}}
+{{$roleList := cslice 496010501990645799 931351059455164477 496010603601854464 507301458853625879 1078386211472805998 1106395328447533077 1054107222856192172 925769441747296316 925767790034583552 925766056650362991 925745256207618139 925761123695886376 925758251662987264 925756577510748210 925745253087076392 925745243180118034 925745259290460210}}
+
+{{giveRoleID $sancUID1 506417754878902272}}
+{{range $roleList}}
+  {{if targetHasRoleID $sancUID1 .}}
+    {{$rMbr1 = (joinStr "-" $rMbr1 .)}}
+    {{takeRoleID $sancUID1 .}}
+  {{end}}
+{{end}}
+{{dbSet $sancUID1 "SancRoles" $rMbr1}}
+
+{{giveRoleID $sancUID2 506417754878902272}}
+{{range $roleList}}
+  {{if targetHasRoleID $sancUID2 .}}
+    {{$rMbr2 = (joinStr "-" $rMbr2 .)}}
+    {{takeRoleID $sancUID2 .}}
+  {{end}}
+{{end}}
+{{dbSet $sancUID2 "SancRoles" $rMbr2}}
+
+{{giveRoleID $sancUID3 506417754878902272}}
+{{range $roleList}}
+  {{if targetHasRoleID $sancUID3 .}}
+    {{$rMbr3 = (joinStr "-" $rMbr3 .)}}
+    {{takeRoleID $sancUID3 .}}
+  {{end}}
+{{end}}
+{{dbSet $sancUID3 "SancRoles" $rMbr3}}
+
+{{sendMessage 618851288825856010 (print "BuyVIP 1 : <@" $sancUID1 "> (Acheteur) **·** <@" $sancUID2 "> <@" $sancUID3 "> (Victimes)")}}
+
+{{$msg := sendMessageRetID 550364083195609089 (print "<@" $sancUID1 "> <@" $sancUID2 "> <@" $sancUID3 "> Vous avez été Goulag par le BuyVIP 1 !\nPas de panique, vous serez tous dégoulag une fois les 30 minutes passées.\n### *Ce message s'autodétruira une fois les goulags levés.*")}}
+{{deleteMessage 550364083195609089 $msg 1805}}
+
+{{scheduleUniqueCC 291 nil 1800 $sancUID1 (dict "sancUsr1" (toString .ExecData.sancUsr1) "sancUsr2" (toString .ExecData.sancUsr2) "sancUsr3" (toString .ExecData.sancUsr3))}}

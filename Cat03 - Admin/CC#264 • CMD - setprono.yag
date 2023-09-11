@@ -1,0 +1,5 @@
+{{$args := parseArgs 2 "`-setprono ‹MiseMax› \"‹1:côte1,2:côte2,3:côte3…›\"`" (carg "int" "Parieurs") (carg "string" "InflationMDR")}}
+{{$toSet := (joinStr "" "true-" (toString ($args.Get 0)) "-" ($args.Get 1))}}
+{{dbSet 0 "cotes" $toSet}}
+{{dbDel 0 "parieurs"}}
+Les pronos sont désormais lancés avec les côtes définies !

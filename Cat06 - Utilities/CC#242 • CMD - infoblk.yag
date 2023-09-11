@@ -1,0 +1,3 @@
+{{deleteTrigger 0}}
+{{$args := parseArgs 1 "`-infoblk ‹Text›`" (carg "string" "text")}}
+{{sendMessage 752600438217375814 (joinStr "" (.User.Mention) " :\n" ($args.Get 0))}}

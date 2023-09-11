@@ -1,0 +1,14 @@
+{{$args := parseArgs 1 ".m mot" (carg "string" "string")}}
+{{$mot := $args.Get 0}}
+{{$entry := dbGet 0 "dictPing"}}
+{{if not $entry}}
+Bordel mais ajoute des entrées triso de merde 
+{{else}}
+  {{$dict := sdict $entry.Value}}
+  {{$id := $dict.Get (lower $mot)}}
+  {{if not $id}} 
+  Ya pas chef ptn 
+  {{else}} 
+    {{mentionRoleID (toInt64 $id)}}
+  {{end}} 
+{{end}} 

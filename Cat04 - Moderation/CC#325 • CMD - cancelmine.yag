@@ -1,0 +1,15 @@
+{{$args := parseArgs 3 "`-cancelmine ‹@UserOrID›`" (carg "userid" "minedID")}}
+{{$minedID := ($args.Get 0)}}
+{{$mine := dbGet $minedID "gulag"}}
+
+{{$user := print "`" $minedID "`"}}
+{{if (getMember $minedID)}}
+  {{$user = (getMember $minedID).User.Mention}}
+{{end}}
+
+{{if $mine}}
+  {{dbDel $minedID "gulag"}}
+  {{sendMessage nil (print "La mine posée à l'encontre de " $user " a été annulée.")}}
+{{else}}
+  {{sendMessage nil (print "**Erreur :**\n" $user " n'est actuellement pas visé(e) par une mine. Impossible donc de l'enlever.")}}
+{{end}}

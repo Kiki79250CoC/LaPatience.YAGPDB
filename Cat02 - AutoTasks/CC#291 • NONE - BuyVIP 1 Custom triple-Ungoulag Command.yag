@@ -1,0 +1,18 @@
+{{$sancUID1 := (toInt .ExecData.sancUsr1)}}
+{{$sancUID2 := (toInt .ExecData.sancUsr2)}}
+{{$sancUID3 := (toInt .ExecData.sancUsr3)}}
+
+{{$rMbr1 := (dbGet $sancUID1 "SancRoles").Value}}
+{{range $k,$v := (split $rMbr1 "-")}}{{giveRoleID $sancUID1 (toInt $v)}}{{end}}
+{{takeRoleID $sancUID1 506417754878902272}}
+{{dbDel $sancUID1 "SancRoles"}}
+
+{{$rMbr2 := (dbGet $sancUID2 "SancRoles").Value}}
+{{range $k,$v := (split $rMbr2 "-")}}{{giveRoleID $sancUID2 (toInt $v)}}{{end}}
+{{takeRoleID $sancUID2 506417754878902272}}
+{{dbDel $sancUID2 "SancRoles"}}
+
+{{$rMbr3 := (dbGet $sancUID3 "SancRoles").Value}}
+{{range $k,$v := (split $rMbr3 "-")}}{{giveRoleID $sancUID3 (toInt $v)}}{{end}}
+{{takeRoleID $sancUID3 506417754878902272}}
+{{dbDel $sancUID3 "SancRoles"}}

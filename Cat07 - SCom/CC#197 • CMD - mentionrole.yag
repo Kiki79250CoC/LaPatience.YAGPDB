@@ -1,0 +1,14 @@
+{{deleteTrigger 0}}
+{{$args := parseArgs 1 "-mentionRole id text-optional" (carg "string" "id") (carg "string" "text")}}
+{{$id :=  ($args.Get 0)}}
+{{$string := ""}}
+{{if $args.IsSet 1}}
+  {{$string = $args.Get 1}}
+{{end}}
+{{$daslice := cslice "890226098871336991" "786373725158899744" "737984434317426688" "773184892073934859" "860562698348527616" "925179553243078676" "925179545219391509" "925179162694680626" "925179063763619960" "878712396632444978" "892016181983203328" "783323308560351282" "714124485397315656" "681478568185692183" "622226500967464960" "925179162694680626" "925179063763619960"}} 
+{{if in $daslice $id}} 
+  {{sendMessageNoEscape nil (print "🔔 <@&" $id "> " $string)}}
+{{else}}
+  Erreur.
+  {{sendDM (print "Tiens ton texte, comme ça t'auras pas à le retaper de zéro :\n `" $string "`")}}
+{{end}} 

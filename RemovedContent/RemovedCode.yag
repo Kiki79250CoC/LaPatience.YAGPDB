@@ -1,0 +1,61 @@
+  // Cmd #183 - REGEX
+
+  {{/*TAXES*/}}
+  {{$taxes := dbGet 0 "taxes"}}
+  {{$toSetTaxes := sdict}}
+  {{if ge $userPoints 3000}}
+    {{if not $taxes}}
+      {{$toSetTaxes = sdict (toString .User.ID) (cslice $userPoints 0)}}
+    {{else}}
+      {{$val2 := sdict ($taxes.Value)}}
+      {{$toSetTaxes = $val2}}
+      {{if not ($val2.Get (toString .User.ID))}}
+        {{$toSetTaxes.Set (toString .User.ID) (cslice $userPoints 0)}}
+      {{end}}
+    {{end}} 
+    {{dbSet 0 "taxes" $toSetTaxes}}
+  {{end}}
+
+// -----------------------------------------------------------------------------
+
+  // Cmd #208 - Reaction
+
+{{$qentry := dbGet 0 "qcmrecrutement"}}
+{{if $qentry}}
+  {{$qvalue := $qentry.Value}}
+  {{if eq .ReactionMessage.ID (toInt64 $qvalue)}}
+    {{if not (targetHasRoleID .User.ID 767786202954203186)}}
+      {{giveRoleID .User.ID 767786202954203186}}
+    {{end}}
+  {{end}}
+{{end}}
+
+// -----------------------------------------------------------------------------
+
+  // Cmd #226 - Reac
+
+{{/* OhMyGoal */}}
+
+{{$entry3 := dbGet 0 "reacmsgsport"}}
+{{if $entry3}}
+  {{$value := $entry3.Value}}
+  {{if eq .ReactionMessage.ID (toInt64 $value)}}
+    {{$listEntry := dbGet 0 "list-abo"}}
+    {{$list := ""}}
+    {{if $listEntry}}
+       {{$list = $listEntry.Value}}
+    {{end}}
+    {{$lnull := ","}}
+    {{if eq $list ""}}
+      {{$lnull = ""}}
+    {{end}}
+    {{if .ReactionAdded}}
+      {{giveRoleID .User.ID 744146263573790731}}
+      {{$list = joinStr "" $list $lnull (toString .User.ID)}}
+    {{else}}
+       {{takeRoleID .User.ID 744146263573790731}}
+       {{$list = reReplace (joinStr "" (toString .User.ID) `,?`) $list ""}}
+    {{end}}
+    {{dbSet 0 "list-abo" $list}}
+  {{end}}
+{{end}}

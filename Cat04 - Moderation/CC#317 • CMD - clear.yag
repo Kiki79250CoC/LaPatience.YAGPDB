@@ -1,0 +1,3 @@
+{{$args := parseArgs 1 "`-clear ‹HowManyMessageToDelete›`" (carg "int" "int")}}
+{{addReactions "🧹"}}
+{{execAdmin "clear" ($args.Get 0) "-nopin"}}

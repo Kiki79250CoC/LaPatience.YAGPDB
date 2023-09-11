@@ -1,0 +1,5 @@
+{{$args := parseArgs 2 "`-xa ‹#ChannelorID› \"‹CommandString›\"`" (carg "channel" "ChannelID") (carg "string" "CommandArgs")}}
+{{define "comm"}}
+  {{execAdmin .TemplateArgs}}
+{{end}}
+{{$x := sendTemplate ($args.Get 0).ID "comm" ($args.Get 1)}}

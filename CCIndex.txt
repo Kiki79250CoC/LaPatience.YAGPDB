@@ -1,0 +1,969 @@
+INDEX
+
+DISCLAIMER : Elements in ‹quotation marks› are variable arguments (IE: User name or ID, string or number)
+             Arguments that countain an asterisk (*) are optional, command will work despite these arguments aren't provided.
+
+    • CATEGORY 01 - BOTINTERNALS
+
+        • 164 - COMMAND
+          › Trigger   : -xa
+          › Arguments : ‹#ChannelOrID› ‹CommandString›
+
+          › Enabled   : Yes
+          › Name      : n/a
+          › Roles     : Limited (01) › "Développeur"
+          › Channels  : Limited (01) › "Gestion Bots"
+
+          › Revision  : 1.10
+
+        • 183 - REGEX
+          › Trigger   : .*
+          › Arguments : n/a
+
+          › Enabled   : Yes
+          › Name      : Points
+          › Roles     : Not limited
+          › Channels  : Limited (11) › "Général", "Sports", "Jeux-Vidéo", "Anime-Films", "Débats", "Actualités", "Channel Jeux", "Humour", "Humour Noir", "Tchat noir", "Gestion Bots"
+
+          › Revision  : 2.20
+
+        • 200 - REGEX
+          › Trigger   : .*
+          › Arguments : n/a
+
+          › Enabled   : Yes
+          › Name      : AutomaticThings 01
+          › Roles     : Not limited
+          › Channels  : Not limited
+
+          › Revision  : v2.81
+
+        • 215 - REGEX
+          › Trigger   : .*
+          › Arguments : n/a
+
+          › Enabled   : Yes
+          › Name      : AutomaticThings 02
+          › Roles     : Not limited
+          › Channels  : Limited (20) › "Livre Platine", "Livre d'argent", "Général", "Sport", "Jeux-Vidéo", "Anime-Films", "Débats", "Actualités", "Anecdotes libres", "Screen Serveur", "Channel Jeux", "Antre des anciens", "Humour", "Humour Noir", "Tchat Noir", "Pubs et Partage", "No Micro", "Commandes Bot", "Tchat Gérants", "Gestion Bots"
+
+          › Revision  : 2.45
+
+        • 218 - REGEX
+          › Trigger   : .*
+          › Arguments : n/a
+
+          › Enabled   : Yes
+          › Name      : AutomaticThings 03 - RESERVED FOR LATER USE
+          › Roles     : Not limited
+          › Channels  : Not limited
+
+          › Revision  : Not available
+
+        • 219 - REGEX
+          › Trigger   : .*
+          › Arguments : n/a
+
+          › Enabled   : Yes
+          › Name      : AutomaticThings 04 - RESERVED FOR LATER USE
+          › Roles     : Not limited
+          › Channels  : Not limited
+
+          › Revision  : Not available
+
+        • 225 - REGEX
+          › Trigger   : .*
+          › Arguments : n/a
+
+          › Enabled   : Yes
+          › Name      : AutomaticThings 05 - RESERVED FOR LATER USE
+          › Roles     : Not limited
+          › Channels  : Not limited
+
+          › Revision  : Not available
+
+        • 250 - COMMAND
+          › Trigger   : -dbAll
+          › Arguments : ‹Page*›
+
+          › Enabled   : Yes
+          › Name      : n/a
+          › Roles     : Not limited
+          › Channels  : Limited (01) › "Gestion Bots"
+
+          › Revision  : 2.00
+
+        • 270 - COMMAND
+          › Trigger   : -dbCount
+          › Arguments : ‹@UserOrID*›
+
+          › Enabled   : Yes
+          › Name      : n/a
+          › Roles     : Not limited
+          › Channels  : Limited (01) › "Gestion Bots"
+
+          › Revision  : 1.00
+
+        • 271 - COMMAND
+          › Trigger   : -dbDel
+          › Arguments : ‹@UserOrID› "‹Key›"
+
+          › Enabled   : Yes
+          › Name      : n/a
+          › Roles     : Not limited
+          › Channels  : Limited (01) › "Gestion Bots"
+
+          › Revision  : 2.00
+
+        • 294 - COMMAND
+          › Trigger   : -dbResetKey
+          › Arguments : "‹Key›"
+
+          › Enabled   : Yes
+          › Name      : n/a
+          › Roles     : Not limited
+          › Channels  : Limited (01) › "Gestion Bots"
+
+          › Revision  : 1.05
+
+        • 296 - COMMAND
+          › Trigger   : -dbKey
+          › Arguments : "‹Key›" ‹Page*›
+
+          › Enabled   : Yes
+          › Name      : n/a
+          › Roles     : Not limited
+          › Channels  : Limited (01) › "Gestion Bots"
+
+          › Revision  : 1.05
+
+        • 297 - COMMAND
+          › Trigger   : -dbGet
+          › Arguments : ‹@UserOrID› "‹Key›"
+
+          › Enabled   : Yes
+          › Name      : n/a
+          › Roles     : Not limited
+          › Channels  : Limited (01) › "Gestion Bots"
+
+          › Revision  : 1
+
+        • 298 - COMMAND
+          › Trigger   : -dbSet
+          › Arguments : ‹@UserOrID› "‹Key›" "‹Value›"
+
+          › Enabled   : Yes
+          › Name      : n/a
+          › Roles     : Not limited
+          › Channels  : Limited (01) › "Gestion Bots"
+
+          › Revision  : 1
+
+
+
+    • CATEGORY 02 - AUTOTASKS
+
+        • 226 - REACT (ADDED ONLY)
+          › Trigger   : n/a
+          › Arguments : n/a
+
+          › Enabled   : Yes
+          › Name      : Au bon endroit au Bon moment + Drops de Points
+          › Roles     : Not limited
+          › Channels  : Limited (11) › "Général", "Sports", "Jeux-Vidéo", "Anime-Films", "Débats", "Actualités", "Anecdotes-Libres", "Channel-Jeux", "Humour", "Humour-Noir", "Tchat-Noir"
+
+          › Revision  : 1.02
+
+        • 246 - NONE
+          › Trigger   : n/a
+          › Arguments : n/a
+
+          › Enabled   : Yes
+          › Name      : Rôle "Au bon endroit au Bon moment"
+          › Roles     : Not limited
+          › Channels  : Not limited
+
+          › Revision  : 1.02
+
+        • 247 - INTERVAL (40h)
+          › Trigger   : n/a (Channel : Général)
+          › Arguments : n/a
+
+          › Enabled   : Yes
+          › Name      : Automatic task for role "Au bon endroit au bon moment"
+          › Roles     : Not limited
+          › Channels  : Not limited
+
+          › Revision  : 1.21
+
+        • 268 - NONE
+          › Trigger   : n/a
+          › Arguments : n/a
+
+          › Enabled   : No
+          › Name      : Commande de fin de période du Buy Légendaire
+          › Roles     : Not limited
+          › Channels  : Not limited
+
+          › Revision  : 1.02
+
+        • 269 - INTERVAL (1h)
+          › Trigger   : n/a (Channel : Général)
+          › Arguments : n/a
+
+          › Enabled   : Yes
+          › Name      : Drops de Points
+          › Roles     : Not limited
+          › Channels  : Not limited
+
+          › Revision  : 1.04
+
+        • 290 - NONE
+          › Trigger   : buyvip1p1
+          › Arguments : n/a
+
+          › Enabled   : Yes
+          › Name      : BuyVIP 1 Custom triple-Goulag command
+          › Roles     : Not limited
+          › Channels  : Not limited
+
+          › Revision  : 1.12
+
+        • 291 - NONE
+          › Trigger   : n/a
+          › Arguments : n/a
+
+          › Enabled   : Yes
+          › Name      : BuyVIP 1 Custom triple-Ungoulag command
+          › Roles     : Not limited
+          › Channels  : Not limited
+
+          › Revision  : 1.08
+
+        • 300 - NONE
+          › Trigger   : n/a
+          › Arguments : n/a
+
+          › Enabled   : Yes
+          › Name      : Commande de fin de période du Buy Légendaire
+          › Roles     : Not limited
+          › Channels  : Not limited
+
+          › Revision  : 1.00
+
+        • 315 - INTERVAL (24 H)
+          › Trigger   : n/a (Channel : Gestion-Bots)
+          › Arguments : n/a
+
+          › Enabled   : Yes
+          › Name      : Reset daily limits for "Goulag", "Kick" and "Ban".
+          › Roles     : Not limited
+          › Channels  : Not limited
+
+          › Revision  : 1.03
+
+
+
+    • CATEGORY 03 - ADMIN
+
+        • 158 - COMMAND
+          › Trigger   : -levier
+          › Arguments : n/a
+
+          › Enabled   : Yes
+          › Name      : n/a
+          › Roles     : Not limited
+          › Channels  : Limited (01) › "Gestion Bots"
+
+          › Revision  : 1.10
+
+        • 190 - COMMAND
+          › Trigger   : -retrieve
+          › Arguments : n/a
+
+          › Enabled   : Yes
+          › Name      : n/a
+          › Roles     : Limited (02) › "Dictateur Suprême", "Développeur"
+          › Channels  : Not limited
+
+          › Revision  : 2
+
+        • 212 - COMMAND
+          › Trigger   : -banword
+          › Arguments : ‹[ListAll|Add|Remove]› "‹Banword›"
+
+          › Enabled   : Yes
+          › Name      : n/a
+          › Roles     : Not limited
+          › Channels  : Limited (01) › "Gestion Bots"
+
+          › Revision  : 1.10
+
+        • 259 - COMMAND
+          › Trigger   : -sendmessage
+          › Arguments : "‹Message›"
+
+          › Enabled   : Yes
+          › Name      : n/a
+          › Roles     : Not limited
+          › Channels  : Limited (01) › "Gestion Bots"
+
+          › Revision  : 1.02
+
+        • 264 - COMMAND
+          › Trigger   : -setprono
+          › Arguments : ‹MiseMax› "‹1:côte1,2:côte2,3:côte3,...›"
+
+          › Enabled   : Yes
+          › Name      : Lancement Prono
+          › Roles     : Not limited
+          › Channels  : Limited (01) › "Gestion Bots"
+
+          › Revision  : 1.21
+
+        • 266 - COMMAND
+          › Trigger   : -close
+          › Arguments : n/a
+
+          › Enabled   : Yes
+          › Name      : Fermeture Prono
+          › Roles     : Not limited
+          › Channels  : Limited (01) › "Gestion Bots"
+
+          › Revision  : Unavailable
+
+        • 267 - COMMAND
+          › Trigger   : -winner
+          › Arguments : ‹WinOption›
+
+          › Enabled   : Yes
+          › Name      : Gagnant Prono
+          › Roles     : Not limited
+          › Channels  : Limited (01) › "Gestion Bots"
+
+          › Revision  : Unavailable
+
+        • 273 - COMMAND
+          › Trigger   : -removetrigger
+          › Arguments : ‹[Bombe|Shifumi]›
+
+          › Enabled   : Yes
+          › Name      : n/a
+          › Roles     : Not limited
+          › Channels  : Limited (01) › "Gestion Bots"
+
+          › Revision  : 1.01
+
+        • 274 - COMMAND
+          › Trigger   : -bseuil
+          › Arguments : ‹[Add|Remove]*› ‹Amount*›
+
+          › Enabled   : Yes
+          › Name      : n/a
+          › Roles     : Not limited
+          › Channels  : Limited (01) › "Gestion Bots"
+
+          › Revision  : 1.31
+
+        • 292 - COMMAND
+          › Trigger   : -setsanccount
+          › Arguments : ‹@UserOrID› ‹[Exclusion|Goulag|Kick|Ban]› ‹Amount› ‹Timestamp›
+
+          › Enabled   : Yes
+          › Name      : n/a
+          › Roles     : Not limited
+          › Channels  : Limited (01) › "Gestion Bots"
+
+          › Revision  : 1.00
+
+        • 299 - COMMAND
+          › Trigger   : -setslastsanc
+          › Arguments : ‹@UserOrID› ‹SancTimestamp› ‹ModeratorID› ‹[Exclusion|Goulag|Kick|Ban]› "‹Reason›" ‹Duration›
+
+          › Enabled   : Yes
+          › Name      : n/a
+          › Roles     : Not limited
+          › Channels  : Limited (01) › "Gestion Bots"
+
+          › Revision  : 1.00
+
+
+
+    • CATEGORY 04 - MODERATION
+
+        • 317 - COMMAND
+          › Trigger   : -clear
+          › Arguments : ‹Amount›
+
+          › Enabled   : Yes
+          › Name      : n/a
+          › Roles     : Limited (06) › "Dictateur Suprême", "Développeur", "Grand Modérateur", "Médiateur", "Gestionnaire", "Modération"
+          › Channels  : Not limited
+
+          › Revision  : 2.01
+
+        • 318 - COMMAND
+          › Trigger   : -exclude
+          › Arguments : n/a
+
+          › Enabled   : No
+          › Name      : FUTURE : Exclude user
+          › Roles     : Limited (03) › "Dictateur Suprême", "Développeur", "Modération"
+          › Channels  : Not limited
+
+          › Revision  : Not available
+
+        • 319 - COMMAND
+          › Trigger   : -unexclude
+          › Arguments : ‹@UserOrID›
+
+          › Enabled   : No
+          › Name      : FUTURE : Revoke user exclusion
+          › Roles     : Limited (03) › "Dictateur Suprême", "Développeur", "Modération"
+          › Channels  : Not limited
+
+          › Revision  : Not Available
+
+       • 320 - COMMAND
+          › Trigger   : -goulag
+          › Arguments : ‹@UserOrID› "‹Reason›" "‹Duration›" ‹OptArg*›
+          › OptArgs   : --force-as-mine
+
+          › Enabled   : Yes
+          › Name      : n/a
+          › Roles     : Limited (04) › "Dictateur Suprême", "Développeur", "Grand Modérateur", "Médiateur"
+          › Channels  : Not Limited
+
+          › Revision  : 2.20
+
+        • 321 - COMMAND
+          › Trigger   : -ungoulag
+          › Arguments : ‹@UserOrID› "‹Reason*›" ‹OptArg*›
+          › OptArgs   : --no-logs
+
+          › Enabled   : Yes
+          › Name      : n/a
+          › Roles     : Limited (04) › "Dictateur Suprême", "Développeur", "Grand Modérateur", "Médiateur"
+          › Channels  : Not Limited
+
+          › Revision  : 2.10
+
+        • 322 - COMMAND
+          › Trigger   : -prolgoulag
+          › Arguments : n/a
+
+          › Enabled   : No
+          › Name      : FUTURE : Prolongate current active Goulag of specific User
+          › Roles     : Not Limited
+          › Channels  : Not Limited
+
+          › Revision  : Not available
+
+        • 323 - COMMAND
+          › Trigger   : -getout
+          › Arguments : ‹@UserOrID›
+
+          › Enabled   : Yes
+          › Name      : n/a
+          › Roles     : Limited (06) › "Dictateur Suprême", "Développeur", "Grand Modérateur", "Médiateur", "Gestionnaire", "Modération"
+          › Channels  : Not limited
+
+          › Revision  : 2.01
+
+        • 324 - COMMAND
+          › Trigger   : -mine
+          › Arguments : ‹@UserOrID› "‹Reason›" ‹Duration› ‹OptArgToRelay*›
+          › OptArgs   : --force-as-mine
+
+          › Enabled   : Yes
+          › Name      : n/a
+          › Roles     : Limited (06) › "Dictateur Suprême", "Développeur", "Grand Modérateur", "Médiateur", "Gestionnaire" (Boutique), "Modération"
+          › Channels  : Not limited
+
+          › Revision  : 2.21
+
+        • 325 - COMMAND
+          › Trigger   : -cancelmine
+          › Arguments : ‹@UserOrID›
+
+          › Enabled   : Yes
+          › Name      : n/a
+          › Roles     : Limited (06) › "Dictateur Suprême", "Développeur", "Grand Modérateur", "Médiateur", "Gestionnaire" (Boutique), "Modération"
+          › Channels  : Not limited
+
+          › Revision  : 1.02
+
+        • 326 - COMMAND
+          › Trigger   : -kick
+          › Arguments : ‹@UserOrID› "‹Reason›"
+
+          › Enabled   : Yes
+          › Name      : n/a
+          › Roles     : Limited (03) › "Dictateur Suprême", "Développeur", "Grand Modérateur", "Médiateur", "Gestionnaire"
+          › Channels  : Not limited
+
+          › Revision  : 2.10
+
+        • 327 - COMMAND
+          › Trigger   : -preban
+          › Arguments : ‹@UserOrID› "‹Reason›" ‹DurationBeforeExpiry*›
+
+          › Enabled   : Yes
+          › Name      : n/a
+          › Roles     : Limited (03) › "Dictateur Suprême", "Développeur", "Grand Modérateur", "Médiateur"
+          › Channels  : Not limited
+
+          › Revision  : 1.00
+
+        • 328 - COMMAND
+          › Trigger   : -unpreban
+          › Arguments : ‹@UserOrID› "‹Reason›"
+
+          › Enabled   : Yes
+          › Name      : n/a
+          › Roles     : Limited (03) › "Dictateur Suprême", "Développeur", "Grand Modérateur", "Médiateur"
+          › Channels  : Not limited
+
+          › Revision  : 1.00
+
+        • 329 - COMMAND
+          › Trigger   : -ban
+          › Arguments : ‹@UserOrID› "‹Reason*›" ‹Duration*› ‹OptArg*›
+          › OptArgs   : --silent
+
+          › Enabled   : Yes
+          › Name      : n/a
+          › Roles     : Limited (04) › "Dictateur Suprême", "Développeur", "Grand Modérateur", "Médiateur"
+          › Channels  : Not limited
+
+          › Revision  : 2.10
+
+        • 330 - COMMAND
+          › Trigger   : -prolban
+          › Arguments : n/a
+
+          › Enabled   : No
+          › Name      : FUTURE : Prolongate User Ban
+          › Roles     : Limited (04) › "Dictateur Suprême", "Développeur", "Grand Modérateur", "Médiateur"
+          › Channels  : Not limited
+
+          › Revision  : Not available
+
+        • 331 - COMMAND
+          › Trigger   : -unban
+          › Arguments : n/a
+
+          › Enabled   : No
+          › Name      : FUTURE : Unban User
+          › Roles     : Limited (04) › "Dictateur Suprême", "Développeur", "Grand Modérateur", "Médiateur"
+          › Channels  : Not limited
+
+          › Revision  : Not available
+
+        • 332 - COMMAND
+          › Trigger   : -removepaysanc
+          › Arguments : ‹@UserOrID› ‹[Buy19|Buy25]›
+
+          › Enabled   : Yes
+          › Name      : n/a
+          › Roles     : Limited (04) › "Dictateur Suprême", "Développeur", "Grand Modérateur", "Médiateur", "Gestionnaire"
+          › Channels  : Not limited
+
+          › Revision  : 1.20
+
+        • 333 - COMMAND
+          › Trigger   : .
+          › Arguments : n/a
+
+          › Enabled   : No
+          › Name      : n/a
+          › Roles     : Not limited
+          › Channels  : Not limited
+
+          › Revision  : Not available
+
+
+
+    • CATEGORY 05 - STAFFTOOLS
+
+        • 140 - COMMAND
+          › Trigger   : -anniv
+          › Arguments : ‹@UserMention›
+
+          › Enabled   : No
+          › Name      : n/a
+          › Roles     : Limited (04) › "Dictateur Suprême", "Développeur", "Grand Modérateur", "Médiateur"
+          › Channels  : Not limited
+
+          › Revision  : 2
+
+        • 311 - COMMAND
+          › Trigger   : -bam
+          › Arguments : ‹@UserOrID› "‹Reason*›" ‹Duration*›
+
+          › Enabled   : Yes
+          › Name      : Troll ban
+          › Roles     : Limited (06) › "Dictateur Suprême", "Développeur", "Grand Modérateur", "Médiateur", "Gestionnaire", "Modération"
+          › Channels  : Not limited
+
+          › Revision  : 1.02
+
+        • 312 - COMMAND
+          › Trigger   : -rank
+          › Arguments : ‹@UserOrID›
+
+          › Enabled   : Yes
+          › Name      : n/a
+          › Roles     : Limited (03) › "Dictateur Suprême", "Développeur", "Modération"
+          › Channels  : Limited (01) › "Salle d'attente"
+
+          › Revision  : 2.00
+
+        • 314 - COMMAND
+          › Trigger   : -sanchistory
+          › Arguments : ‹@UserOrID›
+
+          › Enabled   : Yes
+          › Name      : n/a
+          › Roles     : Limited (06) › "Dictateur Suprême", "Développeur", "Grand Modérateur", "Médiateur", "Gestionnaire", "Modération"
+          › Channels  : Not limited
+
+          › Revision  : 2.23
+
+
+
+    • CATEGORY 06 - UTILITIES
+
+        • 154 - COMMAND
+          › Trigger   : -cv
+          › Arguments : "‹Présentation rapide›" "‹Pourquoi voulez vous intégrer la Modération ?›" "‹Vos disponibilités›"
+
+          › Enabled   : Yes
+          › Name      : n/a
+          › Roles     : Not limited
+          › Channels  : Limited (02) › "Modération", "Gestion Bots"
+
+          › Revision  : 2.00
+
+        • 157 - COMMAND
+          › Trigger   : -plainte
+          › Arguments : "‹ContentInQuotes›"
+
+          › Enabled   : Yes
+          › Name      : n/a
+          › Roles     : Not limited
+          › Channels  : Limited (02) › "Modération", "Gestion Bots"
+
+          › Revision  : 2.00
+
+        • 163 - COMMAND
+          › Trigger   : -avis
+          › Arguments : "‹ContentInQuotes›"
+
+          › Enabled   : Yes
+          › Name      : n/a
+          › Roles     : Not limited
+          › Channels  : Limited (02) › "Modération", "Gestion Bots"
+
+          › Revision  : 2.00
+
+        • 182 - COMMAND
+          › Trigger   : -avatar
+          › Arguments : ‹@UserOrID›
+
+          › Enabled   : Yes
+          › Name      : n/a
+          › Roles     : Not limited
+          › Channels  : Limited (02) › "Commandes Bots", "Gestion Bots"
+
+          › Revision  : 1
+
+        • 213 - COMMAND
+          › Trigger   : -necromancien
+          › Arguments : "‹Text›"
+
+          › Enabled   : No
+          › Name      : n/a
+          › Roles     : Limited (01) › "Gérant de Salon"
+          › Channels  : Not limited
+
+          › Revision  : 1.00
+
+        • 242 - COMMAND
+          › Trigger   : -infoblk
+          › Arguments : "‹Text›"
+
+          › Enabled   : Yes
+          › Name      : n/a
+          › Roles     : Not limited
+          › Channels  : Limited (01) › "Commandes Bots"
+
+          › Revision  : 1
+
+        • 289 - COMMAND
+          › Trigger   : -mysancs
+          › Arguments : n/a
+
+          › Enabled   : No
+          › Name      : n/a
+          › Roles     : Not limited
+          › Channels  : Limited (02) › "Commandes Bots", "Gestion Bots"
+
+          › Revision  : Not available
+
+        • 293 - COMMAND
+          › Trigger   : -bouquiner
+          › Arguments : n/a
+
+          › Enabled   : Yes
+          › Name      : n/a
+          › Roles     : Not limited
+          › Channels  : Limited (02) › "Commandes Bots", "Gestion Bots"
+
+          › Revision  : 1.10
+
+        • 304 - COMMAND
+          › Trigger   : -joueur
+          › Arguments : ‹@UserOrID›
+
+          › Enabled   : Yes
+          › Name      : n/a
+          › Roles     : Limited (03) › "Dictateur Suprême", "Développeur", "Ministre des Évents"
+          › Channels  : Not limited
+
+          › Revision  : 1.00
+
+
+
+    • CATEGORY 07 - SCOM
+
+        • 197 - COMMAND
+          › Trigger   : -mentionrole
+          › Arguments : ‹RoleID› "‹OptionalText*›"
+
+          › Enabled   : Yes
+          › Name      : n/a
+          › Roles     : Not limited
+          › Channels  : Limited (09) › "Actus", "Actus Sportives", "Infos du Jour", "Actus Serveur", "Sondages", "Mème of the Week", "Phénomènes Naturels", "Histoire Géo", "Gestion Bots"
+
+          › Revision  : 1.11
+
+        • 243 - COMMAND
+          › Trigger   : -addelement
+          › Arguments : "‹Code›" ‹RoleID›
+
+          › Enabled   : No
+          › Name      : n/a
+          › Roles     : Not limited
+          › Channels  : Limited (01) › "Commandes Bots"
+
+          › Revision  : 1
+
+        • 244 - COMMAND
+          › Trigger   : .m
+          › Arguments : "‹Code›"
+
+          › Enabled   : No
+          › Name      : n/a
+          › Roles     : Limited (02) › "Dictateur Suprême", "Développeur"
+          › Channels  : Not limited
+
+          › Revision  : 1
+
+
+
+    • CATEGORY 08 - GAMES & EVENTS
+
+        • --- INDISPONIBLE ---
+
+
+
+    • CATEGORY 09 - POINTS
+
+        • 184 - COMMAND
+          › Trigger   : -points
+          › Arguments : ‹@UserOrID*›
+
+          › Enabled   : Yes
+          › Name      : n/a
+          › Roles     : Not limited
+          › Channels  : Limited (02) › "Commandes Bots", "Gestion Bots"
+
+          › Revision  : 2.13
+
+        • 257 - COMMAND
+          › Trigger   : -buy
+          › Arguments : ‹ItemID› ‹[@UserOrID|"Text"]*›
+
+          › Enabled   : Yes
+          › Name      : n/a
+          › Roles     : Not limited
+          › Channels  : Limited (02) › "Boutique", "Gestion Bots"
+
+          › Revision  : 2.70.1
+
+        • 262 - COMMAND
+          › Trigger   : -buyvip
+          › Arguments : ‹ItemID› ‹[@UserOrID|"Text"]*›
+
+          › Enabled   : Yes
+          › Name      : n/a
+          › Roles     : Not limited
+          › Channels  : Limited (02) › "Boutique", "Gestion Bots"
+
+          › Revision  : 1.24.4
+
+        • 265 - COMMAND
+          › Trigger   : -mise
+          › Arguments : ‹Item› ‹Amount›
+
+          › Enabled   : Yes
+          › Name      : n/a
+          › Roles     : Not limited
+          › Channels  : Limited (02) › "Commandes Bots", "Gestion Bots"
+
+          › Revision  : 1
+
+        • 310 - COMMAND
+          › Trigger   : -transfer
+          › Arguments : ‹@UserOrID› ‹Amount›
+
+          › Enabled   : Yes
+          › Name      : n/a
+          › Roles     : Not limited
+          › Channels  : Limited (02) › "Commandes Bots", "Gestion Bots"
+
+          › Revision  : 2.32
+
+        • 313 - COMMAND
+          › Trigger   : -daily
+          › Arguments : n/a
+
+          › Enabled   : Yes
+          › Name      : n/a
+          › Roles     : Not limited
+          › Channels  : Limited (02) › "Commandes Bots", "Gestion Bots"
+
+          › Revision  : 1.11
+
+
+
+    • CATEGORY 10 - SCORE
+
+        • 305 - COMMAND
+          › Trigger   : -score
+          › Arguments : ‹@UserOrID›
+
+          › Enabled   : Yes
+          › Name      : n/a
+          › Roles     : Not limited
+          › Channels  : Limited (02) › "Commandes Bots", "Gestion Bots"
+
+          › Revision  : 1
+
+        • 306 - COMMAND
+          › Trigger   : -addscore
+          › Arguments : ‹@UserOrID› ‹Amount›
+
+          › Enabled   : Yes
+          › Name      : n/a
+          › Roles     : Limited (02) › "Dictateur Suprême", "Développeur"
+          › Channels  : Not limited
+
+          › Revision  : 1
+
+        • 307 - COMMAND
+          › Trigger   : -buyscore
+          › Arguments : ‹[1|2|3]›
+
+          › Enabled   : Yes
+          › Name      : n/a
+          › Roles     : Not limited
+          › Channels  : Limited (02) › "Commandes Bots", "Gestion Bots"
+
+          › Revision  : 1
+
+        • 309 - COMMAND
+          › Trigger   : -leaderboard
+          › Arguments : ‹Page›
+
+          › Enabled   : Yes
+          › Name      : n/a
+          › Roles     : Not limited
+          › Channels  : Limited (02) › "Commandes Bots", "Gestion Bots"
+
+          › Revision  : 1a
+
+
+
+    • CATEGORY 11 - LEGACY COMMANDS
+
+        • 77 - COMMAND
+          › Trigger   : -lgoulag
+          › Arguments : ‹@UserOrID› "‹Reason›" ‹Duration›
+
+          › Enabled   : No
+          › Name      : Legacy Goulag Command
+          › Roles     : Limited (04) › "Dictateur Suprême", "Développeur", "Grand Modérateur", "Modérateur"
+          › Channels  : Not Limited
+
+          › Revision  : v1.34
+
+        • 78 - COMMAND
+          › Trigger   : -lungoulag
+          › Arguments : ‹@UserOrID› "‹Reason›"
+
+          › Enabled   : No
+          › Name      : Legacy Ungoulag Command
+          › Roles     : Limited (04) › "Dictateur Suprême", "Développeur", "Grand Modérateur", "Modérateur"
+          › Channels  : Not Limited
+
+          › Revision  : v1.30
+
+        • 199 - COMMAND
+          › Trigger   : -lmine
+          › Arguments : ‹@UserOrID› "‹Reason›" ‹Duration›
+
+          › Enabled   : No
+          › Name      : Legacy Mine Command
+          › Roles     : Limited (04) › "Dictateur Suprême", "Développeur", "Grand Modérateur", "Modérateur"
+          › Channels  : Not Limited
+
+          › Revision  : 2
+
+        • 206 - COMMAND
+          › Trigger   : -lban
+          › Arguments : ‹@UserOrID› "‹Reason*›" ‹Duration*›
+
+          › Enabled   : No
+          › Name      : Legacy Ban Command
+          › Roles     : Limited (04) › "Dictateur Suprême", "Développeur", "Grand Modérateur", "Modérateur"
+          › Channels  : Not Limited
+
+          › Revision  : 2
+
+        • 207 - COMMAND
+          › Trigger   : -lkick
+          › Arguments : ‹@UserOrID› "‹Reason›"
+
+          › Enabled   : No
+          › Name      : Legacy Kick Command
+          › Roles     : Limited (04) › "Dictateur Suprême", "Développeur", "Grand Modérateur", "Modérateur"
+          › Channels  : Not Limited
+
+          › Revision  : v1.10
+
+        • 311 - COMMAND
+          › Trigger   : -lsban
+          › Arguments : ‹@UserOrID› "‹Reason*›" ‹Duration*›
+
+          › Enabled   : No
+          › Name      : Legacy Silent Ban Command
+          › Roles     : Limited (04) › "Dictateur Suprême", "Développeur", "Grand Modérateur", "Modérateur"
+          › Channels  : Not Limited
+
+          › Revision  : v1.02
+
+
+
+

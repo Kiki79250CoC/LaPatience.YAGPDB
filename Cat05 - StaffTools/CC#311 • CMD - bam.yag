@@ -1,0 +1,12 @@
+{{$args := parseArgs 1 "`-bam ‹@User› \"‹Reason›\" ‹Duration›`" (carg "userid" "user") (carg "string" "reason") (carg "string" "duration")}}
+{{$slice := cslice}}
+{{$user := toInt64 ($args.Get 0)}}
+{{$victim := (getMember $user).User.String}}
+{{$duration := "indefinitely"}}
+{{if $args.IsSet 2}}
+  {{$duration = (print "for `" (humanizeDurationHours ($args.Get 2)) "` ")}}
+{{end}}
+{{if eq $user 223894107016134656}}
+    {{$victim = .User.String}}
+{{end}}
+{{sendMessage nil (print "🔨 Banned `" $victim "` " $duration " <:jesus_rire:1054828901014192148>")}}

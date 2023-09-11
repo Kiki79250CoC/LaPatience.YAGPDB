@@ -1,0 +1,40 @@
+{{$args := parseArgs 2 "-addscore @User#1234 points" (carg "userid" "userid") (carg "int" "int")}}
+{{$userid := $args.Get 0}}
+{{$toRetrieve := $args.Get 1}}
+{{$entry := dbGet $userid "score"}}
+{{$toSet := $toRetrieve}}
+{{$oldPoints := 0}}
+{{if $entry}}
+  {{$oldPoints = $entry.Value}}
+  {{$toSet = add $oldPoints $toRetrieve}}
+{{end}}
+{{dbSet $userid "score" $toSet}}
+{{sendMessage nil (joinStr "" (getMember $userid).User.Username " : " $oldPoints " -> " $toSet)}}
+
+{{$oldPoints = toInt $oldPoints}}
+{{$toSet = toInt $toSet}}
+
+{{if and (lt $oldPoints 1000) (ge $toSet 1000)}}
+  {{giveRoleID $userid 1060949245433229373}}
+{{end}}
+{{if and (lt $oldPoints 5000) (ge $toSet 5000)}}
+  {{giveRoleID $userid 1060949252601294940}}
+{{end}}
+{{if and (lt $oldPoints 10000) (ge $toSet 10000)}}
+  {{giveRoleID $userid 1060949258917924934}}
+{{end}}
+{{if and (lt $oldPoints 20000) (ge $toSet 20000)}}
+  {{giveRoleID $userid 1060949256170643558}}
+{{end}}
+{{if and (lt $oldPoints 35000) (ge $toSet 35000)}}
+  {{giveRoleID $userid 1060949819302084678}}
+{{end}}
+{{if and (lt $oldPoints 50000) (ge $toSet 50000)}}
+  {{giveRoleID $userid 1060962927160606721}}
+{{end}}
+
+{{$tone := roundFloor (div $oldPoints 5000)}} 
+{{$ttwo := roundFloor (div $toSet 5000)}}
+{{if not (eq $tone $ttwo)}}
+  {{sendMessage 1060966843667460166 (joinStr "" "Bien joué " (getMember $userid).User.Mention ", tu viens de passer au **Palier " $ttwo "** !")}}
+{{end}}

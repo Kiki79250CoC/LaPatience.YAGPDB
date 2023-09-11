@@ -1,0 +1,16 @@
+{{$args := parseArgs 1 "`-winner ‹WinOption›`" (carg "int" "int")}}
+{{$winner := $args.Get 0}}
+{{$cotes := dbGet 0 "cotes"}}
+{{$parieurs := dbGet 0 "parieurs"}}
+{{$toSend := "Personne n'a encore parié/Pas de prono en cours"}}
+{{if and ($parieurs) ($cotes)}}
+  {{$value1 := $parieurs.Value}}
+  {{$value2 := $cotes.Value}}
+  {{if and (ne $value1 "") (ne $value2 "")}}
+     {{$cote := toFloat (index (split (index (split (index (split $value2 "-") 2) ",") (sub $winner 1)) ":") 1)}}
+     {{$liste := (split $value1 ",")}}
+    {{range $k, $v := $liste}}{{$list2 := split (index (split $v ":") 1) ";"}}{{if eq (toInt (index $list2 0)) $winner}}{{$gains := roundFloor (mult (toFloat (index $list2 1)) $cote)}}{{sendMessage 618851288825856010 (joinStr "" "> " (getMember (toInt64 (index (split $v ":") 0))).User.Mention " a gagné " $gains)}}{{end}}{{end}}
+    {{$toSend = "Le prono s'est terminé de djeuns !"}}
+  {{end}}
+{{end}}
+{{sendMessage nil $toSend}}

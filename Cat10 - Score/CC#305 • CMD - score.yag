@@ -1,0 +1,15 @@
+{{$args := parseArgs 0 "-score @user" (carg "userid" "user")}}
+{{$userID := .User.ID}}
+{{if $args.IsSet 0}}
+  {{$userID = ($args.Get 0)}}
+{{end}}
+{{$string := print (getMember $userID).User.Username " possède" }}
+{{if eq $userID .User.ID}}
+  {{$string = "Vous possédez"}}
+{{end}}
+{{$entry := dbGet $userID "score"}}
+{{$userPoints := 0}}
+{{if $entry}}
+  {{$userPoints = $entry.Value}}
+{{end}}
+{{sendMessage nil (print $string " actuellement un score de **" $userPoints "** points. Pas mal, pas mal <:chat_journal:1054839648574263368>.")}}

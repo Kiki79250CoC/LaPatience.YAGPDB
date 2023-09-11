@@ -1,0 +1,25 @@
+{{$toIncrease := 1}}
+{{$bankSolde := 0}}
+{{$CanBypass := cslice 369101917659332611 531170764183830528}}
+
+{{$plafPremLvl := 0}}
+{{if targetHasRoleID .User.ID 1079418386511040572}} {{$plafPremLvl = 2}}
+{{else if targetHasRoleID .User.ID 967188575005315132}} {{$plafPremLvl = 1}} {{end}}
+{{$plaf := toInt (dbGet $plafPremLvl "points").Value}}
+
+{{$userPts := dbGet .User.ID "points"}}
+{{if $userPts}}
+  {{$bankSolde = (index ($userPts.Value) 0)}}
+  {{if ge (sub .Message.Timestamp.Parse.Unix (index ($userPts.Value) 1)) 120}}
+    {{if or (lt $bankSolde $plaf) (in $CanBypass .User.ID)}}
+      {{dbSet .User.ID "points" (cslice (add $bankSolde $toIncrease) .Message.Timestamp.Parse.Unix)}}
+    {{else}}
+      {{$TP := index (dbGet 531170764183830528 "points").Value 0}}
+      {{dbSet 531170764183830528 "points" (cslice (add $TP $toIncrease) .Message.Timestamp.Parse.Unix)}}
+    {{end}}
+  {{end}}
+
+{{else}}
+  {{dbSet .User.ID "points" (cslice (add $bankSolde $toIncrease) .Message.Timestamp.Parse.Unix)}}
+
+{{end}}

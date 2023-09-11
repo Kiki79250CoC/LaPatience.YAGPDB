@@ -1,0 +1,85 @@
+{{if (reFind (joinStr "" `(\[.+\]\(.+\))`) $.Message.Content)}}{{deleteTrigger 0}}{{end}}
+
+{{if eq .Message.ChannelID 496010398848253965}}
+  {{/* ---------- Buy 16 ---------- */}}
+  {{$dbThief := dbGet 16 "Buy"}}
+  {{if $dbThief}}
+    {{$thiefID := toInt $dbThief.Value}}
+    {{if not (dbGet 161 "Buy")}}
+      {{if not (eq $thiefID .User.ID)}}
+        {{dbSetExpire 161 "Buy" "#" 10}}
+        {{dbDel 16 "Buy"}}
+        {{$dbVictAcc := dbGet .User.ID "points"}}
+        {{if $dbVictAcc}}
+          {{$toSend := print "Tiens, on dirait que " (getMember $thiefID).User.Mention " a tenté de faire les poches de " .User.Mention ", sauf qu'un flic l'a vu...\nDu coup les **600 Points** se sont envolés vers les cieux... 💸"}}
+          {{$victAcc := index $dbVictAcc.Value 0}}
+          {{if ge $victAcc 600}}
+            {{$toSend = print "Tiens, on dirait que " (getMember $thiefID).User.Mention " vient de faire les poches de " .User.Mention " et a trouvé **600 Points** dans l'une d'elles... 💸"}}
+            {{sendMessage 618851288825856010 (print "Buy 16 : " .User.Mention)}}
+            {{sendMessage nil $toSend}}
+            {{dbSet .User.ID "points" (cslice (sub $victAcc 600) .Message.Timestamp.Parse.Unix)}}
+            {{dbSet $thiefID "points" (cslice (add (index (dbGet $thiefID "points").Value 0) 1200) .Message.Timestamp.Parse.Unix)}}
+          {{else}}
+            {{sendMessage nil $toSend}}
+          {{end}}
+        {{else}}
+          {{sendMessage nil $toSend}}
+        {{end}}
+      {{end}}
+    {{end}}
+  {{end}}
+{{end}}
+
+{{/* ---------- Bombe ---------- */}}
+{{$bomb := dbGet 0 "bomb"}}
+{{if $bomb}}
+  {{if eq (index ($bomb.Value) 0) .User.ID}}
+    {{if lt (sub (index $bomb.Value 1) .Message.Timestamp.Parse.Unix) 0}}
+      {{dbDel 0 "bomb"}}
+      {{takeRoleID .User.ID 967187787260518440}}
+      {{sendMessage nil (print "Désolé " .User.Mention ", mais il semblerait que **La Sainte Bombe** viens de t'exploser à la gueule... Cheh. <a:risitas_boom:1056315066653364346>")}}
+      {{execCC 320 nil 0 (sdict "sancUsr" .User.ID "sancRes" "AutoSanc.Bomb" "sancDur" (toDuration "5m") "sancMod" 204255221017214977)}}
+      {{sendDM "Tu es l'élu(e) ! **La Sainte Bombe** vient de péter sur toi !\nUn sincère merci (de la part des autres) pour le sacrifice."}}
+    {{end}}
+  {{end}}
+{{end}}
+
+{{/* ---------- Banword Boutique ---------- */}}
+{{$banwordToggle := false}}
+{{if $banwordToggle}}
+  {{$bBWList := cslice "mais" "banword" "bw"}}
+  {{$btBanwTrigger := false}}
+  {{range $k, $v := $bBWList}}{{if (reFind (joinStr "" `(?i)(\b` $v `\b)`) $.Message.Content)}}{{$btBanwTrigger = true}}{{end}}{{end}}
+  {{if $btBanwTrigger}}
+    {{if not (in (cslice 223894107016134656 369101917659332611) .User.ID)}}
+      {{execCC 320 nil 0 (sdict "sancUsr" .User.ID "sancRes" "AutoSanc.Banword" "sancDur" (toDuration "5m") "sancMod" 204255221017214977)}}
+      {{sendDM "Tu viens de te faire avoir par un Banword (Buy 23). On se revoit dans 5 minutes <:esso:1054716569449668609>"}}
+      {{sendMessage 618851288825856010 (print .User.Mention " s'est mangé un Banword Boutique.")}}
+    {{else}}
+      {{sendMessage 618851288825856010 (print "`" .User.Username "` a dit le mot 😱 ! J'vais le dire à ma mère !")}}
+    {{end}}
+  {{end}}
+{{end}}
+
+{{/* ---------- BuyVIP 3 ---------- */}}
+{{$buyvip3 := dbGet 10003 "Buy"}}
+{{if $buyvip3}}
+  {{$channelList := $buyvip3.Value}}
+  {{if (in $channelList (toString .Message.ChannelID))}}
+    {{if not (dbGet .User.ID "gulag")}}
+      {{sendMessage 618851288825856010 (print "BuyVIP 3 : Mine déclenchée par <@" .User.ID "> sur le channel <#" .Message.ChannelID ">.")}}
+      {{sendDM "Désolé, tu as noclip au Goulag à cause du BuyVIP 3."}}
+      {{execCC 320 nil 0 (sdict "sancUsr" .User.ID "sancRes" "AutoSanc.BuyVIP3" "sancDur" (toDuration "10m") "sancMod" 204255221017214977)}}
+      {{$newList := cslice}}
+      {{$remove := (toString .Message.ChannelID)}}
+      {{range $channelList}}{{if ne . $remove}}{{$newList = $newList.Append .}}{{end}}{{end}}
+      {{if not (eq (len $newList) 0)}}
+        {{dbSet 10003 "Buy" $newList}}
+      {{else}}
+        {{dbDel 10003 "Buy"}}
+      {{end}}
+    {{end}}
+  {{end}}
+{{end}}
+
+{{/* --- REGEX END ---*/}}

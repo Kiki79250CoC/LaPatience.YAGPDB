@@ -1,0 +1,13 @@
+{{$args := parseArgs 1 "-leaderboard [page]" (carg "int" "int")}}
+{{$skip := mult (sub ($args.Get 0) 1) 20}}
+{{$message := ""}}
+{{$i := $skip}}
+{{range (dbTopEntries "score" 20 $skip)}}
+  {{$i = add $i 1}}
+  {{if (getMember .UserID)}}
+    {{$message = (joinStr "" $message "\n**" $i " :** " (getMember .UserID).User.Username " avec un score de **" .Value "** !")}}
+  {{else}}
+    {{$message = (joinStr "" $message "\n**" $i " :** `ID : " .UserID "` avec un score de **" .Value "** !")}}
+  {{end}}
+{{end}}
+{{sendMessage nil $message}}

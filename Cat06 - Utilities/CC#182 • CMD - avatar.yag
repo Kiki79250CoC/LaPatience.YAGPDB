@@ -1,0 +1,7 @@
+{{$args  := parseArgs 0 "-avatar @utilisateur#1234" (carg "userid" "user")}}
+{{$user := .User.ID}}
+{{if $args.IsSet 0}}
+  {{$user = ($args.Get 0)}}
+{{end}}
+{{$avatar := (getMember $user).User.AvatarURL "256"}}
+{{sendMessage nil $avatar}}

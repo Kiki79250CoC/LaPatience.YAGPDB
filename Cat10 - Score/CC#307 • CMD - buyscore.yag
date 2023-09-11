@@ -1,0 +1,57 @@
+{{$args := parseArgs 1 "-buyscore (1/2/3)" (carg "int" "int")}}
+{{$zlogos := $args.Get 0}}
+{{if gt $zlogos 3}}
+  {{$zlogos = 1}}
+{{end}}
+{{$wii := toInt (pow 10 (add $zlogos 1))}}
+{{$userid := .User.ID}}
+{{$sendDM := joinStr "" "Tu viens d'injecter " $wii " points dans ton score !"}}
+{{$pwants := dbGet $userid "points"}}
+{{$petos := 0}}
+{{if $pwants}}
+  {{$petos = (index ($pwants.Value) 0)}}
+{{end}}
+{{$riche := ge $petos $wii}}
+{{if $riche}}
+  {{$toSet := cslice (sub $petos $wii) .Message.Timestamp.Parse.Unix}}
+  {{dbSet $userid "points" $toSet}}
+  {{$score := dbGet $userid "score"}}
+  {{$oldPoints := 0}}
+  {{if $score}}
+    {{$oldPoints = $score.Value}}
+  {{end}}
+  {{$toSet := add $oldPoints $wii}}
+  {{dbSet $userid "score" $toSet}}
+  {{sendMessage 1060966654722445322 (joinStr "" .User.Mention " vient d'injecter " $wii " points dans son scoreboard.")}}
+
+  {{$oldPoints = toInt $oldPoints}}
+  {{$toSet = toInt $toSet}}
+ 
+  {{if and (lt $oldPoints 1000) (ge $toSet 1000)}}
+    {{giveRoleID $userid 1060949245433229373}}
+  {{end}}
+  {{if and (lt $oldPoints 5000) (ge $toSet 5000)}}
+    {{giveRoleID $userid 1060949252601294940}}
+  {{end}}
+  {{if and (lt $oldPoints 10000) (ge $toSet 10000)}}
+    {{giveRoleID $userid 1060949258917924934}}
+  {{end}}
+  {{if and (lt $oldPoints 20000) (ge $toSet 20000)}}
+    {{giveRoleID $userid 1060949256170643558}}
+  {{end}}
+  {{if and (lt $oldPoints 35000) (ge $toSet 35000)}}
+    {{giveRoleID $userid 1060949819302084678}}
+  {{end}}
+  {{if and (lt $oldPoints 50000) (ge $toSet 50000)}}
+    {{giveRoleID $userid 1060962927160606721}}
+  {{end}}
+   
+  {{$tone := roundFloor (div $oldPoints 5000)}} 
+  {{$ttwo := roundFloor (div $toSet 5000)}}
+  {{if not (eq $tone $ttwo)}}
+    {{sendMessage 1060966843667460166 (joinStr "" "Bien joué " (getMember $userid).User.Mention ", tu viens de passer au **Palier " $ttwo "** !")}}
+  {{end}}
+{{else}}
+  {{$sendDM = "Vous n'avez pas assez de points pour effectuer cette transaction !"}}
+{{end}}
+{{sendDM $sendDM}}

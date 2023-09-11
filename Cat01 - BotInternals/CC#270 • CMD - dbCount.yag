@@ -1,0 +1,6 @@
+{{$args := parseArgs 0 "`-dbCount ‹@UserOrID›`" (carg "string" "id")}}
+{{if ($args.IsSet 0)}}
+  {{sendMessage nil (dbCount (toInt64 ($args.Get 0)))}}
+{{else}}
+  {{sendMessage nil dbCount}}
+{{end}}

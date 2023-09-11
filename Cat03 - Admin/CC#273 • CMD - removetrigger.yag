@@ -1,0 +1,17 @@
+{{$args := parseArgs 1 "`-removetrigger ‹[Bombe|Shifumi]›`" (carg "string" "ItemToDefuse")}}
+
+{{if eq (lower ($args.Get 0)) "bombe"}}
+  {{$bomb := dbGet 0 "bomb"}}
+  {{if $bomb}}
+    {{takeRoleID (index $bomb.Value 0) 967187787260518440}}
+    {{dbDel 0 "bomb"}}
+    {{sendMessage nil "L'entrée de la base de donnée concernant la bombe a été réinitialisé."}}
+  {{else}}
+    {{sendMessage nil "Aucune bombe n'est actuellement active."}}
+  {{end}}
+{{else if eq (lower ($args.Get 0)) "shifumi"}}
+  {{dbDel 0 "shifumiboolean"}}
+  {{sendMessage nil "L'entrée de la base de donnée concernant une potentielle partie de Shifumi active a été réinitialisé."}}
+{{else}}
+  {{sendMessage nil "**Erreur :**\nEspèce de triso, c'est soit \"Bombe\", soit \"Shifumi\", pas un autre mot."}}
+{{end}}

@@ -1,0 +1,28 @@
+{{deleteTrigger 0}}
+{{$args := parseArgs 4 "`-cv \"‹Présentation rapide›\" \"‹Pourquoi voulez vous intégrer la Modération ?›\" \"‹Vos disponibilités›\"`" (carg "string" "AboutMe") (carg "string" "WhyJoinMod") (carg "string" "MyAvailability")}}
+{{$value := (dbGet 0 "cv").Value}}
+
+{{if $value}}
+  {{$userText := .User.Username}}
+  {{$footerText := " "}}
+  {{if (getMember .User.ID).Nick}}
+    {{$userText = print (getMember .User.ID).Nick}}
+    {{$footerText = print (getMember .User.ID).Nick " de son vrai nom " .User.String}}
+  {{end}}
+
+  {{$embed := cembed "color" 0xb555ff
+    "title" (print "📫 CV de " $userText)
+    "fields" (cslice
+        (sdict "name" " " "value" " " "inline" false)
+      (sdict "name" "👤 __Présentation rapide :__" "value" ($args.Get 0))
+      (sdict "name" "<:ModUnified_v2:1080310814453542952> __Pourquoi voulez-vous intégrer la Modération ?__" "value" ($args.Get 1))
+      (sdict "name" "🕒 __Vos disponibilités :__" "value" ($args.Get 2))
+        (sdict "name" " " "value" " " "inline" false)
+    ) "footer" (sdict "text" $footerText)
+      "timestamp" currentTime
+  }}
+  {{sendMessage 691745911692329040 (complexMessage "content" (print "📫 " (mentionRoleID 507301458853625879) " Vous avez reçu un nouveau CV !") "embed" $embed)}}
+  {{sendDM (complexMessage "content" (print "Voici une copie carbone du CV que vous avez envoyé.") "embed" $embed)}}
+{{else}}
+  {{sendDM (complexMessage "content" (print "Les recrutements sont actuellement fermés. Veuillez réessayer après leur ouverture.\n\nPour que vous n'ayez pas a tout réécrire, le système vous rend votre CV.") "embed" $embed)}}
+{{end}}

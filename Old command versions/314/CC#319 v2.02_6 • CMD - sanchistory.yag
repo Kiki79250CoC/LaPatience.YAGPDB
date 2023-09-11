@@ -1,0 +1,46 @@
+{{$args := parseArgs 1 "`-sanchistory ‹@UserOrID›`" (carg "userid" "sancUsr")}}
+
+{{$sancUsr := ($args.Get 0)}}
+{{$sancNic := (getMember $sancUsr).Nick}}
+{{$lnColor := 0xAA0000}}
+
+{{if ne $sancNic ""}}
+  {{$sancNic = (print " · " (getMember $sancUsr).Nick)}}
+{{end}}
+
+{{$GoulagCount := 0}}
+{{$dbGoulagCT := dbGet $sancUsr "GoulagCount"}}
+{{if $dbGoulagCT}}
+  {{$GoulagCount = (index $dbGoulagCT.Value 0)}}
+{{end}}
+
+{{$KickCount := 0}}
+{{$dbKickCT := dbGet $sancUsr "KickCount"}}
+{{if $dbKickCT}}
+  {{$KickCount = (index $dbKickCT.Value 0)}}
+{{end}}
+
+{{$BanCount := 0}}
+{{$dbBanCT := dbGet $sancUsr "BanCount"}}
+{{if $dbBanCT}}
+  {{$BanCount = (index $dbBanCT.Value 0)}}
+{{end}}
+
+{{$lastSanc := print "*" (getMember $sancUsr).User.Username " n'a jamais fait l'objet d'une sanction par le passé ou cette dernière n'est pas référencée dans la base de données.*"}}
+{{$dbLastSanc := dbGet $sancUsr "LastSanc"}}
+{{if $dbLastSanc}}
+  {{$lastSanc = (index $dbLastSanc.Value 0)}}
+{{end}}
+
+{{$embed := cembed "color" $lnColor
+  "fields" (cslice
+    (sdict "name" "👤 Membre" "value" (print "> " (getMember $sancUsr).User.Mention) "inline" false)
+    (sdict "name" " " "value" (print ">>> *(" (getMember $sancUsr).User.String "" $sancNic ")*\n*ID : `" $sancUsr "`*") "inline" false)
+      (sdict "name" " " "value" " " "inline" false)
+    (sdict "name" "📜 Historique" "value" " " "inline" false)
+    (sdict "name" "⛏️ Nombre de Goulags" "value" (print "> " $GoulagCount) "inline" true)
+    (sdict "name" "🔨 Nombre de Bans" "value" (print "> " $BanCount) "inline" true)
+    (sdict "name" "🚪 Nombre de Kicks" "value" (print "> " $KickCount) "inline" true)
+    (sdict "name" "⛔ Dernière sanction" "value" (print "> " $lastSanc) "inline" false)
+      (sdict "name" " " "value" " " "inline" false)
+  ) "footer" (sdict "text" (print "Commande invoquée par " .User.String) "icon_url" "https://cdn.discordapp.com/emojis/1080310621607829564.webp?quality=lossless") "timestamp" currentTime}} {{sendMessage nil $embed}}

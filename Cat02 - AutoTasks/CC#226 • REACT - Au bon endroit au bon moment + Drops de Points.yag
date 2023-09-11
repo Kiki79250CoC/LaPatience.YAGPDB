@@ -1,0 +1,44 @@
+{{/* Badge "Au bon endroit au bon moment" */}}
+{{$entry := dbGet 0 "msgluck"}}
+{{if $entry}}
+  {{$value := $entry.Value}}
+  {{$dict := sdict $value}}
+  {{$msgid := $dict.Get "msgid"}}
+  {{$bool := $dict.Get "bool"}}
+  {{$newDict := sdict "msgid" $msgid}}
+  {{if and (eq $bool "false") (eq .ReactionMessage.ID (toInt64 $msgid))}}
+    {{$lemsg := (print .User.Mention " devient l'heureux détenteur du badge de la Vision du Faucon !")}}
+    {{if (targetHasRoleID .User.ID 760955221919793202)}} 
+      {{$lemsg = (print "Merci à toi " .User.Mention ", tu viens d'empêcher un autre membre de l'avoir car tu l'avais déjà !\nAllez salut !")}}
+    {{end}}
+    {{giveRoleID .User.ID 760955221919793202}}
+    {{sendMessage nil $lemsg}} 
+    {{$newDict.Set "bool" "true"}}
+    {{dbSet 0 "msgluck" $newDict}}
+  {{end}}
+{{end}}
+
+{{/* Drops de Points lors d'évènements */}}
+{{$entry2 := dbGet 0 "msgluck2"}}
+{{if $entry2}}
+  {{$value := $entry2.Value}}
+  {{$dict := sdict $value}}
+  {{$msgid := $dict.Get "msgid"}}
+  {{$bool := $dict.Get "bool"}}
+  {{$newDict := sdict "msgid" $msgid}}
+  {{if and (eq $bool "false") (eq .ReactionMessage.ID (toInt64 $msgid))}}
+    {{$userid := .User.ID}}
+    {{$pts := dbGet $userid "points"}}
+    {{if $pts}}
+      {{$value := $pts.Value}}
+      {{$pts := index $value 0}}
+      {{$tayme := index $value 1}}
+      {{$nePts := add $pts 200}}
+      {{$nyouslice := cslice $nePts $tayme}}
+      {{sendMessage nil (print "Bien joué " .User.Mention ", tu viens de gagner un pochon avec 200 Points à l'intérieur !")}}
+      {{dbSet $userid "points" $nyouslice}}
+    {{end}}
+    {{$newDict.Set "bool" "true"}}
+    {{dbSet 0 "msgluck2" $newDict}}
+  {{end}}
+{{end}}

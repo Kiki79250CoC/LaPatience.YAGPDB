@@ -1,0 +1,3 @@
+{{$randsec := randInt 300 1500}}
+{{execCC 268 nil $randsec (sdict)}}
+{{sendMessage 618851288825856010 (print "<:GoldenXP:1080314290449420368> Déclenchement du message pour le drop de points dans **" (reReplace "second" (reReplace "hour" (reReplace "and" (humanizeDurationSeconds (mult $randsec 1000000000)) "et") "heure") "seconde") "** (" $randsec " secondes)\n\nLe message apparaîtra donc le <t:" (add currentTime.Unix $randsec) ":D> à <t:" (add currentTime.Unix $randsec) ":T>")}}

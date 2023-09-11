@@ -1,0 +1,112 @@
+{{$roles := "496010501990645799"}}
+{{$args := parseArgs 3 "`-lgoulag ‹@User› \"‹Reason›\" \"‹Duration›\"`" (carg "user" "user") (carg "string" "reason") (carg "string" "duration")}}
+{{$user := ($args.Get 0).ID}}
+{{$reason := $args.Get 1}}
+{{$sduration := $args.Get 2}}
+{{$sanctionneur := .User.Mention}}
+{{$lalala := "true"}}
+{{$salonzer := 515972308645707777}}
+{{if .ExecData}}
+  {{$user = .ExecData.user}}
+  {{$reason = .ExecData.reason}}
+  {{if eq $reason "Mot interdit CQFD"}}
+    {{$lalala = "false"}}
+  {{end}}
+  {{$sduration = .ExecData.duration}}
+  {{$sanctionneur = (getMember .ExecData.sanctionneur).User.Mention}}
+  {{if eq (toInt64 .ExecData.sanctionneur) 204255221017214977}}
+    {{$salonzer = 925172096252936223}}
+  {{end}}
+{{end}}
+{{if and (and (reFind `^(\d\d?)s(ec)?|1m(in)?` $sduration) (not .ExecData)) (false)}}
+  {{$user = .User.ID}}
+  {{$roles = joinStr "" $roles "-496010603601854464"}}
+  {{$sduration = "10min"}}
+  {{$reason = "Troll goulag"}}
+  {{takeRoleID $user 496010603601854464}}
+{{end}}
+{{if targetHasRoleID $user 506417754878902272}}
+  {{sendMessage nil "> **Erreur :**\n> La personne mentionnée se trouve déjà au Goulag !"}}
+{{else}}
+  {{takeRoleID $user 496010501990645799}}
+  {{if targetHasRoleID $user 507301458853625879}}
+    {{takeRoleID $user 507301458853625879}}
+    {{$roles = (joinStr "" $roles "-507301458853625879")}}
+  {{end}}
+  {{if targetHasRoleID $user 669333038068662285}}
+    {{takeRoleID $user 669333038068662285}}
+    {{$roles = (joinStr "" $roles "-669333038068662285")}}
+  {{end}}
+  {{if targetHasRoleID $user 669333046759129119}}
+    {{takeRoleID $user 669333046759129119}}
+    {{$roles = (joinStr "" $roles "-669333046759129119")}}
+  {{end}}
+  {{if targetHasRoleID $user 669333044842332171}}
+    {{takeRoleID $user 669333044842332171 }}
+    {{$roles = (joinStr "" $roles "-669333044842332171")}}
+  {{end}}
+  {{if targetHasRoleID $user 669333046025256965}}
+    {{takeRoleID $user 669333046025256965}}
+    {{$roles = (joinStr "" $roles "-669333046025256965")}}
+  {{end}}
+  {{if targetHasRoleID $user 496010603601854464}}
+    {{takeRoleID $user 496010603601854464}}
+    {{$roles = (joinStr "" $roles "-496010603601854464")}}
+  {{end}}
+  {{if targetHasRoleID $user 1060995501798981762}}
+    {{takeRoleID $user 1060995501798981762}}
+    {{$roles = (joinStr "" $roles "-1060995501798981762")}}
+  {{end}}
+  {{if targetHasRoleID $user 1060995505238311032}}
+    {{takeRoleID $user 1060995505238311032}}
+    {{$roles = (joinStr "" $roles "-1060995505238311032")}}
+  {{end}}
+  {{if targetHasRoleID $user 1060995508207890432 }}
+    {{takeRoleID $user 1060995508207890432 }}
+    {{$roles = (joinStr "" $roles "-1060995508207890432")}}
+  {{end}}
+  {{if targetHasRoleID $user 1062481473480966356 }}
+    {{takeRoleID $user 1062481473480966356 }}
+    {{$roles = (joinStr "" $roles "-1062481473480966356")}}
+  {{end}}
+  {{if targetHasRoleID $user 1062481477130014862}}
+    {{takeRoleID $user 1062481477130014862}}
+    {{$roles = (joinStr "" $roles "-1062481477130014862")}}
+  {{end}}
+  {{giveRoleID $user 506417754878902272}}
+  {{if eq $lalala "true"}}
+    {{giveRoleID $user 657981836412321842}}
+    {{if ne .User.ID 507141139321716763}}
+      {{if or (eq $sduration "1min") (eq $sduration "1m")}}
+        {{$salonzer = 925172096252936223}}
+      {{end}}
+      {{sendMessage $salonzer (joinStr "" "> **Pseudo :** " (getMember $user).User.Mention "\n> **Sanction :** Goulag\n> **Raison :** " $reason "\n> **Durée :** " $sduration "\n> \n> **Sanctionné par** " $sanctionneur)}}
+      {{if eq $salonzer 515972308645707777}}
+        {{sendMessage 550364083195609089 (joinStr "" "> *Message automatically redirected from <#515972308645707777> to <#550364083195609089>*`\n> \n> **Pseudo :** " (getMember $user).User.Mention "\n> **Sanction :** Goulag\n> **Raison :** " $reason "\n> **Durée :** " $sduration "\n> \n> **Sanctionné par** " $sanctionneur)}}
+      {{end}}
+    {{end}}
+  {{else}}
+    {{sendMessage 618851288825856010 (joinStr "" "**Pseudo :** " (getMember $user).User.Mention "\n> **Sanction :** Goulag\n> **Raison :** " $reason "\n> **Durée :** " $sduration "\n> \n> **Sanctionné par** " $sanctionneur)}}
+  {{end}}
+  {{$dur := $sduration}}
+  {{$duration := 0}}
+  {{$hr := .TimeHour}}{{$min := .TimeMinute}}{{$sec := .TimeSecond}}
+  {{with reFindAllSubmatches `(\d+)(d)` $dur}}
+    {{$duration = toDuration ( add (mult 24 (toInt (index (index . 0) 1))  $hr) $duration)}}
+  {{end}}
+  {{with reFindAllSubmatches `(\d+)(h)` $dur}}
+    {{$duration = toDuration ( add (mult  (toInt (index (index . 0) 1)) $hr) $duration)}}
+  {{end}}
+  {{with reFindAllSubmatches `(\d+)(m)` $dur}}
+    {{$duration = toDuration ( add (mult  (toInt (index (index . 0 ) 1)) $min) $duration)}}
+  {{end}}
+  {{with reFindAllSubmatches `(\d+)(s)` $dur}}
+    {{$duration = toDuration ( add (mult  (toInt (index (index . 0 ) 1)) $sec) $duration)}}
+  {{end}}
+  {{if eq $duration (mult 0 .TimeSecond)}}
+    {{sendDM "Une erreur s'est produite durant le traitement de la durée de la sanction.\nVous devrez donc enlever le rôle de sanction manuellement une fois la peine purgée."}}
+  {{else}}
+    {{$seconds := $duration.Seconds}}
+    {{scheduleUniqueCC 78 nil $seconds $user (dict "userid" $user "roles" $roles)}}
+  {{end}}
+{{end}}

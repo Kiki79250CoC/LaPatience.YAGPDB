@@ -1,0 +1,6 @@
+{{$list := cslice "496010398848253965" "504683776149028865" "517331312877633553" "731509213687185480" "552913229399982091" "575108485990055947" "719209393475813396" "561926517290958868" "496012052406468639" "506544049763909634" "828011798086418513"}}
+{{$index := randInt 0 (len $list)}}
+{{$id := toInt64 (index $list $index)}}
+{{$x := sendMessageRetID $id "**Appuie sur ✅ pour avoir tes points!**"}}
+{{addMessageReactions $id $x "✅"}}
+{{dbSet 0 "msgluck2" (sdict "msgid" $x "bool" "false")}}

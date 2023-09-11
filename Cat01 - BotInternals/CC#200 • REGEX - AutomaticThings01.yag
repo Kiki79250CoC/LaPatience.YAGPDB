@@ -1,0 +1,84 @@
+{{/* ---------- Mine ---------- */}}
+{{$mine := dbGet .User.ID "gulag"}}
+{{if $mine}}
+  {{sendMessage nil "Oups... On dirait qu'un truand vient de marcher sur quelque chose de relativement explosif... <:gros_jesus:1054705212910211144>"}}
+  {{$slice := split ($mine.Value) "™"}}
+  {{$sancRes := (index $slice 1)}}
+  {{$sancDur := (index $slice 2)}}
+  {{$sancMod := (index $slice 3)}}
+  {{$OptArgs := (index $slice 0)}}
+  {{execCC 320 nil 0 (sdict "sancUsr" .User.ID "sancRes" $sancRes "sancDur" (toDuration $sancDur) "sancMod" (toInt64 $sancMod) "OptArgs" $OptArgs)}}
+  {{dbDel .User.ID "gulag"}}
+{{end}}
+
+{{/* ---------- Général ---------- */}}
+{{if eq .Message.ChannelID 496010398848253965}}
+  {{$IsImmun := cslice "223894107016134656" "369101917659332611"}}
+
+  {{/* ---------- Buy 11 ---------- */}}
+  {{$buy11 := dbGet 11 "Buy"}}
+  {{if ge (toInt ($buy11.Value)) 1}}
+    {{if eq (randInt 1 7) 5}}
+      {{sendDM "Tu viens de te faire Goulag par le Buy 11 !"}}
+      {{sendMessage 618851288825856010 (print "Buy 11 : " .User.Mention)}}
+      {{dbSet 11 "Buy" (sub (toInt $buy11.Value) 1)}}
+      {{execCC 320 nil 0 (sdict "sancUsr" .User.ID "sancRes" "AutoSanc.Buy11" "sancDur" (toDuration "5m") "sancMod" 204255221017214977)}}
+    {{end}}
+  {{end}}
+
+  {{/* ---------- Buy 14 ---------- */}}
+  {{$buy14 := dbGet 14 "Buy"}}
+  {{if ge (toInt $buy14.Value) 1}}
+    {{if not (in $IsImmun (toString .User.ID))}}
+      {{sendDM "Tu viens de te faire Goulag par le Buy 14 !"}}
+      {{sendMessage 618851288825856010 (print "Buy 14 : " .User.Mention)}}
+      {{dbSet 14 "Buy" (sub (toInt $buy14.Value) 1)}}
+      {{execCC 320 nil 0 (sdict "sancUsr" .User.ID "sancRes" "AutoSanc.Buy14" "sancDur" (toDuration "5m") "sancMod" 204255221017214977)}}
+    {{end}}
+  {{end}}
+
+  {{/* ---------- Buy 17 ---------- */}}
+  {{if (dbGet 17 "Buy")}}
+    {{if not (in $IsImmun (toString .User.ID))}}
+      {{sendMessage 618851288825856010 (print "Buy 17 : " .User.Mention)}}
+      {{sendDM "Oups... Tu as été assommé et transporté au Goulag par un Buy 17."}}
+      {{execCC 320 nil 0 (sdict "sancUsr" .User.ID "sancRes" "AutoSanc.Buy17" "sancDur" (toDuration "2m") "sancMod" 204255221017214977)}}
+    {{end}}
+  {{end}}
+
+  {{/* ---------- Buy 26 ---------- */}}
+  {{if (dbGet 26 "Buy")}}
+    {{if not (in $IsImmun (toString .User.ID))}}
+      {{sendMessage 618851288825856010 (print "Buy 26 : " .User.Mention)}}
+      {{sendDM "Oups... Tu as été assommé et transporté au Goulag par un Buy 26."}}
+      {{execCC 320 nil 0 (sdict "sancUsr" .User.ID "sancRes" "AutoSanc.Buy26" "sancDur" (toDuration "1h") "sancMod" 204255221017214977)}}
+    {{end}}
+  {{end}}
+
+  {{/* ---------- Boutique Légendaire ---------- */}}
+  {{if (dbGet 21 "Buy")}}
+    {{if not (dbGet 210 "Buy")}}
+      {{dbSetExpire 210 "Buy" "#" (randInt 55 80)}}
+      {{sendMessage nil (print "🔥 " .User.Mention " tu gagnes 250 Points gratuitement comme ça.")}}
+      {{dbSet .User.ID "points" (cslice (add (index (dbGet .User.ID "points").Value 0) 250) .Message.Timestamp.Parse.Unix)}}
+    {{end}}
+  {{end}}
+
+{{end}} {{/* --- End --- */}}
+
+{{/* ---------- Livre d'Argent ---------- */}}
+{{if eq .Message.ChannelID 783725584336420906}}
+  {{removeRoleID 784090664580415508 300}}
+{{end}}
+
+{{/* ---------- Livre Platine ---------- */}}
+{{if eq .Message.ChannelID 1030950947993702451}}
+  {{removeRoleID 1030956478384832664 300}}
+  {{$platine := dbGet 0 "platinium"}}
+  {{if $platine}}
+    {{deleteMessage 1030950947993702451 (toInt64 $platine.Value)}}
+  {{end}}
+  {{dbSet 0 "platinium" (toString .Message.ID)}}
+{{end}}
+
+{{/* --- REGEX END ---*/}}

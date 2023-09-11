@@ -1,0 +1,34 @@
+{{deleteTrigger 0}} 
+{{$args := parseArgs 1 "`-avis \"‹FeedbackContent›\"`" (carg "string" "FeedbackText")}}
+{{$value := (dbGet 0 "avisActif").Value}}
+
+{{if $value}}
+  {{$userText := .User.Username}}
+  {{if (getMember .User.ID).Nick}}
+    {{$userText = print (getMember .User.ID).Nick " (" .User.String ")"}}
+  {{end}}
+
+  {{$contentPart1 := " "}}
+  {{$contentPart2 := " "}}
+  
+  {{if lt (len ($args.Get 0)) 1024}}
+    {{$contentPart1 = $args.Get 0}}
+  {{else}}
+    {{$list := split ($args.Get 0) " "}}
+    {{range $k,$v := $list}}{{$index := (roundFloor (div (len $list) 2))}}{{if le (toInt $k) (toInt $index)}}{{$contentPart1 = joinStr " " $contentPart1 $v}}{{else}}{{$contentPart2 = joinStr " " $contentPart2 $v}}{{end}}{{end}}
+  {{end}}
+
+  {{$embed := sdict "color" 0x69ed74 "fields" (cslice (sdict "title" (print "📫 Avis de " $userText) "name" "Contenu de l'avis :" "value" $contentPart1 "inline" false)) "timestamp" currentTime}}
+  {{$fields := $embed.fields}}
+
+  {{if (ne $contentPart2 " ")}}
+    {{$fields = $fields.Append (sdict "name" " " "value" $contentPart2 "inline" false)}}
+  {{end}}
+  {{$embed.Set "fields" $fields}}
+
+  {{sendMessage 693795482639794276 (complexMessage "content" (print "📫 " (getMember 369101917659332611).User.Mention " Vous avez reçu un nouvel avis de " .User.Mention ".") "embed" $embed)}}
+
+  {{sendDM (complexMessage "content" "Votre avis a été délivré sans encombres. Merci de l'intérêt que vous portez pour le serveur.\n\nCopie carbone de ce qui a été reçu :" "embed" $embed)}}
+{{else}}
+  {{sendDM (complexMessage "content" "Nous sommes désolés mais la réception d'avis est désactivée à l'heure actuelle. Veuillez donc réessayer lorsque la réception des avis sera de nouveau active.\n\nA celà, voici une copie carbone de ce que vous avez tapé pour ne pas avoir à le refaire la prochaine fois :" "embed" $embed)}}
+{{end}}

@@ -1,0 +1,21 @@
+{{$dailyVIPlv1 := 75}}
+{{$dailyVIPlv2 := 150}}
+{{$dailyInvLmt := 86400}} {{/*86400 = 24 heures*/}}
+{{$ptsToDonate := 0}}
+
+{{if or (targetHasRoleID .User.ID 967188575005315132) (targetHasRoleID .User.ID 1079418386511040572)}}
+  {{if targetHasRoleID .User.ID 967188575005315132}} {{$ptsToDonate = $dailyVIPlv1}}
+  {{else if targetHasRoleID .User.ID 1079418386511040572}} {{$ptsToDonate = $dailyVIPlv2}} {{end}}
+  {{if not (dbGet .User.ID "VIPdailyPoints")}}
+    {{$UsrBA := dbGet .User.ID "points"}}
+    {{$UsrPS := 0}} {{if $UsrBA}} {{$UsrPS = index $UsrBA.Value 0}} {{end}}
+    {{$UsrN := or .Member.Nick .User.Globalname .User.Username}}
+    {{dbSet .User.ID "points" (cslice (add $UsrPS $ptsToDonate) .Message.Timestamp.Parse.Unix)}}
+    {{dbSetExpire .User.ID "VIPdailyPoints" "cooldown" $dailyInvLmt}}
+    {{sendMessage nil (print "## <:GoldenXP:1080314290449420368> · Vous venez de récupérer votre bonus journalier de **" $ptsToDonate " Points**.\n> " $UsrN " · **" (reReplace "," (humanizeThousands ($UsrPS)) " ") " › " (reReplace "," (humanizeThousands (add $UsrPS $ptsToDonate)) " ") "**.\n> Revenez dans **" (reReplace "day" (humanizeDurationSeconds (mult $dailyInvLmt 1000000000)) "jour") "** pour récupérer votre prochain bonus journalier.")}}
+  {{else}}
+    {{sendMessage nil (print "## <:GoldenXP:1080314290449420368> · Vous ne pouvez pas récupérer votre bonus quotidien pour l'instant.\n> Vous pourrez le récupérer dans **" (reReplace "second" (reReplace "hour" (reReplace "and" (humanizeDurationSeconds ((dbGet .User.ID "VIPdailyPoints").ExpiresAt.Sub currentTime)) "et") "heure") "seconde") "**.")}}
+  {{end}}
+{{else}}
+  {{sendMessage nil (print "**Désolé " (or .Member.Nick .User.Globalname .User.Username) ", mais il semblerait que vous n'êtes pas <:VIP1_v2:1080311093785788507> VIP <:VIP2_v2:1080311144285229106>.**\nSi vous voulez devenir VIP, vous avez les instructions dans le salon <#1079830707423154227>.")}}
+{{end}}

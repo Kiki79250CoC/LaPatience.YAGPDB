@@ -1,0 +1,23 @@
+{{$args := parseArgs 1 "` -lban ‹@UserOrID› ‹Reason› ‹Duration›` › **regular** ban\n`-lsban ‹@UserOrID› ‹Reason› ‹Duration›` › **silent** ban" (carg "userid" "user") (carg "string" "reason") (carg "string" "duration")}}
+{{$slice := cslice}}
+{{$user := toInt64 ($args.Get 0)}}
+{{if and (not (in $slice (toString $user))) (not (targetHasRoleID $user 496010603601854464))}}
+  {{$member := (getMember $user)}}
+  {{$string := print "Personne ayant quitté, impossible de trouver le nom. Identifiant : " $user}}
+  {{if $member}}
+    {{$string = $member.User.Mention}}
+  {{end}}
+  {{$reason := "Non spécifiée"}}
+  {{if ($args.IsSet 1)}}
+    {{$reason = $args.Get 1}}
+  {{end}}
+  {{$duration := "Non spécifiée"}}
+  {{if $args.IsSet 2}}
+    {{$duration = $args.Get 2}}
+  {{end}}
+  {{sendMessage 515972308645707777 (print "> **Pseudo :** " $string "\n> **Sanction :** <:ban:1054840260179279882>\n> **Raison :** " $reason "\n> **Durée :** " $duration "\n> \n> **Bannissement prononcé par** " .User.Mention )}}
+    {{execAdmin "ban" $user $reason $duration}}
+{{else}}
+  {{sendMessage 515972308645707777 (print "> **Pseudo :** " .User.Mention "\n> **Sanction :** Auto<:ban:1054840260179279882>   (<:gros_jesus:1054705212910211144>)\n> **Raison :** A trébuché sur le tapis <:jesus_rire:1054828901014192148>")}}
+  {{execAdmin "ban" .User.ID "No."}}
+{{end}}
