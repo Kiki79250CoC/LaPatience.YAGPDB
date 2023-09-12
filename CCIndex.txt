@@ -53,7 +53,7 @@ DISCLAIMER : Elements in ‹quotation marks› are variable arguments (IE: User 
           › Trigger   : .*
           › Arguments : n/a
 
-          › Enabled   : Yes
+          › Enabled   : No
           › Name      : AutomaticThings 03 - RESERVED FOR LATER USE
           › Roles     : Not limited
           › Channels  : Not limited
@@ -64,7 +64,7 @@ DISCLAIMER : Elements in ‹quotation marks› are variable arguments (IE: User 
           › Trigger   : .*
           › Arguments : n/a
 
-          › Enabled   : Yes
+          › Enabled   : No
           › Name      : AutomaticThings 04 - RESERVED FOR LATER USE
           › Roles     : Not limited
           › Channels  : Not limited
@@ -75,7 +75,7 @@ DISCLAIMER : Elements in ‹quotation marks› are variable arguments (IE: User 
           › Trigger   : .*
           › Arguments : n/a
 
-          › Enabled   : Yes
+          › Enabled   : No
           › Name      : AutomaticThings 05 - RESERVED FOR LATER USE
           › Roles     : Not limited
           › Channels  : Not limited
