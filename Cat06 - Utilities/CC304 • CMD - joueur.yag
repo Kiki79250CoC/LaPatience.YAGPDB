@@ -1,0 +1,12 @@
+{{deleteTrigger 5}}
+{{$args := parseArgs 1 "`-joueur ‹@UserOrID›`" (carg "userid" "user")}}
+
+{{if not (targetHasRoleID ($args.Get 0) 893134727714844673)}}
+  {{giveRoleID ($args.Get 0) 893134727714844673}}
+  {{$msg := sendMessageRetID nil "Le rôle a été attribué."}}
+  {{deleteMessage nil $msg 5}}
+{{else}}
+  {{takeRoleID ($args.Get 0) 893134727714844673}}
+  {{$msg := sendMessageRetID nil "Le rôle a été retiré."}}
+  {{deleteMessage nil $msg 5}}
+{{end}}
