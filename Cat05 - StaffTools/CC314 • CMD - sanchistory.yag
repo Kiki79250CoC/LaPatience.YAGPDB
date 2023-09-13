@@ -3,15 +3,14 @@
 
 {{$usrSpec := " "}}
 {{$usrStr := print "`" $UID "`"}}
-{{$isOnSvrTitle := (print $usrStr " n'est pas sur le serveur." )}}
+{{$isOnSvrTitle := (print $usrStr " n'est pas sur le serveur.")}}
 {{$isOnSvr := " "}}
 {{$usrRankTitle := " "}}
 {{$usrRank := " "}}
-{{$rankID := ""}}
 {{$rColor := 0x0}}
 
 {{if (getMember $UID)}}
-  {{$usrSpec = (print "***" (getMember $UID).User.String "***\n" (or (print "" (getMember $UID).User.Globalname "") "   --"))}}
+  {{$usrSpec = (print "***" (getMember $UID).User.String "***\n" (or (print "" (getMember $UID).User.Globalname "") "<:Nothing:1066734470151024830>--"))}}
 
   {{if (getMember $UID).Nick}} {{$usrSpec = (print $usrSpec "\n*" (getMember $UID).Nick "*")}} {{end}}
   {{$usrStr = or (getMember $UID).Nick (getMember $UID).User.Globalname (getMember $UID).User.Username}}
@@ -19,24 +18,12 @@
   {{$isOnSvrTitle = "Date d'arrivée sur le Serveur :"}}
   {{$isOnSvr = (print "> <t:" (getMember $UID).JoinedAt.Parse.Unix ":D> à <t:" (getMember $UID).JoinedAt.Parse.Unix ":T>")}}
 
-  {{$rankID = 496010501990645799}}
-  {{$roleList := cslice 925745259290460210 925745243180118034 925745253087076392 925756577510748210 925758251662987264 925761123695886376 925745256207618139 925766056650362991 925767790034583552 925769441747296316 1054107222856192172 1106395328447533077 506417754878902272}}
-  {{range $roleList}}
-    {{if targetHasRoleID $UID .}}
-      {{$rankID = .}}
-    {{end}}
-  {{end}}
+  {{$rankID := 496010501990645799}}
+  {{$roleList := cslice 925745259290460210 925745243180118034 925745253087076392 925756577510748210 925758251662987264 925761123695886376 925745256207618139 925766056650362991 925767790034583552 925769441747296316 1054107222856192172 1106395328447533077 506417754878902272 503892310862331905}}
+  {{range $roleList}}{{if targetHasRoleID $UID .}}{{$rankID = .}}{{end}}{{end}}
   {{$usrRankTitle = "⋄  Rank :"}}
-  {{if (getMember $UID).User.Bot}}
-    {{$rankID = 503892310862331905}}
-  {{end}}
   {{$usrRank = (print "> <@&" $rankID ">")}}
-
-  {{range .Guild.Roles}}
-    {{- if eq .ID $rankID}}
-      {{- $rColor = .Color}}
-    {{- end}}
-  {{- end}}
+  {{range .Guild.Roles}}{{- if eq .ID $rankID}}{{- $rColor = .Color}}{{- end}}{{- end}}
 {{end}}
 
 {{/* Mine */}}
@@ -50,14 +37,12 @@
 {{end}}
 
 {{/* Pre-ban */}}
-{{$hasPreBanTitle := (print "🟢  " $usrStr " ne fait l'objet d'aucun Avertissement Pré-ban")}}
+{{$hasPreBanTitle := "🟢  Aucun Avertissement Pré-ban actif à son encontre"}}
 {{$hasPreBanText := " "}}
 {{$dbGetHasPreBan := dbGet $UID "AvPreBan"}}
 {{if $dbGetHasPreBan}}
   {{$hasPreBanExpiry := ""}}
-  {{if ne $dbGetHasPreBan.ExpiresAt.Unix -62135596800}}
-    {{$hasPreBanExpiry = print "\n\n**Cet avertissement expire le <t:" $dbGetHasPreBan.ExpiresAt.Unix ":f>**"}}
-  {{end}}
+  {{if ne $dbGetHasPreBan.ExpiresAt.Unix -62135596800}}{{$hasPreBanExpiry = print "\n\n**Cet avertissement expire le <t:" $dbGetHasPreBan.ExpiresAt.Unix ":f>**"}}{{end}}
   {{$hasPreBanTitle = (print "🟠  " $usrStr " fait l'objet d'un Avertissement Pré-ban")}}
   {{$hasPreBanSlice := split $dbGetHasPreBan.Value "➷"}}
   {{$hasPreBanText = (print ">>> **Avertissement ajouté le <t:" $dbGetHasPreBan.CreatedAt.Unix ":f> par** <@" (index $hasPreBanSlice 1) ">\n**Raison :** " (index $hasPreBanSlice 0) $hasPreBanExpiry)}}
@@ -84,9 +69,9 @@
 {{if $dbMuteCT}} {{$MuteCount = toInt $dbMuteCT.Value}} {{end}}
 
 {{/* Last Sanctions */}}
-{{$sanc1 := ""}} {{$sanc1Title := ""}} {{$sanc1Content := ""}}
-{{$sanc2 := ""}} {{$sanc2Title := ""}} {{$sanc2Content := ""}}
-{{$sanc3 := ""}} {{$sanc3Title := ""}} {{$sanc3Content := ""}}
+{{$sanc1 := ""}} {{$sanc1Title := "⋄  VIDE"}} {{$sanc1Content := " "}}
+{{$sanc2 := ""}} {{$sanc2Title := "⋄  VIDE"}} {{$sanc2Content := " "}}
+{{$sanc3 := ""}} {{$sanc3Title := "⋄  VIDE"}} {{$sanc3Content := " "}}
 
 {{$dbLastSanc := dbGet $UID "LastSanc"}}
 {{if $dbLastSanc}}
@@ -96,70 +81,44 @@
     {{$sanc1Content = (index $sanc1 1)}}
   {{catch}}
     {{try}}
-      {{$legacySanc := cslice "raison"}}
-      {{range $k, $v := $legacySanc}}
+      {{range $k, $v := cslice "raison"}}
         {{if (reFind (joinStr "" `(?i)(\b` $v `\b)`) (index $sanc1 0))}}
           {{$sanc1Title = print "⋄  Sanction héritée"}}
           {{$sanc1Content = print "> " (index $sanc1 0)}}
-        {{else}}
-          {{$sanc1Title = print "⋄  VIDE"}}
-          {{$sanc1Content = " "}}
-        {{end}}
+        {{else}} {{$sanc1Title = print "⋄  VIDE"}} {{$sanc1Content = " "}} {{end}}
       {{end}}
-    {{catch}}
-      {{$sanc1Title = print "⋄  VIDE"}}
-      {{$sanc1Content = " "}}
-    {{end}}
+    {{catch}} {{$sanc1Title = print "⋄  VIDE"}} {{$sanc1Content = " "}} {{end}}
   {{end}}
+
   {{try}}
     {{$sanc2 = split (toString (index $dbLastSanc.Value 1)) "❖"}}
     {{$sanc2Title = print "⋄  Le <t:" (index $sanc2 0) ":f>"}}
     {{$sanc2Content = (index $sanc2 1)}}
   {{catch}}
     {{try}}
-      {{$legacySanc := cslice "raison"}}
-      {{range $k, $v := $legacySanc}}
+      {{range $k, $v := cslice "raison"}}
         {{if (reFind (joinStr "" `(?i)(\b` $v `\b)`) (index $sanc2 0))}}
           {{$sanc2Title = print "⋄  Sanction héritée"}}
           {{$sanc2Content = print "> " (index $sanc2 0)}}
-        {{else}}
-          {{$sanc2Title = print "⋄  VIDE"}}
-          {{$sanc2Content = " "}}
-        {{end}}
+        {{else}} {{$sanc2Title = print "⋄  VIDE"}} {{$sanc2Content = " "}} {{end}}
       {{end}}
-    {{catch}}
-      {{$sanc2Title = print "⋄  VIDE"}}
-      {{$sanc2Content = " "}}
-    {{end}}
+    {{catch}} {{$sanc2Title = print "⋄  VIDE"}} {{$sanc2Content = " "}} {{end}}
   {{end}}
+
   {{try}}
     {{$sanc3 = split (toString (index $dbLastSanc.Value 2)) "❖"}}
     {{$sanc3Title = print "⋄  Le <t:" (index $sanc3 0) ":f>"}}
     {{$sanc3Content = (index $sanc3 1)}}
   {{catch}}
     {{try}}
-      {{$legacySanc := cslice "raison"}}
-      {{range $k, $v := $legacySanc}}
+      {{range $k, $v := cslice "raison"}}
         {{if (reFind (joinStr "" `(?i)(\b` $v `\b)`) (index $sanc3 0))}}
           {{$sanc3Title = print "⋄  Sanction héritée"}}
           {{$sanc3Content = print "> " (index $sanc3 0)}}
-        {{else}}
-          {{$sanc3Title = print "⋄  VIDE"}}
-          {{$sanc3Content = " "}}
-        {{end}}
+        {{else}} {{$sanc3Title = print "⋄  VIDE"}} {{$sanc3Content = " "}} {{end}}
       {{end}}
-    {{catch}}
-      {{$sanc3Title = print "⋄  VIDE"}}
-      {{$sanc3Content = " "}}
-    {{end}}
+    {{catch}} {{$sanc3Title = print "⋄  VIDE"}} {{$sanc3Content = " "}} {{end}}
   {{end}}
-{{else}}
-  {{$sanc1Title = print "⋄  VIDE"}}
-  {{$sanc1Content = " "}}
-  {{$sanc2Title = print "⋄  VIDE"}}
-  {{$sanc2Content = " "}}
-  {{$sanc3Title = print "⋄  VIDE"}}
-  {{$sanc3Content = " "}}
 {{end}}
 
 {{/* Embed */}}
