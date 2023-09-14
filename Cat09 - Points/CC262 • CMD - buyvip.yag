@@ -44,7 +44,7 @@
           {{else}}
             {{if and (eq ($args.Get 1) (toString $UID)) (eq ($args.Get 2) (toString $UID))}} {{$pr = 0}}{{$DM = print $bErr "L'une des deux cibles n'est autre que vous-même."}}
             {{else}}
-              {{if or (targetHasRoleID ($args.Get 1) 506417754878902272) (targetHasRoleID ($args.Get 2) 506417754878902272)}} {{$pr = 0}}{{$DM = print $bErr "L'une des deux cibles se trouve déjà au Goulag."}}
+              {{if or (targetHasRoleID .User.ID 506417754878902272)  (targetHasRoleID ($args.Get 1) 506417754878902272) (targetHasRoleID ($args.Get 2) 506417754878902272)}} {{$pr = 0}}{{$DM = print $bErr "L'une des deux cibles se trouve déjà au Goulag."}}
               {{else}} {{execCC 290 618851288825856010 0 (sdict "sancUsr1" (toString .User.ID) "sancUsr2" (toString (getMember ($args.Get 1)).User.ID) "sancUsr3" (toString (getMember ($args.Get 2)).User.ID))}} {{end}}
             {{end}}
           {{end}}
