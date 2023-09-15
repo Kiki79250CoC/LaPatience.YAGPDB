@@ -10,9 +10,10 @@
     {{if not (eq (lower (toString $optArgs)) "--no-logs")}}
       {{$ungoulagRes := or ($args.Get 1) "*Aucune raison fournie*"}}
 
-      {{$lastSanc := dbGet $sancUID "LastSanc"}}
-      {{if $lastSanc}}
-        {{$lastSanc = index $lastSanc.Value 0}}
+      {{$lastSanc := ""}}
+      {{$dbLastSanc := dbGet $sancUID "LastSanc"}}
+      {{if $dbLastSanc}}
+        {{$lastSanc = index $dbLastSanc.Value 0}}
         {{dbSet $sancUID "LastSanc" (cslice (print $lastSanc "\n\n> **Dégoulag manuel** le <t:" currentTime.Unix ":f> par <@" .User.ID "> \n> **Raison :** " $ungoulagRes) (index $dbLastSanc.Value 1) (index $dbLastSanc.Value 2))}}
       {{end}}
 

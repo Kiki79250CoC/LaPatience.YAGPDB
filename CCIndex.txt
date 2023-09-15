@@ -446,7 +446,7 @@ DISCLAIMER : Elements in ‹quotation marks› are variable arguments (IE: User 
           › Roles     : Limited (04) › "Dictateur Suprême", "Développeur", "Grand Modérateur", "Médiateur"
           › Channels  : Not Limited
 
-          › Revision  : 2.11
+          › Revision  : 2.12
 
         • 322 - COMMAND
           › Trigger   : -prolgoulag
