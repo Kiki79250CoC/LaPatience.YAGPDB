@@ -12,7 +12,7 @@
 {{$optArgs := or .ExecData.OptArgs ($args.Get 3) ""}}
 {{$rMbr := ""}}
 
-{{if (in (cslice "AutoSanc.Banword" "AutoSanc.Bomb" "AutoSanc.Buy11" "AutoSanc.Buy13" "AutoSanc.Buy14" "AutoSanc.Buy17" "AutoSanc.Buy26" "AutoSanc.BuyVIP3") $sancRes)}} {{$isTrollG = true}} {{end}}
+{{if and .ExecData (in (cslice "AutoSanc.Banword" "AutoSanc.Bomb" "AutoSanc.Buy11" "AutoSanc.Buy13" "AutoSanc.Buy14" "AutoSanc.Buy17" "AutoSanc.Buy26" "AutoSanc.BuyVIP3") $sancRes)}} {{$isTrollG = true}} {{end}}
 {{if eq $sancMod 204255221017214977}} {{$isMinedG = true}} {{end}}
 {{range $k, $v := cslice "Buy19" "Buy 19"}} {{if (reFind (joinStr "" `(?i)(\b` $v `\b)`) $sancRes)}} {{$isMinedG = true}} {{end}} {{end}}
 {{if eq (lower (toString $optArgs)) "--force-as-mine"}} {{$isMinedG = true}} {{end}}
@@ -23,7 +23,7 @@
 {{$dailyGL := dbGet $sancMod "DailyGoulag"}}
 {{if $dailyGL}} {{$modDailyGCount = (toInt $dailyGL.Value)}} {{end}}
 
-{{if and (targetHasRoleID $sancUID 1079418386511040572) (lt (toInt (fdiv $sancDur 1000000000)) 900)}}
+{{if and (targetHasRoleID $sancUID 1079418386511040572) (lt (toInt (fdiv $sancDur 1000000000)) 900) (not $isTrollG)}}
   {{sendMessage nil (print ">>> **Erreur :**\nImpossible de miner <@" ($args.Get 0) "> : Cette personne est <:VIP2_v2:1080311144285229106> **Membre VIP 2**.")}}
 {{else}}
   {{if lt $modDailyGCount $useLimit}}
