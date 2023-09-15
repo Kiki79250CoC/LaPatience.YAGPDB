@@ -1,117 +1,95 @@
-{{$args := parseArgs 1 "`-ban ‹@UserOrID› \"‹Reason›\" ‹Duration›`" (carg "userid" "banUID") (carg "string" "banRes") (carg "string" "banDur") (carg "string" "OptArg")}}
+{{$args := parseArgs 1 "`-ban ‹@UserOrID› \"‹Reason›\" ‹Duration› ‹OptArg›`\n\nOptional Arguments :\n`--silent`" (carg "userid" "banUID") (carg "string" "banRes") (carg "string" "banDur") (carg "string" "OptArg")}}
 {{$chnSanc := 515972308645707777}}
+{{$chnMine := 925172096252936223}}
 {{$banUID := $args.Get 0}}
-{{$banRes := "Aucune raison fournie"}}{{if $args.IsSet 1}}{{$banRes = $args.Get 1}}{{end}}
-{{$banDur := "à **durée indéterminée**"}}{{if $args.IsSet 2}}{{$banDur = $args.Get 2}}{{end}}
+{{$banRes := or ($args.Get 1) "Aucune raison fournie"}}
+{{$banDur := or ($args.Get 2) "à **durée indéterminée**"}}
+{{$optArg := or ($args.Get 3) ""}}
 {{$banMod := .User.ID}}
 {{$banLmt := 5}}
 {{$silentB := false}}
+{{$isTroll := false}}
 
-{{if $args.IsSet 3}}
-  {{if eq (lower ($args.Get 3)) "--silent"}}{{$silentB = true}}{{end}}
-{{else}}
-  {{if $args.IsSet 2}}
-    {{if eq (lower ($args.Get 2)) "--silent"}}{{$silentB = true}}{{$banRes = "Aucune raison fournie"}}{{end}}
-  {{else}}
-    {{if $args.IsSet 1}}
-      {{if eq (lower ($args.Get 1)) "--silent"}}{{$silentB = true}}{{$banRes = "Aucune raison fournie"}}{{$banDur = "à **durée indéterminée**"}}{{end}}
-    {{end}}
-  {{end}}
+{{$sText := ""}}
+{{if or (eq (lower $optArg) "--silent") (eq (lower $banDur) "--silent") (eq (lower $banRes) "--silent")}}
+  {{$silentB = true}}
+  {{$sText = "silencieusement "}}
+  {{if not (eq (lower $banRes) "--silent")}} {{$banRes = or ($args.Get 1) "Aucune raison fournie"}}
+  {{else}} {{$banRes = "Aucune raison fournie"}} {{end}}
+  {{if not (eq (lower $banDur) "--silent")}} {{$banDur = or ($args.Get 2) "à **durée indéterminée**"}}
+  {{else}} {{$banDur = "à **durée indéterminée**"}} {{end}}
 {{end}}
+
+{{range $k, $v := cslice "Buy25" "Buy 25"}} {{if (reFind (joinStr "" `(?i)(\b` $v `\b)`) $banRes)}} {{$isTroll = true}} {{end}} {{end}}
 
 {{$trappedIDs := cslice "223894107016134656"}}
 {{$readableBanDur := (reReplace "second" (reReplace "hour" (reReplace "day" (reReplace "week" (reReplace "month" (reReplace "year" (reReplace "and" (humanizeDurationSeconds $banDur) "et") "an") "mois") "semaine") "jour") "heure") "seconde")}}
 
 {{$modDailyBanCount := 0}}
 {{$dailyBL := dbGet $banMod "DailyBan"}}
-{{if $dailyBL}}
-  {{$modDailyBanCount = toInt $dailyBL.Value}}
-{{end}}
+{{if $dailyBL}} {{$modDailyBanCount = toInt $dailyBL.Value}} {{end}}
 
 {{if lt $modDailyBanCount $banLmt}}
   {{if and (not (in $trappedIDs (toString $banUID))) (not (targetHasRoleID $banUID 496010603601854464))}}
-
-    {{$usrSpec := " "}}
-    {{$usrStr := print "`" $banUID "`"}}
-    {{if (getMember $banUID)}}
-      {{$usrSpec = (print "***" (getMember $banUID).User.String "***")}}
-      {{if ((getMember $banUID).Nick)}}
-        {{$usrSpec = (print $usrSpec "\n*" (getMember $banUID).Nick "*")}}
+    {{if not $isTroll}}
+      {{$usrSpec := " "}}
+      {{$usrStr := print "`" $banUID "`"}}
+      {{if (getMember $banUID)}}
+        {{$usrSpec = (print "***" (getMember $banUID).User.String "***\n" (or (print "" (getMember $banUID).User.Globalname "") "<:Nothing:1066734470151024830>--"))}}
+        {{if ((getMember $banUID).Nick)}} {{$usrSpec = (print $usrSpec "\n*" (getMember $banUID).Nick "*")}} {{end}}
+        {{$usrStr = (getMember $banUID).User.Username}}
       {{end}}
-      {{$usrStr = (getMember $banUID).User.Username}}
-    {{end}}
 
-    {{$banCount := 0}}
-    {{$dbBanCT := dbGet $banUID "BanCount"}}
-    {{if $dbBanCT}}
-      {{$banCount = $dbBanCT.Value}}
-    {{end}}
-    {{dbSet $banUID "BanCount" (add $banCount 1)}}
+      {{$banCount := dbGet $banUID "BanCount"}}
+      {{if $banCount}} {{$banCount = $banCount.Value}} {{end}}
 
-    {{$durationText := $banDur}}
-    {{$durationTextLog := "Indéterminée"}}
-    {{if not (eq $banDur "à **durée indéterminée**")}}
-      {{$durationText = print "de **" $readableBanDur "**"}}
-      {{$durationTextLog = $readableBanDur}}
-    {{end}}
+      {{$durationText := $banDur}}
+      {{$durationTextLog := "Indéterminée"}}
+      {{if not (eq $banDur "à **durée indéterminée**")}}
+        {{$durationText = print "de **" $readableBanDur "**"}}
+        {{$durationTextLog = $readableBanDur}}
+      {{end}}
 
-    {{$silentText := " "}}
-    {{if $silentB}}
-      {{$silentText = " silencieusement "}}
-    {{end}}
+      {{$aTimer := ""}}
+      {{if (targetHasRoleID $banUID 506417754878902272)}} {{$aTimer = print " **le** <t:" currentTime.Unix ":f>"}} {{end}}
 
-    {{$dbLastSanc := dbGet $banUID "LastSanc"}}
-    {{if $dbLastSanc}}
-      {{if (targetHasRoleID $banUID 506417754878902272)}}
-        {{$toAdd := print "\n\n> **Banni(e)" $silentText "par** <@" $banMod "> **le** <t:" currentTime.Unix ":f>\n> **Raison :** " $banRes "\n> **Durée :** " $durationTextLog}}
-        {{dbSet $banUID "LastSanc" (cslice (print (index $dbLastSanc.Value 0) $toAdd) (index $dbLastSanc.Value 1) (index $dbLastSanc.Value 2))}}
-      {{else}}
-        {{$toSet := joinStr "❖" currentTime.Unix (print "> **Banni(e)" $silentText "par** <@" $banMod ">\n> **Raison :** " $banRes "\n> **Durée :** " $durationTextLog)}}
+      {{$toSet := print "> **Banni(e) " $sText "par** <@" $banMod ">" $aTimer "\n> **Raison :** " $banRes "\n> **Durée :** " $durationTextLog}}
+
+      {{$dbLastSanc := dbGet $banUID "LastSanc"}}
+      {{if $dbLastSanc}}
+        {{if (targetHasRoleID $banUID 506417754878902272)}} {{$toSet = print (index $dbLastSanc.Value 0) $toSet}} {{end}}
         {{dbSet $banUID "LastSanc" (cslice $toSet (index $dbLastSanc.Value 0) (index $dbLastSanc.Value 1))}}
-      {{end}}
-    {{else}}
-      {{if (targetHasRoleID $banUID 506417754878902272)}}
-        {{$toAdd := print "\n\n> **Banni(e)" $silentText "par** <@" $banMod "> **le** <t:" currentTime.Unix ":f>\n> **Raison :** " $banRes "\n> **Durée :** " $durationTextLog}}
-        {{dbSet $banUID "LastSanc" (cslice (print (index $dbLastSanc.Value 0) $toAdd) 0 0)}}
-      {{else}}
-        {{$toSet := joinStr "❖" currentTime.Unix (print "> **Banni(e)" $silentText "par** <@" $banMod ">\n> **Raison :** " $banRes "\n> **Durée :** " $durationTextLog)}}
-        {{dbSet $banUID "LastSanc" (cslice $toSet 0 0)}}
-      {{end}}
-    {{end}}
+      {{else}} {{dbSet $banUID "LastSanc" (cslice $toSet 0 0)}} {{end}}
 
-    {{if ne $banMod 204255221017214977}}
+      {{if not $silentB}}
+        {{$embed := cembed "color" 0xAC0000
+          "title" (print "🧾 ▸ Compte rendu · Bannissement de " $usrStr)
+          "fields" (cslice
+              (sdict "name" " " "value" " " "inline" false)
+
+            (sdict "name" "🪪  •  Membre" "value" (print ">>> <@" $banUID ">\nID : `" $banUID "`") "inline" true)
+            (sdict "name" "\b" "value" $usrSpec "inline" true)
+              (sdict "name" " " "value" " " "inline" false)
+
+            (sdict "name" "⋄  Sanction" "value" (print "> " "Bannissement <:ban:1054840260179279882> **(" (add $banCount 1) ")** " $durationText) "inline" false)
+            (sdict "name" "⋄  Raison" "value" (print ">>> " $banRes) "inline" false)
+              (sdict "name" " " "value" " " "inline" false)
+
+          ) "footer" (sdict "text" (print "Sanction prononcée par " (getMember $banMod).User.String))
+          "timestamp" currentTime}}
+        {{sendMessage $chnSanc $embed}}
+      {{end}}
+
+      {{dbSet $banUID "BanCount" (add $banCount 1)}}
       {{dbSet $banMod "DailyBan" (add $modDailyBanCount 1)}}
+
+      {{if (dbGet $banUID "AvPreBan")}} {{dbDel $banUID "AvPreBan"}} {{end}}
+    {{else}}
+      {{sendMessage $chnMine (print ">>> **Pseudo :** <@" $banUID ">\n**Sanction :** <:ban:1054840260179279882>\n**Raison :** " $banRes "\n**Durée :** " $readableBanDur "\n\n**Banned by** <@" $banMod ">")}}
     {{end}}
 
-    {{if not $silentB}}
-      {{$embed := cembed "color" 0xAC0000
-        "title" (print "🧾 ▸ Compte rendu · Bannissement de " $usrStr)
-        "fields" (cslice
-            (sdict "name" " " "value" " " "inline" false)
+    {{if not (eq $banDur "à **durée indéterminée**")}} {{execAdmin "ban" $banUID (print "Banni(e) " $sText $readableBanDur " par " (getMember $banMod).User.Username " · " $banRes) $banDur}}
+    {{else}} {{execAdmin "ban" $banUID (print "Banni(e) " $sText " à durée indéterminée par " (getMember $banMod).User.Username " · " $banRes) 0}} {{end}}
 
-          (sdict "name" "🪪  •  Membre" "value" (print ">>> <@" $banUID ">\nID : `" $banUID "`") "inline" true)
-          (sdict "name" "\b" "value" $usrSpec "inline" true)
-            (sdict "name" " " "value" " " "inline" false)
-
-          (sdict "name" "⋄  Sanction" "value" (print "> " "Bannissement <:ban:1054840260179279882> **(" (add $banCount 1) ")** " $durationText) "inline" false)
-          (sdict "name" "⋄  Raison" "value" (print ">>> " $banRes) "inline" false)
-            (sdict "name" " " "value" " " "inline" false)
-
-        ) "footer" (sdict "text" (print "Sanction prononcée par " (getMember $banMod).User.String))
-        "timestamp" currentTime}}
-      {{sendMessage $chnSanc $embed}}
-    {{end}}
-
-    {{$dbGetHasPreBan := dbGet $banUID "AvPreBan"}}
-    {{if $dbGetHasPreBan}}
-      {{dbDel $banUID "AvPreBan"}}
-    {{end}}
-
-    {{execAdmin "ban" $banUID (print "Banni(e) par " (getMember $banMod).User.Username " · " $banRes) $banDur}}
-
-  {{else}}
-    {{sendMessage nil ">>> **Erreur :**\n`[FrostGuard Error]` Vous n'êtes pas autorisé à effectuer cette action."}}
-  {{end}}
-{{else}}
-  {{sendMessage nil (print "**Erreur :**\nVous avez atteint votre plafond de " $banLmt " bannissements aujourd'hui.")}}
-{{end}}
+  {{else}} {{sendMessage nil ">>> **Erreur :**\n`[FrostGuard Error]` Vous n'êtes pas autorisé à effectuer cette action."}} {{end}}
+{{else}} {{sendMessage nil (print "**Erreur :**\nVous avez atteint votre plafond de " $banLmt " bannissements aujourd'hui.")}} {{end}}
