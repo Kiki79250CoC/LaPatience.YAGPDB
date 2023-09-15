@@ -1,23 +1,18 @@
-{{$args := parseArgs 1 "`-ungoulag ‹@UserOrID› ‹\"Reason\"›`" (carg "userid" "sancUsr") (carg "string" "ungRes") (carg "string" "OptArg")}}
+{{$args := parseArgs 1 "`-ungoulag ‹@UserOrID› ‹\"Reason\"› ‹OptArg›`\n\nOptional Arguments :\n`--no-logs`" (carg "userid" "sancUsr") (carg "string" "ungRes") (carg "string" "OptArg")}}
 {{$chnSanc := 515972308645707777}}
-{{$sancUID := $args.Get 0}}
+
+{{$sancUID := or .ExecData.sancUsr ($args.Get 0)}}
 {{$optArgs := or ($args.Get 2) ($args.Get 1) " "}}
-{{$rMbr := "496010501990645799"}}
+{{$rMbr := or (toString (dbGet $sancUID "SancRoles").Value) "496010501990645799"}}
 
-{{if .ExecData}}
-  {{$sancUID = .ExecData.sancUsr}}
-  {{$rMbr = print $rMbr "-" (toString (dbGet $sancUID "SancRoles").Value)}}
-{{else}}
-  {{if targetHasRoleID $sancUID 506417754878902272}}
-    {{$rMbr = print $rMbr "-" (toString (dbGet $sancUID "SancRoles").Value)}}
-    {{$ungoulagRes := "Aucune raison fournie"}}
-    {{if $args.IsSet 1}}{{$ungoulagRes = $args.Get 1}}{{end}}
-
+{{if targetHasRoleID $sancUID 506417754878902272}}
+  {{if not .ExecData}}
     {{if not (eq (lower (toString $optArgs)) "--no-logs")}}
-      {{$lastSanc := ""}}
-      {{$dbLastSanc := dbGet $sancUID "LastSanc"}}
-      {{if $dbLastSanc}}
-        {{$lastSanc = index $dbLastSanc.Value 0}}
+      {{$ungoulagRes := or ($args.Get 1) "*Aucune raison fournie*"}}
+
+      {{$lastSanc := dbGet $sancUID "LastSanc"}}
+      {{if $lastSanc}}
+        {{$lastSanc = index $lastSanc.Value 0}}
         {{dbSet $sancUID "LastSanc" (cslice (print $lastSanc "\n\n> **Dégoulag manuel** le <t:" currentTime.Unix ":f> par <@" .User.ID "> \n> **Raison :** " $ungoulagRes) (index $dbLastSanc.Value 1) (index $dbLastSanc.Value 2))}}
       {{end}}
 
@@ -27,14 +22,16 @@
           (sdict "name" " " "value" " " "inline" false)
         ) "timestamp" currentTime}}
       {{sendMessage $chnSanc $embed}}
-
     {{end}}
     {{cancelScheduledUniqueCC 321 $sancUID}}
-  {{else}}
-    {{sendMessage nil (print "**Erreur :**\nPTDR, il est pas au goulag ton pelo de **" (getMember $sancUID).User.String "** là ...")}}
   {{end}}
+
+  {{range $k,$v := (split $rMbr "-")}}{{giveRoleID $sancUID (toInt $v)}}{{end}}
+  {{takeRoleID $sancUID 506417754878902272}}
+  {{takeRoleID $sancUID 657981836412321842}}
+  {{dbDel $sancUID "SancRoles"}}
+
+{{else}}
+  {{sendMessage nil (print "**Erreur :**\nPTDR, il est pas au goulag ton pelo de **" (getMember $sancUID).User.String "** là ...")}}
+
 {{end}}
-{{range $k,$v := (split $rMbr "-")}}{{giveRoleID $sancUID (toInt $v)}}{{end}}
-{{takeRoleID $sancUID 506417754878902272}}
-{{takeRoleID $sancUID 657981836412321842}}
-{{dbDel $sancUID "SancRoles"}}
