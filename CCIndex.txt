@@ -709,7 +709,7 @@ DISCLAIMER : Elements in ‹quotation marks› are variable arguments (IE: User 
           › Roles     : Not limited
           › Channels  : Limited (02) › "Commandes Bots", "Gestion Bots"
 
-          › Revision  : Not available
+          › Revision  : 0.10
 
         • 293 - COMMAND
           › Trigger   : -bouquiner

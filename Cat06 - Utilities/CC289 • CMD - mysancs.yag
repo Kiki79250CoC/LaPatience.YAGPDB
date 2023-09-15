@@ -1,1 +1,118 @@
-.
+{{$UID := .User.ID}}
+{{$usrStr := or .Member.Nick .User.Globalname .User.Username}}
+{{$rColor := 0x0}}
+
+{{$rankID := 496010501990645799}}
+{{$roleList := cslice 925745259290460210 925745243180118034 925745253087076392 925756577510748210 925758251662987264 925761123695886376 925745256207618139 925766056650362991 925767790034583552 925769441747296316 1054107222856192172 1106395328447533077 506417754878902272}}
+{{range $roleList}}{{if targetHasRoleID $UID .}}{{$rankID = .}}{{end}}{{end}}
+{{range .Guild.Roles}}{{- if eq .ID $rankID}}{{- $rColor = .Color}}{{- end}}{{- end}}
+
+{{/* Pre-ban */}}
+{{$hasPreBanText := "Non"}}
+{{$dbGetHasPreBan := dbGet $UID "AvPreBan"}}
+{{if $dbGetHasPreBan}}
+  {{$hasPreBanExpiry := "\n*Aucune date d'expiration, Indéterminé.*"}}
+  {{if ne $dbGetHasPreBan.ExpiresAt.Unix -62135596800}}{{$hasPreBanExpiry = print "\n*Expire le <t:" $dbGetHasPreBan.ExpiresAt.Unix ":f>*"}}{{end}}
+  {{$hasPreBanText = (print "**Oui depuis le <t:" $dbGetHasPreBan.CreatedAt.Unix ":f>**" $hasPreBanExpiry)}}
+{{end}}
+
+{{/* Goulag Count */}}
+{{$GoulagCount := 0}}
+{{$dbGoulagCT := dbGet $UID "GoulagCount"}}
+{{if $dbGoulagCT}} {{$GoulagCount = toInt $dbGoulagCT.Value}} {{end}}
+
+{{/* Kick Count */}}
+{{$KickCount := 0}}
+{{$dbKickCT := dbGet $UID "KickCount"}}
+{{if $dbKickCT}} {{$KickCount = toInt $dbKickCT.Value}} {{end}}
+
+{{/* Ban Count */}}
+{{$BanCount := 0}}
+{{$dbBanCT := dbGet $UID "BanCount"}}
+{{if $dbBanCT}} {{$BanCount = toInt $dbBanCT.Value}} {{end}}
+
+{{/* Mute Count */}}
+{{$MuteCount := 0}}
+{{$dbMuteCT := dbGet $UID "MuteCount"}}
+{{if $dbMuteCT}} {{$MuteCount = toInt $dbMuteCT.Value}} {{end}}
+
+{{/* Last Sanctions */}}
+{{$sanc1 := ""}} {{$sanc1Title := "⋄  VIDE"}} {{$sanc1Content := " "}}
+{{$sanc2 := ""}} {{$sanc2Title := "⋄  VIDE"}} {{$sanc2Content := " "}}
+{{$sanc3 := ""}} {{$sanc3Title := "⋄  VIDE"}} {{$sanc3Content := " "}}
+
+{{$dbLastSanc := dbGet $UID "LastSanc"}}
+{{if $dbLastSanc}}
+  {{try}}
+    {{$sanc1 = split (toString (index $dbLastSanc.Value 0)) "❖"}}
+    {{$sanc1Title = print "⋄  Le <t:" (index $sanc1 0) ":f>"}}
+    {{$sanc1Content = (index $sanc1 1)}}
+  {{catch}}
+    {{try}}
+      {{range $k, $v := cslice "raison"}}
+        {{if (reFind (joinStr "" `(?i)(\b` $v `\b)`) (index $sanc1 0))}}
+          {{$sanc1Title = print "⋄  Sanction héritée"}}
+          {{$sanc1Content = print "> " (index $sanc1 0)}}
+        {{else}} {{$sanc1Title = print "⋄  VIDE"}} {{$sanc1Content = " "}} {{end}}
+      {{end}}
+    {{catch}} {{$sanc1Title = print "⋄  VIDE"}} {{$sanc1Content = " "}} {{end}}
+  {{end}}
+
+  {{try}}
+    {{$sanc2 = split (toString (index $dbLastSanc.Value 1)) "❖"}}
+    {{$sanc2Title = print "⋄  Le <t:" (index $sanc2 0) ":f>"}}
+    {{$sanc2Content = (index $sanc2 1)}}
+  {{catch}}
+    {{try}}
+      {{range $k, $v := cslice "raison"}}
+        {{if (reFind (joinStr "" `(?i)(\b` $v `\b)`) (index $sanc2 0))}}
+          {{$sanc2Title = print "⋄  Sanction héritée"}}
+          {{$sanc2Content = print "> " (index $sanc2 0)}}
+        {{else}} {{$sanc2Title = print "⋄  VIDE"}} {{$sanc2Content = " "}} {{end}}
+      {{end}}
+    {{catch}} {{$sanc2Title = print "⋄  VIDE"}} {{$sanc2Content = " "}} {{end}}
+  {{end}}
+
+  {{try}}
+    {{$sanc3 = split (toString (index $dbLastSanc.Value 2)) "❖"}}
+    {{$sanc3Title = print "⋄  Le <t:" (index $sanc3 0) ":f>"}}
+    {{$sanc3Content = (index $sanc3 1)}}
+  {{catch}}
+    {{try}}
+      {{range $k, $v := cslice "raison"}}
+        {{if (reFind (joinStr "" `(?i)(\b` $v `\b)`) (index $sanc3 0))}}
+          {{$sanc3Title = print "⋄  Sanction héritée"}}
+          {{$sanc3Content = print "> " (index $sanc3 0)}}
+        {{else}} {{$sanc3Title = print "⋄  VIDE"}} {{$sanc3Content = " "}} {{end}}
+      {{end}}
+    {{catch}} {{$sanc3Title = print "⋄  VIDE"}} {{$sanc3Content = " "}} {{end}}
+  {{end}}
+{{end}}
+
+{{/* Embed */}}
+{{$embed := cembed "color" (or $rColor 0xaa0000)
+  "title" (print "🗃️ ▸ " $usrStr ", résumé de votre Casier judiciaire")
+  "fields" (cslice
+      (sdict "name" " " "value" " " "inline" false)
+
+    (sdict "name" "📜  •  Historique des infractions" "value" " " "inline" false)
+    (sdict "name" "⋄  Nombre de Goulags" "value" (print "> " $GoulagCount) "inline" false)
+    (sdict "name" "⋄  Nombre de Bans" "value" (print "> " $BanCount) "inline" true)
+    (sdict "name" "⋄  Nombre de Kicks" "value" (print "> " $KickCount) "inline" true)
+    (sdict "name" "⋄  Nombre d'exclusions" "value" (print "> " $MuteCount) "inline" true)
+      (sdict "name" " " "value" " " "inline" false)
+
+    (sdict "name" "⋄  Avertissement Pré-ban actif ?" "value" (print ">>> " $hasPreBanText) "inline" false)
+      (sdict "name" " " "value" " " "inline" false)
+      (sdict "name" "￣￣￣￣￣￣￣￣￣￣￣￣￣￣￣￣￣￣￣￣￣￣￣" "value" " " "inline" false)
+
+    (sdict "name" "⛔  •  Dernières sanctions" "value" " " "inline" false)
+    (sdict "name" $sanc1Title "value" $sanc1Content "inline" false)
+    (sdict "name" $sanc2Title "value" $sanc2Content "inline" false)
+    (sdict "name" $sanc3Title "value" $sanc3Content "inline" false)
+      (sdict "name" " " "value" " " "inline" false)
+
+  ) "footer" (sdict "text" "" "icon_url" "https://cdn.discordapp.com/emojis/1080310621607829564.webp?quality=lossless")
+  "timestamp" currentTime}}
+{{sendDM $embed}}
+{{addReactions "✅"}}
