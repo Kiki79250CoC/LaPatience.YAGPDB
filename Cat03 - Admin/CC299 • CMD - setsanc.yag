@@ -1,0 +1,26 @@
+{{$args := parseArgs 6 "`-setsanc ‹@UserOrID› ‹DBPosition› ‹SancType› ‹SancUnixTS› ‹ModID› \"‹Reason›\" ‹Duration›`\n\nDBPosition : `[0, 1, 2]`\nSancType : `[Mute, Goulag, Kick, Skick, Ban, Sban]`" (carg "userid" "UserID") (carg "int" "DBSancID") (carg "string" "SancType") (carg "int" "UnixTS") (carg "userid" "ModID") (carg "string" "SancRes") (carg "duration" "SancDur")}}
+{{$SancTypeList := sdict "mute" "Exclu(e)"  "goulag" "Goulag"  "kick" "Expulsé(e)"  "skick" "Expulsé(e) silencieusement"  "ban" "Banni(e)"  "sban" "Banni(e) silencieusement"}}
+
+{{$readableSancDur := "Indéterminée"}}
+{{if ($args.IsSet 6)}} {{$readableSancDur = (reReplace "second" (reReplace "hour" (reReplace "day" (reReplace "week" (reReplace "month" (reReplace "year" (reReplace "and" (humanizeDurationSeconds ($args.Get 6)) "et") "an") "mois") "semaine") "jour") "heure") "seconde")}} {{end}}
+
+{{if (in (cslice "mute" "goulag" "kick" "skick" "ban" "sban") (lower ($args.Get 2)))}}
+  {{$SancType := $SancTypeList.Get (lower ($args.Get 2))}}
+
+  {{$DurationField := (print "\n> **Durée :** " $readableSancDur)}}
+  {{if (in (cslice "kick" "skick") (lower ($args.Get 2)))}} {{$DurationField = ""}} {{end}}
+
+  {{$SancCompositor := joinStr "❖" ($args.Get 3) (print "> **" $SancType " par** <@" ($args.Get 4) ">\n> **Raison :** " ($args.Get 5) $DurationField)}}
+
+  {{$chkDB := dbGet ($args.Get 0) "LastSanc"}}
+  {{if $chkDB}}
+    {{if and (ge ($args.Get 1) 0) (le ($args.Get 1) 2)}}
+      {{if eq ($args.Get 1) 0}} {{dbSet ($args.Get 0) "LastSanc" (cslice $SancCompositor (index $chkDB.Value 1) (index $chkDB.Value 2))}}
+      {{else if eq ($args.Get 1) 1}} {{dbSet ($args.Get 0) "LastSanc" (cslice (index $chkDB.Value 0) $SancCompositor (index $chkDB.Value 2))}}
+      {{else if eq ($args.Get 1) 2}} {{dbSet ($args.Get 0) "LastSanc" (cslice (index $chkDB.Value 0) (index $chkDB.Value 1) $SancCompositor)}} {{end}}
+    {{else}} {{sendMessage nil ">>> **Erreur :**\nEntrée de la base de données invalide. Le nombre doit se comporter entre `0`, `1` et `2`."}} {{end}}
+  {{else}}
+    {{sendMessage nil ">>> **Erreur non-fatale :**\nCet ID n'existe pas dans la base de données.\n**L'entrée a été créée**. Valeur de position ignorée et définie à l'emplacement 0."}}
+    {{dbSet ($args.Get 0) "LastSanc" (cslice $SancCompositor 0 0)}}
+  {{end}}
+{{else}} {{sendMessage nil ">>> **Erreur :**\nType de sanction inconnu.\nValeurs acceptées : `Mute`, `Goulag`, `Kick`, `Skick`, `Ban`, `Sban`."}} {{end}}

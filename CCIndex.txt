@@ -377,15 +377,15 @@ DISCLAIMER : Elements in ‹quotation marks› are variable arguments (IE: User 
           › Revision  : 1.00
 
         • 299 - COMMAND
-          › Trigger   : -setslastsanc
-          › Arguments : ‹@UserOrID› ‹SancTimestamp› ‹ModeratorID› ‹[Exclusion|Goulag|Kick|Ban]› "‹Reason›" ‹Duration›
+          › Trigger   : -setsanc
+          › Arguments : ‹@UserOrID› ‹DBPosition› ‹SancType› ‹SancUnixTS› ‹ModID› "‹Reason›" ‹Duration*›
 
           › Enabled   : Yes
           › Name      : n/a
           › Roles     : Not limited
           › Channels  : Limited (01) › "Gestion Bots"
 
-          › Revision  : 1.00
+          › Revision  : 2.00
 
 
 
