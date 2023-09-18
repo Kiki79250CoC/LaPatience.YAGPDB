@@ -9,7 +9,6 @@
   {{if not .ExecData}}
     {{if not (eq (lower (toString $optArgs)) "--no-logs")}}
       {{$ungoulagRes := or ($args.Get 1) "*Aucune raison fournie*"}}
-
       {{$lastSanc := ""}}
       {{$dbLastSanc := dbGet $sancUID "LastSanc"}}
       {{if $dbLastSanc}}
@@ -31,8 +30,4 @@
   {{takeRoleID $sancUID 506417754878902272}}
   {{takeRoleID $sancUID 657981836412321842}}
   {{dbDel $sancUID "SancRoles"}}
-
-{{else}}
-  {{sendMessage nil (print "**Erreur :**\nPTDR, il est pas au goulag ton pelo de **" (getMember $sancUID).User.String "** là…")}}
-
-{{end}}
+{{else}} {{sendMessage nil (print "**Erreur :**\nPTDR, il est pas au goulag ton pelo de **" (getMember $sancUID).User.String "** là…")}} {{end}}
