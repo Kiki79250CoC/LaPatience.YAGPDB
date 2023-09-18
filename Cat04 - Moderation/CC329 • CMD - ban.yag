@@ -50,10 +50,10 @@
         {{$durationTextLog = $readableBanDur}}
       {{end}}
 
-      {{$aTimer := ""}}
-      {{if (targetHasRoleID $banUID 506417754878902272)}} {{$aTimer = print " **le** <t:" currentTime.Unix ":f>"}} {{end}}
+      {{$aTimer := ""}} {{$jump := ""}}
+      {{if (targetHasRoleID $banUID 506417754878902272)}} {{$aTimer = print " **le** <t:" currentTime.Unix ":f>"}} {{$jump = "\n\n"}} {{end}}
 
-      {{$toSet := print "> **Banni(e) " $sText "par** <@" $banMod ">" $aTimer "\n> **Raison :** " $banRes "\n> **Durée :** " $durationTextLog}}
+      {{$toSet := print $jump "> **Banni(e) " $sText "par** <@" $banMod ">" $aTimer "\n> **Raison :** " $banRes "\n> **Durée :** " $durationTextLog}}
 
       {{$dbLastSanc := dbGet $banUID "LastSanc"}}
       {{if $dbLastSanc}}

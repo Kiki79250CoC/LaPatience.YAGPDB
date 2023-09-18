@@ -536,7 +536,7 @@ DISCLAIMER : Elements in ‹quotation marks› are variable arguments (IE: User 
           › Roles     : Limited (04) › "Dictateur Suprême", "Développeur", "Grand Modérateur", "Médiateur"
           › Channels  : Not limited
 
-          › Revision  : 2.20
+          › Revision  : 2.20.1
 
         • 330 - COMMAND
           › Trigger   : -prolban
