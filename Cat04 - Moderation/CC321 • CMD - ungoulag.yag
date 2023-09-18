@@ -33,6 +33,6 @@
   {{dbDel $sancUID "SancRoles"}}
 
 {{else}}
-  {{sendMessage nil (print "**Erreur :**\nPTDR, il est pas au goulag ton pelo de **" (getMember $sancUID).User.String "** là ...")}}
+  {{sendMessage nil (print "**Erreur :**\nPTDR, il est pas au goulag ton pelo de **" (getMember $sancUID).User.String "** là...")}}
 
 {{end}}
