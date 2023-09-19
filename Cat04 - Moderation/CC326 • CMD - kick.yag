@@ -1,82 +1,73 @@
-{{$args := parseArgs 2 "`-kick ‹@UserOrID› \"‹Reason›\"`" (carg "userid" "kickUID") (carg "string" "kickRes")}}
+{{$args := parseArgs 1 "`-kick ‹@UserOrID› \"‹Reason›\" ‹OptArg›`\n\nOptional Arguments :\n`--silent`" (carg "userid" "kickUID") (carg "string" "kickRes") (carg "string" "OptArg")}}
 {{$chnSanc := 515972308645707777}}
 {{$kickUID := ($args.Get 0)}}
-{{$kickRes := ($args.Get 1)}}
+{{$kickRes := or ($args.Get 1) "Aucune raison fournie"}}
+{{$optArgs := or ($args.Get 2) ""}}
 {{$kickMod := .User.ID}}
 {{$kickLmt := 5}}
+{{$silentK := false}}
+
+{{$sText := ""}}
+{{if or (eq (lower $optArgs) "--silent") (eq (lower $kickRes) "--silent")}}
+  {{$silentK = true}}
+  {{$sText = "silencieusement "}}
+  {{if not (eq (lower $kickRes) "--silent")}} {{$kickRes = or ($args.Get 1) "Aucune raison fournie"}}
+  {{else}} {{$kickRes = "Aucune raison fournie"}} {{end}}
+{{end}}
 
 {{$trappedIDs := cslice "223894107016134656"}}
 
 {{$modDailyKCount := 0}}
 {{$dailyKL := dbGet $kickMod "DailyKick"}}
-{{if $dailyKL}}
-  {{$modDailyKCount = index ($dailyKL.Value) 0}}
-{{end}}
+{{if $dailyKL}} {{$modDailyKCount = index ($dailyKL.Value) 0}} {{end}}
 
 {{if lt $modDailyKCount $kickLmt}}
   {{if and (not (in $trappedIDs (toString $kickUID))) (not (targetHasRoleID $kickUID 1078386211472805998))}}
-
     {{$usrSpec := " "}}
     {{$usrStr := print "`" $kickUID "`"}}
     {{if (getMember $kickUID)}}
-      {{$usrSpec = (print "***" (getMember $kickUID).User.String "***")}}
-      {{if ((getMember $kickUID).Nick)}}
-        {{$usrSpec = (print $usrSpec "\n*" (getMember $kickUID).Nick "*")}}
-      {{end}}
+      {{$usrSpec = (print "***" (getMember $kickUID).User.String "***\n" (or (print "" (getMember $kickUID).User.Globalname "") "<:Nothing:1066734470151024830>--"))}}
+      {{if ((getMember $kickUID).Nick)}} {{$usrSpec = (print $usrSpec "\n*" (getMember $kickUID).Nick "*")}} {{end}}
       {{$usrStr = (getMember $kickUID).User.Username}}
     {{end}}
 
-    {{$kickCount := 0}}
-    {{$dbKickCT := dbGet $kickUID "KickCount"}}
-    {{if $dbKickCT}}
-      {{$kickCount = (toInt $dbKickCT.Value)}}
-    {{end}}
-    {{dbSet $kickUID "KickCount" (add $kickCount 1)}}
+    {{$kickCount := dbGet $kickUID "KickCount"}}
+    {{if $kickCount}} {{$kickCount = (toInt $kickCount.Value)}} {{end}}
+
+    {{$aTimer := ""}} {{$jump := ""}}
+    {{if (targetHasRoleID $kickUID 506417754878902272)}} {{$aTimer = print " **le** <t:" currentTime.Unix ":f>"}} {{$jump = "\n\n"}} {{end}}
+
+    {{$toSet := joinStr "❖" currentTime.Unix (print $jump "> **Expulsé(e) " $sText "par** <@" $kickMod ">" $aTimer "\n> **Raison :** " $kickRes)}}
 
     {{$dbLastSanc := dbGet $kickUID "LastSanc"}}
     {{if $dbLastSanc}}
-      {{if (targetHasRoleID $kickUID 506417754878902272)}}
-        {{$toAdd := print "\n\n> **Expulsé(e) par** <@" $kickMod "> **le** <t:" currentTime.Unix ":f>\n> **Raison :** " $kickRes}}
-        {{dbSet $kickUID "LastSanc" (cslice (print (index $dbLastSanc.Value 0) $toAdd) (index $dbLastSanc.Value 1) (index $dbLastSanc.Value 2))}}
-      {{else}}
-        {{$toSet := joinStr "❖" currentTime.Unix (print "> **Expulsé(e) par** <@" $kickMod ">\n> **Raison :** " $kickRes)}}
-        {{dbSet $kickUID "LastSanc" (cslice $toSet (index $dbLastSanc.Value 0) (index $dbLastSanc.Value 1))}}
-      {{end}}
-    {{else}}
-      {{if (targetHasRoleID $kickUID 506417754878902272)}}
-        {{$toAdd := print "\n\n> **Expulsé(e) par** <@" $kickMod "> **le** <t:" currentTime.Unix ":f>\n> **Raison :** " $kickRes}}
-        {{dbSet $kickUID "LastSanc" (cslice (print (index $dbLastSanc.Value 0) $toAdd) 0 0)}}
-      {{else}}
-        {{$toSet := joinStr "❖" currentTime.Unix (print "> **Expulsé(e) par** <@" $kickMod ">\n> **Raison :** " $kickRes)}}
-        {{dbSet $kickUID "LastSanc" (cslice $toSet 0 0)}}
-      {{end}}
+      {{if (targetHasRoleID $kickUID 506417754878902272)}} {{$toSet = print (index $dbLastSanc.Value 0) $toSet}} {{end}}
+      {{dbSet $kickUID "LastSanc" (cslice $toSet (index $dbLastSanc.Value 0) (index $dbLastSanc.Value 1))}}
+    {{else}} {{dbSet $kickUID "LastSanc" (cslice $toSet 0 0)}} {{end}}
+
+    {{if not $silentK}}
+      {{$embed := cembed "color" 0xFAA61A
+        "title" (print "🧾 ▸ Compte rendu · Expulsion de " $usrStr)
+        "fields" (cslice
+            (sdict "name" " " "value" " " "inline" false)
+
+          (sdict "name" "🪪  •  Membre" "value" (print ">>> <@" $kickUID ">\nID : `" $kickUID "`") "inline" true)
+          (sdict "name" "\b" "value" $usrSpec "inline" true)
+            (sdict "name" " " "value" " " "inline" false)
+
+          (sdict "name" "⋄  Sanction" "value" (print "> " "Expulsion **(" (add $kickCount 1) ")**") "inline" false)
+          (sdict "name" "⋄  Raison" "value" (print ">>> " $kickRes) "inline" false)
+            (sdict "name" " " "value" " " "inline" false)
+
+        ) "footer" (sdict "text" (print "Sanction prononcée par " (getMember $kickMod).User.String))
+        "timestamp" currentTime}}
+      {{sendMessage $chnSanc $embed}}
     {{end}}
 
-    {{if ne $kickMod 204255221017214977}}
-      {{dbSet $kickMod "DailyKick" (cslice (add $modDailyKCount 1) .Message.Timestamp.Parse.Unix)}}
-    {{end}}
+    {{dbSet $kickUID "KickCount" (add $kickCount 1)}}
+    {{dbSet $kickMod "DailyKick" (cslice (add $modDailyKCount 1) .Message.Timestamp.Parse.Unix)}}
 
-    {{$embed := cembed "color" 0xFAA61A
-      "title" (print "🧾 ▸ Compte rendu · Expulsion de " $usrStr)
-      "fields" (cslice
-          (sdict "name" " " "value" " " "inline" false)
+    {{execAdmin "kick" $kickUID (print "Expulsé(e) " $sText " par " (getMember $kickMod).User.Username " · " $kickRes)}}
 
-        (sdict "name" "🪪  •  Membre" "value" (print ">>> <@" $kickUID ">\nID : `" $kickUID "`") "inline" true)
-        (sdict "name" "\b" "value" $usrSpec "inline" true)
-          (sdict "name" " " "value" " " "inline" false)
-
-        (sdict "name" "⋄  Sanction" "value" (print "> " "Expulsion **(" (add $kickCount 1) ")**") "inline" false)
-        (sdict "name" "⋄  Raison" "value" (print ">>> " $kickRes) "inline" false)
-          (sdict "name" " " "value" " " "inline" false)
-
-      ) "footer" (sdict "text" (print "Sanction prononcée par " (getMember $kickMod).User.String))
-      "timestamp" currentTime}}
-    {{sendMessage $chnSanc $embed}}
-
-    {{execAdmin "kick" $kickUID (print "Expulsé(e) par " (getMember $kickMod).User.Username " · " $kickRes)}}
-  {{else}}
-    {{sendMessage nil ">>> **Erreur :**\n`[FrostGuard Error]` <:jawad:1054718732620009512>"}}
-  {{end}}
-{{else}}
-  {{sendMessage nil (print ">>> **Erreur :**\nVous avez atteint votre plafond de " $kickLmt " expulsions aujourd'hui.")}}
-{{end}}
+  {{else}} {{sendMessage nil ">>> **Erreur :**\n`[FrostGuard Error]` <:jawad:1054718732620009512>"}} {{end}}
+{{else}} {{sendMessage nil (print ">>> **Erreur :**\nVous avez atteint votre plafond de " $kickLmt " expulsions aujourd'hui.")}} {{end}}
