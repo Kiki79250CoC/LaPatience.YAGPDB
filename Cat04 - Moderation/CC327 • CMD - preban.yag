@@ -1,6 +1,5 @@
 {{$args :=  parseArgs 2 "`-preban ‹@UserOrID› \"‹Reason›\"`" (carg "userid" "avpbUID") (carg "string" "avpbRes") (carg "duration" "avpbExpiry")}}
-{{$avpbExp := 0}}
-{{if $args.IsSet 2}}{{$avpbExp = $args.Get 2}}{{end}}
+{{$avpbExp := or ($args.Get 2) 0}}
 
 {{if eq $avpbExp 0}}
   {{dbSet ($args.Get 0) "AvPreBan" (joinStr "➷" ($args.Get 1) .User.ID)}}
