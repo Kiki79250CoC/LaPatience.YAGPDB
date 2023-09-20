@@ -25,6 +25,8 @@
 
 {{if and (targetHasRoleID $sancUID 1079418386511040572) (lt (toInt (fdiv $sancDur 1000000000)) 900) (not $isTrollG)}}
   {{sendMessage nil (print ">>> **Erreur :**\nImpossible de miner <@" ($args.Get 0) "> : Cette personne est <:VIP2_v2:1080311144285229106> **Membre VIP 2**.")}}
+{{else if (getMember $sancUID).User.Bot}}
+  {{sendMessage nil (print ">>> **Erreur :**\nImpossible de sanctionner/miner <@" ($args.Get 0) "> : C'est un bot putain, gros con va !")}}
 {{else}}
   {{if lt $modDailyGCount $useLimit}}
     {{if not (targetHasRoleID $sancUID 506417754878902272)}}
