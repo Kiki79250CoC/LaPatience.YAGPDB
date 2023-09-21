@@ -1,0 +1,11 @@
+{{$args := parseArgs 3 "`-mine ‹@UserOrID› \"‹Reason›\" \"‹duration›\"`" (carg "userid" "user") (carg "string" "reason") (carg "string" "duration")}}
+{{$id := ($args.Get 0)}}
+{{$sdur := ($args.Get 2)}}
+{{$reason := ($args.Get 1)}}
+{{if and (reFind `^(\d\d?)s(ec)?|1m(in)?` $sdur) (and (not (eq $reason "Dégoulag")) false)}}
+  {{$sdur = "1min"}}
+  {{$reason = "Troll mine"}}
+  {{takeRoleID $id 496010603601854464}}
+{{end}}
+{{$value := (joinStr "™" (toString $id) $reason $sdur (toString .User.ID))}}
+{{dbSet (toInt64 $id) "gulag" $value}}

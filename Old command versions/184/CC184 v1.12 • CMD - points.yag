@@ -1,0 +1,28 @@
+{{$args := parseArgs 0 "-points @user" (carg "userid" "user")}}
+{{$userID := .User.ID}}
+{{if ($args.IsSet 0)}}
+  {{$userID = ($args.Get 0)}}
+{{end}}
+{{$string := print (getMember $userID).User.Username " possède" }}
+{{if eq $userID .User.ID}}
+  {{$string = "Vous possédez"}}
+{{end}}
+{{$entry := dbGet $userID "points"}}
+{{$userPoints := 0}}
+{{if $entry}}
+  {{$userPoints = (index ($entry.Value) 0)}}
+{{end}}
+{{$taxes := dbGet 0 "taxes"}}
+{{$note := ""}}
+{{if $taxes}}
+  {{$val2 := sdict $taxes.Value}}
+  {{$zebi := $val2.Get (toString $userID)}}
+  {{if $zebi}}
+    {{$pututu := index $zebi 0}}
+    {{$factor := 10}}
+    {{if ge $pututu 8000}}
+      {{$factor = 4}}
+    {{end}}
+  {{end}}
+{{end}}
+{{sendMessage nil (print $string " actuellement **" (reReplace "," (humanizeThousands $userPoints) " ") "** Points.\n__Rappel :__ On gagne 1 point toutes les 3minutes tant que l'on envoie un message, c'est un système similaire à l'xp de MEE6 mais avec 3min de délai.\n")}}

@@ -1,0 +1,24 @@
+﻿
+{{/* ---------- Donner rôles si le boug ne les possède pas ---------- */}}
+{{if (not (targetHasRoleID .User.ID 985561749862350868))}}
+  {{giveRoleID .User.ID 985561749862350868}}
+{{end}}
+{{if (not (targetHasRoleID .User.ID 1060947923422162984))}}
+  {{giveRoleID .User.ID 1060947923422162984}}
+{{end}}
+
+
+{{/* ---------- Banword Boutique ---------- */}}
+{{$bBWList := cslice}}
+{{$btBanwTrigger := false}}
+{{range $k, $v := $bBWList}}{{$regex := joinStr "" `(?i)(\b` $v `\b)`}}{{if (reFind $regex (.Message.Content))}}{{$btBanwTrigger = true}}{{end}}{{end}}
+{{if $btBanwTrigger}}
+  {{$bBWImmun := cslice "223894107016134656" "369101917659332611"}}
+  {{if not (in $bBWImmun (toString .User.ID))}}
+    {{execCC 320 nil 0 (sdict "sancUsr" .User.ID "sancRes" "AutoSanc.Banword" "sancDur" "5min" "sancMod" 204255221017214977)}}
+    {{sendDM "Tu viens de te faire avoir par un Banword. On se revoit dans 5 minutes <:esso:1054716569449668609>"}}
+    {{sendMessage 618851288825856010 (print .User.Mention " s'est mangé un Banword Boutique.")}}
+  {{else}}
+    {{sendMessage 618851288825856010 (print .User.Mention " Il a dit le mot 😱 ! J'vais le dire à ma mère !")}}
+  {{end}}
+{{end}}
