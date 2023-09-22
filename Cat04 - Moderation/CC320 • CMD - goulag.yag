@@ -28,7 +28,7 @@
 {{else if (getMember $sancUID).User.Bot}}
   {{sendMessage nil (print ">>> **Erreur :**\nImpossible de sanctionner/miner <@" ($args.Get 0) "> : C'est un bot putain, gros con va !")}}
 {{else}}
-  {{if lt $modDailyGCount $useLimit}}
+  {{if or (lt $modDailyGCount $useLimit) .ExecData}}
     {{if not (targetHasRoleID $sancUID 506417754878902272)}}
       {{$roleList := cslice 496010501990645799 931351059455164477 496010603601854464 507301458853625879 1078386211472805998 1106395328447533077 1054107222856192172 925769441747296316 925767790034583552 925766056650362991 925745256207618139 925761123695886376 925758251662987264 925756577510748210 925745253087076392 925745243180118034 925745259290460210}}
       {{range $roleList}} {{if targetHasRoleID $sancUID .}} {{$rMbr = (joinStr "-" $rMbr .)}} {{takeRoleID $sancUID .}} {{end}} {{end}}
