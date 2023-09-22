@@ -480,7 +480,7 @@ DISCLAIMER : Elements in ‹quotation marks› are variable arguments (IE: User 
           › Roles     : Limited (06) › "Dictateur Suprême", "Développeur", "Grand Modérateur", "Médiateur", "Gestionnaire" (Boutique), "Modération"
           › Channels  : Not limited
 
-          › Revision  : 2.30
+          › Revision  : 2.31
 
         • 325 - COMMAND
           › Trigger   : -cancelmine

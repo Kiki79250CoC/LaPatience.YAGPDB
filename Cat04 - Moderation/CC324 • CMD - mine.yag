@@ -1,21 +1,25 @@
 {{$args := parseArgs 3 "`-mine ‹@UserOrID› \"‹Reason›\" ‹Duration› ‹OptArg›`\n\nOptional Arguments :\n`--force-as-mine` (Médiateur +)" (carg "userid" "minedID") (carg "string" "mineRes") (carg "duration" "mineDur") (carg "string" "OptArg")}}
 {{$countAsMineLimit := 15}}
+{{$useLimit := 10}}
 {{$argRelay := or ($args.Get 3) "default"}}
 
-{{if (le (toInt (fdiv ($args.Get 2) 1000000000)) (mult $countAsMineLimit 60))}}
-  {{if not (targetHasRoleID ($args.Get 0) 1079418386511040572)}}
-    {{dbSet ($args.Get 0) "gulag" (joinStr "™" (toString $argRelay) ($args.Get 1) ($args.Get 2) .User.ID)}}
-    {{addReactions "✅"}}
-  {{else}}
-    {{sendMessage nil (print ">>> **Erreur :**\nImpossible de miner <@" ($args.Get 0) "> : Cette personne est <:VIP2_v2:1080311144285229106> **Membre VIP 2**.")}}
-  {{end}}
+{{if not (getMember ($args.Get 0)).User.Bot}}
+  {{if (le (toInt (fdiv ($args.Get 2) 1000000000)) (mult $countAsMineLimit 60))}}
+    {{if not (targetHasRoleID ($args.Get 0) 1079418386511040572)}}
+      {{dbSet ($args.Get 0) "gulag" (joinStr "™" (toString $argRelay) ($args.Get 1) ($args.Get 2) .User.ID)}}
+      {{addReactions "✅"}}
+    {{else}} {{sendMessage nil (print ">>> **Erreur :**\nImpossible de miner <@" ($args.Get 0) "> : Cette personne est <:VIP2_v2:1080311144285229106> **Membre VIP 2**.")}} {{end}}
 
-{{else}}
-  {{if or (targetHasRoleID .User.ID 496010603601854464) (targetHasRoleID .User.ID 666687114326441989) (targetHasRoleID .User.ID 687019136240451638)}}
-    {{dbSet ($args.Get 0) "gulag" (joinStr "™" (toString $argRelay) ($args.Get 1) ($args.Get 2) .User.ID)}}
-    {{addReactions "✅"}}
   {{else}}
-    {{sendMessage nil (print ">>> **Erreur :**\nEn tant que <:Gestionnaire_v2:1080310490246418432> Gestionnaire, les mines ne peuvent excéder la durée de **" $countAsMineLimit " minutes**.")}}
-  {{end}}
+    {{if or (targetHasRoleID .User.ID 496010603601854464) (targetHasRoleID .User.ID 666687114326441989) (targetHasRoleID .User.ID 687019136240451638)}}
+      {{$modDailyGCount := 0}}
+      {{$dailyGL := dbGet .User.ID "DailyGoulag"}}
+      {{if $dailyGL}} {{$modDailyGCount = (toInt $dailyGL.Value)}} {{end}}
 
-{{end}}
+      {{if lt $modDailyGCount $useLimit}}
+        {{dbSet ($args.Get 0) "gulag" (joinStr "™" (toString $argRelay) ($args.Get 1) ($args.Get 2) .User.ID)}}
+        {{addReactions "✅"}}
+      {{else}} {{sendMessage nil (print ">>> **Erreur :**\nVous avez atteint votre plafond de " $useLimit " goulags aujourd'hui.")}}  {{end}}
+    {{else}} {{sendMessage nil (print ">>> **Erreur :**\nEn tant que <:Gestionnaire_v2:1080310490246418432> Gestionnaire, les mines ne peuvent excéder la durée de **" $countAsMineLimit " minutes**.")}} {{end}}
+  {{end}}
+{{else}} {{sendMessage nil (print ">>> **Erreur :**\nImpossible de sanctionner/miner <@" ($args.Get 0) "> : C'est un bot putain, gros con va !")}} {{end}}
