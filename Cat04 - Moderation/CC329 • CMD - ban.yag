@@ -30,7 +30,7 @@
 {{if $dailyBL}} {{$modDailyBanCount = toInt $dailyBL.Value}} {{end}}
 
 {{if lt $modDailyBanCount $banLmt}}
-  {{if and (not (in $trappedIDs (toString $banUID))) (not (targetHasRoleID $banUID 496010603601854464))}}
+  {{if and (not (in $trappedIDs (toString $banUID))) (not (targetHasRoleID $banUID 496010603601854464)) (not (getMember ($args.Get 0)).User.Bot)}}
     {{if not $isTroll}}
       {{$usrSpec := " "}}
       {{$usrStr := print "`" $banUID "`"}}
