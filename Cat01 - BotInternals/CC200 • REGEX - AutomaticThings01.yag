@@ -55,15 +55,6 @@
     {{end}}
   {{end}}
 
-  {{/* ---------- Boutique Légendaire ---------- */}}
-  {{if (dbGet 21 "Buy")}}
-    {{if not (dbGet 210 "Buy")}}
-      {{dbSetExpire 210 "Buy" "#" (randInt 55 80)}}
-      {{sendMessage nil (print "🔥 " .User.Mention " tu gagnes 250 Points gratuitement comme ça.")}}
-      {{dbSet .User.ID "points" (cslice (add (index (dbGet .User.ID "points").Value 0) 250) .Message.Timestamp.Parse.Unix)}}
-    {{end}}
-  {{end}}
-
 {{end}} {{/* --- End --- */}}
 
 {{/* ---------- Livre d'Argent ---------- */}}
