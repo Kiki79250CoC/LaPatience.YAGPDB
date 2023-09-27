@@ -77,6 +77,13 @@
 
           {{sendMessage $chanZonz (print "## " (getMember $sancUID).User.Mention ", vous avez été sanctionné !\n\n> **Sanction :** Goulag\n> **Durée :** " $readableSancDur "\n> **Raison :** " $sancRes "\n### **Sanctionné par** " (getMember $sancMod).User.Mention)}}
 
+          {{if (dbGet $sancUID "AvPreBan")}}
+            {{$embed := cembed "color" 0xffbf00
+              "footer" (sdict "text" (print "Cette personne requiert des précautions particulières.\nRéférez-vous au -sanchistory pour obtenir les détails.") "icon_url" "https://cdn.discordapp.com/emojis/1156596295352467507.webp?quality=lossless")
+            }}
+            {{sendMessage $chanSanc $embed}}
+          {{end}}
+
           {{dbSet $sancUID "GoulagCount" (add $goulagCount 1)}}
           {{dbSet $sancMod "DailyGoulag" (add $modDailyGCount 1)}}
 
