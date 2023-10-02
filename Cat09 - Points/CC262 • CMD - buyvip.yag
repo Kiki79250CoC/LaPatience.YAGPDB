@@ -34,7 +34,7 @@
       {{else}}
         {{$DM = "Achat effectué avec succès !"}}
 
-        {{if in (cslice 99) $BID}}
+        {{if in (cslice 5) $BID}}
           {{$blk := dbGet $UID (print "Buy" $BID)}}
           {{if $blk}} {{$pr = 0}}{{$DM = print "Item soumis à un cooldown.\nVous pourrez l'utiliser dans **" (reReplace "second" (reReplace "and" (humanizeDurationSeconds (mult (sub $blk.ExpiresAt.Unix $UTS) 1000000000)) "et") "seconde") "**."}} {{$BOKCldw = false}} {{end}}
         {{end}}
@@ -61,12 +61,7 @@
         {{else if ge $BID 5}}
           {{if not (targetHasRoleID .User.ID 1079418386511040572)}} {{$pr = 0}}{{$DM = print $bErr "Vous n'êtes pas <:VIP2_v2:1080311144285229106> **Membre VIP 2**."}}
           {{else}}
-            {{if eq $BID 5}}
-              {{if not ($args.IsSet 1)}} {{$pr = 0}}{{$DM = print $bErr "La mention ou l'ID du bénéficiaire est requis."}}
-              {{else}}
-                {{giveRoleID ($args.Get 1) 783323308560351282}}
-                {{takeRoleID ($args.Get 1) 783323308560351282 259200}}
-              {{end}}
+            {{if eq $BID 5}} {{dbSet 10005 "Buy" "#"}}
 
             {{else if eq $BID 8}} {{$pr = 0}}{{$DM = print $bErr "Item indisponible."}}
 
