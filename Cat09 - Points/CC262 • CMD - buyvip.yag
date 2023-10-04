@@ -8,7 +8,7 @@
 {{$bErr := ">>> **Erreur :**\nImpossible de procéder à l'achat : "}}
 {{$BOKCldw := true}}
 
-{{$PrLst := sdict "1" 400 "2" 1000 "3" 2000 "4" 4000 "5" 300 "6" 2000 "7" 3000 "8" 5000}}
+{{$PrLst := sdict "1" 400 "2" 1000 "3" 2000 "4" 4000 "5" 200 "6" 2000 "7" 3000 "8" 5000}}
 
 {{if gt $BID 8}} {{$DM = print $bErr "L'item sélectionné n'existe pas."}}
 {{else}}
@@ -61,7 +61,7 @@
         {{else if ge $BID 5}}
           {{if not (targetHasRoleID .User.ID 1079418386511040572)}} {{$pr = 0}}{{$DM = print $bErr "Vous n'êtes pas <:VIP2_v2:1080311144285229106> **Membre VIP 2**."}}
           {{else}}
-            {{if eq $BID 5}} {{dbSet 10005 "Buy" "#"}}
+            {{if eq $BID 5}} {{dbSet 10005 "Buy" (toString .User.ID)}}
 
             {{else if eq $BID 8}} {{$pr = 0}}{{$DM = print $bErr "Item indisponible."}}
 

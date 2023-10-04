@@ -811,7 +811,7 @@ DISCLAIMER : Elements in ‹quotation marks› are variable arguments (IE: User 
           › Roles     : Not limited
           › Channels  : Limited (02) › "Boutique", "Gestion Bots"
 
-          › Revision  : 1.25
+          › Revision  : 1.25.1
 
         • 265 - COMMAND
           › Trigger   : -mise
