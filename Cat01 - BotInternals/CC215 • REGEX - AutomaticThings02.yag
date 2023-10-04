@@ -28,6 +28,17 @@
       {{end}}
     {{end}}
   {{end}}
+
+  {{/* ---------- BuyVIP 5 ---------- */}}
+  {{$bvip5 := dbGet 10005 "Buy"}}
+  {{if and $bvip5 (not (eq .User.ID (toInt $bvip5.Value)))}}
+    {{dbDel 10005 "Buy"}}
+    {{sendMessage nil (print "Tiens, on dirait que " .User.Mention " viens de se faire voler 200 points par... une bombe ?!")}}
+    {{$Pts := dbGet .User.ID "points"}}
+    {{dbSet .User.ID "points" (cslice (sub (index $Pts.Value 0) 200) .Message.Timestamp.Parse.Unix)}}
+    {{if and (lt (sub (index $Pts.Value 1) 200) 0) (not (targetHasRoleID .User.ID 1158197672071680083))}} {{giveRoleID .User.ID 1158197672071680083}} {{end}}
+  {{end}}
+
 {{end}}
 
 {{/* ---------- Boutique Légendaire ---------- */}}
@@ -91,10 +102,8 @@
       {{$newList := cslice}}
       {{$remove := (toString .Message.ChannelID)}}
       {{range $channelList}}{{if ne . $remove}}{{$newList = $newList.Append .}}{{end}}{{end}}
-      {{if not (eq (len $newList) 0)}}
-        {{dbSet 10003 "Buy" $newList}}
-      {{else}}
-        {{dbDel 10003 "Buy"}}
+      {{if not (eq (len $newList) 0)}} {{dbSet 10003 "Buy" $newList}}
+      {{else}} {{dbDel 10003 "Buy"}}
       {{end}}
     {{end}}
   {{end}}
