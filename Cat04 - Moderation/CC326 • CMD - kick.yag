@@ -22,7 +22,7 @@
 {{if $dailyKL}} {{$modDailyKCount = index ($dailyKL.Value) 0}} {{end}}
 
 {{if lt $modDailyKCount $kickLmt}}
-  {{if and (not (in $trappedIDs (toString $kickUID))) (not (targetHasRoleID $kickUID 1078386211472805998))}}
+  {{if and (not (in $trappedIDs (toString $kickUID))) (not (targetHasRoleID $kickUID 496010603601854464)) (not (targetHasRoleID $kickUID 628276701796892702)) (not (getMember ($args.Get 0)).User.Bot) (not (eq $kickUID $kickMod))}}
     {{$usrSpec := " "}}
     {{$usrStr := print "`" $kickUID "`"}}
     {{if (getMember $kickUID)}}

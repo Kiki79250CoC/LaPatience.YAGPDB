@@ -502,7 +502,7 @@ DISCLAIMER : Elements in ‹quotation marks› are variable arguments (IE: User 
           › Roles     : Limited (03) › "Dictateur Suprême", "Développeur", "Grand Modérateur", "Médiateur", "Gestionnaire"
           › Channels  : Not limited
 
-          › Revision  : 2.20
+          › Revision  : 2.21.2
 
         • 327 - COMMAND
           › Trigger   : -preban
