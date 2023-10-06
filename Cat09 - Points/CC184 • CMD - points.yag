@@ -1,7 +1,6 @@
 {{$args := parseArgs 0 "`-points ‹@UserOrID›`" (carg "userid" "user")}}
 {{$CanBypass := cslice 369101917659332611 531170764183830528}}
-{{$userID := .User.ID}}
-{{if ($args.IsSet 0)}} {{$userID = ($args.Get 0)}} {{end}}
+{{$userID := or ($args.Get 0) .User.ID}}
 
 {{$tx := ""}} {{$plafPremLvl := 0}}
 {{if targetHasRoleID $userID 1079418386511040572}} {{$plafPremLvl = 2}} {{$tx = " (VIP2)"}}
@@ -23,8 +22,8 @@
   {{$hasPtsTxt = print $usrDN " possède"}}
 {{end}}
 
-{{$ptsSolde := 0}} {{$bankAcct := dbGet $userID "points"}}
-{{if $bankAcct}} {{$ptsSolde = index ($bankAcct.Value) 0}} {{end}}
+{{$ptsSolde := 0}}
+{{if $bankAcct := dbGet $userID "points"}} {{$ptsSolde = index ($bankAcct.Value) 0}} {{end}}
 
 {{$embed := cembed "color" 0xffbf00
   "author" (sdict "name" $usrDN "icon_url" $iURL)
