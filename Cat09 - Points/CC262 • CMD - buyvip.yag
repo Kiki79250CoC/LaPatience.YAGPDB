@@ -36,7 +36,7 @@
       {{else}}
         {{$DM = "Achat effectué avec succès !"}}
 
-        {{if in (cslice 5) $BID}} {{if $blk := dbGet $UID (print "BuyVIP" $BID)}} {{$pr = 0}}{{$DM = print "Item soumis à un cooldown.\nVous pourrez l'utiliser dans **" (reReplace "second" (reReplace "and" (humanizeDurationSeconds (mult (sub $blk.ExpiresAt.Unix $UTS) 1000000000)) "et") "seconde") "**."}} {{$BOKCldw = false}} {{end}} {{end}}
+        {{if in (cslice 5) $BID}} {{if $blk := dbGet $UID (print "BuyVIP" $BID)}} {{$pr = 0}}{{$DM = print "Item soumis à un cooldown.\nVous pourrez l'utiliser dans **" (reReplace "hour" (reReplace "second" (reReplace "and" (humanizeDurationSeconds (mult (sub $blk.ExpiresAt.Unix $UTS) 1000000000)) "et") "seconde") "heure") "**."}} {{$BOKCldw = false}} {{end}} {{end}}
 
         {{if eq $BID 1}}
           {{if not (and ($args.IsSet 1) ($args.IsSet 2))}} {{$pr = 0}}{{$DM = print $bErr "Les deux cibles n'ont pas été correctement définies."}}
