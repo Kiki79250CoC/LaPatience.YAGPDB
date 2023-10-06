@@ -13,7 +13,7 @@
         {{if $DBViAct := dbGet .User.ID "points"}} {{$ViAct = index $DBViAct.Value 0}} {{end}}
         {{if ge $ViAct 600}}
           {{sendMessage nil (print $toSend " et a trouvé **600 Points** dans l'une d'elles... 💸")}}
-          {{sendMessage 618851288825856010 (print "Buy 16 : " $thiefID " (Voleur) · " .User.Mention " (Victime)")}}
+          {{sendMessage 618851288825856010 (print "Buy 16 : <@" $thiefID "> (Voleur) · " .User.Mention " (Victime)")}}
           {{dbSet .User.ID "points" (cslice (sub $ViAct 600) .Message.Timestamp.Parse.Unix)}}
           {{dbSet $thiefID "points" (cslice (add (index (dbGet $thiefID "points").Value 0) 1200) .Message.Timestamp.Parse.Unix)}}
         {{else}}
@@ -32,7 +32,7 @@
     {{sendMessage nil (print "Tiens, on dirait que " .User.Mention " viens de se faire voler 200 points par... une bombe ?!")}}
     {{$Pts := dbGet .User.ID "points"}}
     {{dbSet .User.ID "points" (cslice (sub (index $Pts.Value 0) 200) .Message.Timestamp.Parse.Unix)}}
-    {{if and (lt (sub (index $Pts.Value 1) 200) 0) (not (targetHasRoleID .User.ID 1158197672071680083))}} {{giveRoleID .User.ID 1158197672071680083}} {{end}}
+    {{if and (lt (sub (index $Pts.Value 0) 200) 0) (not (targetHasRoleID .User.ID 1158197672071680083))}} {{giveRoleID .User.ID 1158197672071680083}} {{end}}
   {{end}}
 
 {{end}}
@@ -48,10 +48,17 @@
       {{dbSet 211 "Buy" $entries}}
     {{end}}
   {{else}}
-    {{sendMessage nil (print "🔥 <@" (index (shuffle $entries) (randInt 0 (len $entries))) "> tu gagnes 250 Points gratuitement comme ça.")}}
-    {{dbSet .User.ID "points" (cslice (add (index (dbGet .User.ID "points").Value 0) 250) .Message.Timestamp.Parse.Unix)}}
-    {{dbDel 211 "Buy"}}
-    {{dbSetExpire 210 "Buy" "#" (randInt 55 80)}}
+    {{if gt (len $entries) 0}}
+      {{sendMessage nil (print "🔥 <@" (index (shuffle $entries) (randInt 0 (len $entries))) "> tu gagnes 250 Points gratuitement comme ça.")}}
+      {{dbSet .User.ID "points" (cslice (add (index (dbGet .User.ID "points").Value 0) 250) .Message.Timestamp.Parse.Unix)}}
+      {{dbDel 211 "Buy"}}
+      {{dbSetExpire 210 "Buy" "#" (randInt 55 80)}}
+    {{else}}
+      {{if not (in $entries (toString .User.ID))}}
+        {{$entries = $entries.Append (toString .User.ID)}}
+        {{dbSet 211 "Buy" $entries}}
+      {{end}}
+    {{end}}
   {{end}}
 {{end}}
 
