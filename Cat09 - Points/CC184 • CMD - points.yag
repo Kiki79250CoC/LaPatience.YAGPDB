@@ -9,11 +9,11 @@
 
 {{$plafText := print (reReplace "," (humanizeThousands $plaf) " ") " Points" $tx}}
 {{$usrDN := (toString $userID)}} {{$iURL := ""}}
+{{$subText := ""}}
 {{if (getMember $userID)}}
   {{if or (getMember $userID).User.Bot (in $CanBypass $userID)}} {{$plafText = "Illimité"}} {{end}}
   {{$usrDN = or (getMember $userID).Nick (getMember $userID).User.Username}}
   {{$iURL = print "https://cdn.discordapp.com/avatars/" $userID "/" (getMember $userID).User.Avatar ".png"}}
-{{else}} {{$plafText = "Inconnu"}}
 {{end}}
 
 {{$vp := "Votre"}} {{$hasPtsTxt := "Vous possédez"}}
@@ -22,13 +22,17 @@
   {{$hasPtsTxt = print $usrDN " possède"}}
 {{end}}
 
+{{if (getMember $userID)}}
+  {{$subText = print "\n\n" $vp " plafond : " $plafText "\nNombre d'achats effectués : " (reReplace "," (humanizeThousands (or (dbGet $userID "BuyCt").Value 0)) " ")}}
+{{end}}
+
 {{$ptsSolde := 0}}
 {{if $bankAcct := dbGet $userID "points"}} {{$ptsSolde = index ($bankAcct.Value) 0}} {{end}}
 
 {{$embed := cembed "color" 0xffbf00
   "author" (sdict "name" $usrDN "icon_url" $iURL)
   "title" (print $hasPtsTxt " **" (reReplace "," (humanizeThousands $ptsSolde) " ") "** Points")
-  "footer" (sdict "text" (print "Lorsque vous discutez, vous gagnez 1 Point par tranche de 2 minutes.\n" $vp " plafond : " $plafText))
+  "footer" (sdict "text" (print "Lorsque vous discutez, vous gagnez 1 Point par tranche de 2 minutes." $subText))
 }}
 {{$embed2 := cembed "color" 0xda373c
   "title" "Attention !"
