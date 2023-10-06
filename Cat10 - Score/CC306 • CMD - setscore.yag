@@ -4,8 +4,8 @@
 {{$AftDBSc := 0}}
 
 {{if (in (cslice "add" "remove") (lower ($args.Get 0)))}}
-  {{if (eq (lower ($args.Get 0)) "add")}} {{$AftDBSc = add $DBScore ($args.Get 2)}}
-  {{else if (eq (lower ($args.Get 0)) "remove")}} {{$AftDBSc = sub $DBScore ($args.Get 2)}} {{end}}
+  {{if (eq (lower ($args.Get 0)) "add")}} {{$AftDBSc = toInt (add $DBScore ($args.Get 2))}}
+  {{else if (eq (lower ($args.Get 0)) "remove")}} {{$AftDBSc = toInt (sub $DBScore ($args.Get 2))}} {{end}}
 
   {{dbSet $UID "score" $AftDBSc}}
 
@@ -17,11 +17,11 @@
   )}}
   {{sendMessage nil $embed}}
 
-  {{if and (ge (toInt $AftDBSc) 1000) (not (targetHasRoleID $UID 1060949245433229373))}} {{giveRoleID $UID 1060949245433229373}} {{end}}
-  {{if and (ge (toInt $AftDBSc) 5000) (not (targetHasRoleID $UID 1060949252601294940))}} {{giveRoleID $UID 1060949252601294940}} {{end}}
-  {{if and (ge (toInt $AftDBSc) 10000) (not (targetHasRoleID $UID 1060949258917924934))}} {{giveRoleID $UID 1060949258917924934}} {{end}}
-  {{if and (ge (toInt $AftDBSc) 20000) (not (targetHasRoleID $UID 1060949256170643558))}} {{giveRoleID $UID 1060949256170643558}} {{end}}
-  {{if and (ge (toInt $AftDBSc) 30000) (not (targetHasRoleID $UID 1060949819302084678))}} {{giveRoleID $UID 1060949819302084678}} {{end}}
+  {{if and (lt $DBScore 1000) (ge $AftDBSc 1000)}} {{giveRoleID $UID 1060949245433229373}} {{end}}
+  {{if and (lt $DBScore 5000) (ge $AftDBSc 5000)}} {{giveRoleID $UID 1060949252601294940}} {{end}}
+  {{if and (lt $DBScore 15000) (ge $AftDBSc 15000)}} {{giveRoleID $UID 1060949258917924934}} {{end}}
+  {{if and (lt $DBScore 25000) (ge $AftDBSc 25000)}} {{giveRoleID $UID 1060949256170643558}} {{end}}
+  {{if and (lt $DBScore 40000) (ge $AftDBSc 40000)}} {{giveRoleID $UID 1060949819302084678}} {{end}}
 
   {{if gt ($npal := (roundFloor (div $AftDBSc 5000))) (roundFloor (div $DBScore 5000))}} {{sendMessage 1060966843667460166 (print "Bien joué <@" $UID ">, tu viens de passer au **Palier " $npal "** !")}} {{end}}
 
