@@ -1,19 +1,22 @@
 {{$args := parseArgs 0 "`-score ‹@UserOrID›`" (carg "userid" "user")}}
-{{$userID := or ($args.Get 0) .User.ID}}
+{{$UID := or ($args.Get 0) .User.ID}}
 
-{{$usrDN := (toString $userID)}} {{$iURL := ""}}
-{{if (getMember $userID)}}
-  {{$usrDN = or (getMember $userID).Nick (getMember $userID).User.Username}}
-  {{$iURL = print "https://cdn.discordapp.com/avatars/" $userID "/" (getMember $userID).User.Avatar ".png"}}
+{{$usrDN := (toString $UID)}} {{$iURL := ""}}
+{{if (getMember $UID)}}
+  {{$usrDN = or (getMember $UID).Nick (getMember $UID).User.Username}}
+  {{$iURL = print "https://cdn.discordapp.com/avatars/" $UID "/" (getMember $UID).User.Avatar ".png"}}
 {{else}}
 {{end}}
 
 {{$ScoreTxt := "Votre score"}}
-{{if ne .User.ID $userID}} {{$ScoreTxt = print "Le score de " $usrDN}} {{end}}
+{{if ne .User.ID $UID}} {{$ScoreTxt = print "Le score de " $usrDN}} {{end}}
 
-{{$ptsSolde := or (dbGet $userID "score").Value 0}}
+{{$ptsSolde := or (dbGet $UID "score").Value 0}}
 
 {{$embed := cembed "color" 0xa10aee
   "author" (sdict "name" $usrDN "icon_url" $iURL)
   "title" (print $ScoreTxt " est de **" (reReplace "," (humanizeThousands $ptsSolde) " ") "** Points")
 }}
+{{sendMessage nil $embed}}
+
+{{$a := dbIncr $UID "ScoreExCt" 1}}
