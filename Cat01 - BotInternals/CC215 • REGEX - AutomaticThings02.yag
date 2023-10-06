@@ -2,29 +2,25 @@
 
 {{if eq .Message.ChannelID 496010398848253965}}
   {{/* ---------- Buy 16 ---------- */}}
-  {{$dbThief := dbGet 16 "Buy"}}
-  {{if $dbThief}}
+  {{if $dbThief := dbGet 16 "Buy"}}
     {{$thiefID := toInt $dbThief.Value}}
     {{if not (dbGet 161 "Buy")}}
       {{if not (eq $thiefID .User.ID)}}
         {{dbSetExpire 161 "Buy" "#" 10}}
         {{dbDel 16 "Buy"}}
-        {{$dbVictAcc := dbGet .User.ID "points"}}
-        {{if $dbVictAcc}}
-          {{$toSend := print "Tiens, on dirait que " (getMember $thiefID).User.Mention " a tenté de faire les poches de " .User.Mention ", sauf qu'un flic l'a vu...\nDu coup les **600 Points** se sont envolés vers les cieux... 💸"}}
-          {{$victAcc := index $dbVictAcc.Value 0}}
-          {{if ge $victAcc 600}}
-            {{$toSend = print "Tiens, on dirait que " (getMember $thiefID).User.Mention " vient de faire les poches de " .User.Mention " et a trouvé **600 Points** dans l'une d'elles... 💸"}}
-            {{sendMessage 618851288825856010 (print "Buy 16 : " .User.Mention)}}
-            {{sendMessage nil $toSend}}
-            {{dbSet .User.ID "points" (cslice (sub $victAcc 600) .Message.Timestamp.Parse.Unix)}}
-            {{dbSet $thiefID "points" (cslice (add (index (dbGet $thiefID "points").Value 0) 1200) .Message.Timestamp.Parse.Unix)}}
-          {{else}}
-            {{sendMessage nil $toSend}}
-          {{end}}
+        {{$toSend := print "Tiens, on dirait que <@" $thiefID "> a tenté de faire les poches de " .User.Mention}}
+        {{$ViAct := 0}}
+        {{if $DBViAct := dbGet .User.ID "points"}} {{$ViAct = index $DBViAct.Value 0}} {{end}}
+        {{if ge $ViAct 600}}
+          {{sendMessage nil (print $toSend " et a trouvé **600 Points** dans l'une d'elles... 💸")}}
+          {{sendMessage 618851288825856010 (print "Buy 16 : " $thiefID " (Voleur) · " .User.Mention " (Victime)")}}
+          {{dbSet .User.ID "points" (cslice (sub $ViAct 600) .Message.Timestamp.Parse.Unix)}}
+          {{dbSet $thiefID "points" (cslice (add (index (dbGet $thiefID "points").Value 0) 1200) .Message.Timestamp.Parse.Unix)}}
         {{else}}
-          {{sendMessage nil $toSend}}
+          {{sendMessage nil (print $toSend ", sauf qu'un flic l'a vu...\n Du coup sur les **600 points**, 300 se sont envolés vers les cieux et le reste vont dans la poche de " .User.Mention ". 💸")}}
+          {{dbSet .User.ID "points" (cslice (add $ViAct 300) .Message.Timestamp.Parse.Unix)}}
         {{end}}
+        {{return}}
       {{end}}
     {{end}}
   {{end}}
