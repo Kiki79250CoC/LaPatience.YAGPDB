@@ -20,3 +20,4 @@
 {{sendMessage nil $embed}}
 
 {{$a := dbIncr $UID "ScoreExCt" 1}}
+{{if (eq $a 500)}} {{giveRoleID $UID 1159816955969142836}} {{end}}
