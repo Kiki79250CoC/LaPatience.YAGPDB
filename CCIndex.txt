@@ -862,15 +862,15 @@ DISCLAIMER : Elements in ‹quotation marks› are variable arguments (IE: User 
           › Revision  : 2.00
 
         • 306 - COMMAND
-          › Trigger   : -addscore
-          › Arguments : ‹@UserOrID› ‹Amount›
+          › Trigger   : -setscore
+          › Arguments : ‹[Add|Remove]› ‹@UserOrID› ‹Amount›
 
           › Enabled   : Yes
           › Name      : n/a
           › Roles     : Limited (02) › "Dictateur Suprême", "Développeur"
           › Channels  : Not limited
 
-          › Revision  : 1
+          › Revision  : 2.00
 
         • 307 - COMMAND
           › Trigger   : -buyscore

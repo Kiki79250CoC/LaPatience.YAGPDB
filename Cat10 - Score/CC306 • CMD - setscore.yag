@@ -1,0 +1,30 @@
+{{$args := parseArgs 3 "`-setscore ‹[Add|Remove]› ‹@UserOrID› ‹Amount›`" (carg "string" "Action") (carg "userid" "UID") (carg "int" "Amount")}}
+{{$UID := $args.Get 1}}
+{{$DBScore := or (dbGet $UID "score").Value 0}}
+{{$AftDBSc := 0}}
+
+{{if (in (cslice "add" "remove") (lower ($args.Get 0)))}}
+  {{if (eq (lower ($args.Get 0)) "add")}} {{$AftDBSc = add $DBScore ($args.Get 2)}}
+  {{else if (eq (lower ($args.Get 0)) "remove")}} {{$AftDBSc = sub $DBScore ($args.Get 2)}} {{end}}
+
+  {{dbSet $UID "score" $AftDBSc}}
+
+  {{$embed := cembed
+    "title" (print "✓ Le Score a été mis à jour")
+    "color" 0xa10aee
+    "fields" (cslice
+      (sdict "name" (or .User.Globalname .User.Username) "value" (print "> ~~" (reReplace "," (humanizeThousands $DBScore) " ") "~~ › **" (reReplace "," (humanizeThousands $AftDBSc) " ") "**") "inline" true)
+  )}}
+  {{sendMessage nil $embed}}
+
+  {{if and (ge (toInt $AftDBSc) 1000) (not (targetHasRoleID $UID 1060949245433229373))}} {{giveRoleID $UID 1060949245433229373}} {{end}}
+  {{if and (ge (toInt $AftDBSc) 5000) (not (targetHasRoleID $UID 1060949252601294940))}} {{giveRoleID $UID 1060949252601294940}} {{end}}
+  {{if and (ge (toInt $AftDBSc) 10000) (not (targetHasRoleID $UID 1060949258917924934))}} {{giveRoleID $UID 1060949258917924934}} {{end}}
+  {{if and (ge (toInt $AftDBSc) 20000) (not (targetHasRoleID $UID 1060949256170643558))}} {{giveRoleID $UID 1060949256170643558}} {{end}}
+  {{if and (ge (toInt $AftDBSc) 30000) (not (targetHasRoleID $UID 1060949819302084678))}} {{giveRoleID $UID 1060949819302084678}} {{end}}
+
+  {{if gt ($npal := (roundFloor (div $AftDBSc 5000))) (roundFloor (div $DBScore 5000))}} {{sendMessage 1060966843667460166 (print "Bien joué <@" $UID ">, tu viens de passer au **Palier " $npal "** !")}} {{end}}
+
+{{else}}
+  {{sendMessage nil (print ">>> **Erreur :**\nArgument d'action (`" ($args.Get 0) "`) invalide.\n\nOptions possibles : `Add`, `Remove`")}}
+{{end}}
