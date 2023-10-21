@@ -434,7 +434,7 @@ DISCLAIMER : Elements in ‹quotation marks› are variable arguments (IE: User 
           › Roles     : Limited (04) › "Dictateur Suprême", "Développeur", "Grand Modérateur", "Médiateur"
           › Channels  : Not Limited
 
-          › Revision  : 2.34
+          › Revision  : 2.34.1
 
         • 321 - COMMAND
           › Trigger   : -ungoulag
