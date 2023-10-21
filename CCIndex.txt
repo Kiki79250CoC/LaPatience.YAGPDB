@@ -800,7 +800,7 @@ DISCLAIMER : Elements in ‹quotation marks› are variable arguments (IE: User 
           › Roles     : Not limited
           › Channels  : Limited (02) › "Boutique", "Gestion Bots"
 
-          › Revision  : 2.72.3
+          › Revision  : 2.72.4
 
         • 262 - COMMAND
           › Trigger   : -buyvip
@@ -811,7 +811,7 @@ DISCLAIMER : Elements in ‹quotation marks› are variable arguments (IE: User 
           › Roles     : Not limited
           › Channels  : Limited (02) › "Boutique", "Gestion Bots"
 
-          › Revision  : 1.26.2
+          › Revision  : 1.26.3
 
         • 265 - COMMAND
           › Trigger   : -mise

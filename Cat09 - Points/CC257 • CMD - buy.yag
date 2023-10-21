@@ -35,7 +35,7 @@
         {{if eq $b13ID $UID}} {{$b13msg = print $b13msg "… sauf que le Karma l'a rattrapé."}}
         {{else}} {{$b13msg = print $b13msg " et que " $UM " en a payé les frais."}} {{end}}
         {{sendMessage $ChG (print $b13msg "\nEt les **" $pr "** Points de son achat ? Boh ! Aux oubliettes bien évidemment…")}}
-        {{sendMessage $ChB (print "Buy 13 : " $UM "")}}
+        {{sendMessage $ChB (print "Buy 13 : <@" $b13ID "> (Piégeur) · " $UM " (Piégé)")}}
         {{dbDel 13 "Buy"}} {{dbSet $UID "points" (cslice (sub $uPts $pr) $UTS)}}
         {{execCC 320 nil 0 (sdict "sancUsr" $UID "sancRes" "AutoSanc.Buy13" "sancDur" (toDuration "5m") "sancMod" 0)}}
       {{end}}
@@ -49,7 +49,7 @@
 
       {{if eq $BID 1}}
         {{if not (dbGet 1 "Buy")}}
-          {{dbSetExpire 1 "Buy" "#" (randInt 245600 388800)}} {{giveRoleID $UID 985645140699918356}}
+          {{dbSetExpire 1 "Buy" 0 (randInt 245600 388800)}} {{giveRoleID $UID 985645140699918356}}
           {{$DM = "Bravo ! Tu repars avec le badge du Buy 1 🎲 !"}} {{sendMessage 618851288825856010 (print "Buy 1 : " $UM)}}
         {{end}}
 
@@ -92,7 +92,7 @@
 
       {{else if eq $BID 10}} {{addRoleID 1030956478384832664}}
 
-      {{else if eq $BID 11}} {{dbSet 11 "Buy" 1}}
+      {{else if eq $BID 11}} {{dbSet 11 "Buy" 0}}
 
       {{else if eq $BID 12}} {{addRoleID 998383449008246824}} {{removeRoleID 998383449008246824 259200}}
 
@@ -100,15 +100,15 @@
 
       {{else if eq $BID 14}} {{sendMessage $ChG "C'est l'heure de faire boom-boom ! (Buy 14)"}} {{dbSet 14 "Buy" 3}}
 
-      {{else if eq $BID 15}} {{dbSetExpire $UID "Buy15" "#" 86400}}
+      {{else if eq $BID 15}} {{dbSetExpire $UID "Buy15" 0 86400}}
 
       {{else if eq $BID 16}}
         {{if $BOKCldw}} {{if (dbGet 161 "Buy")}} {{$pr = 0}}{{$DM = print $bErr "Un Buy 16 est déjà en cours…"}}
         {{else}} {{dbSetExpire $UID "Buy16" "#" 2700}} {{dbSetExpire 161 "Buy" "#" 30}} {{dbSet 16 "Buy" (toString $UID)}} {{$DM = print $DM "\nLa magie opérera dans 30 secondes…"}} {{end}} {{end}}
 
-      {{else if eq $BID 17}} {{dbSetExpire 17 "Buy" "#" 60}}
+      {{else if eq $BID 17}} {{dbSetExpire 17 "Buy" 0 60}}
 
-      {{else if eq $BID 19}} {{dbSetExpire $UID "Buy19" "#" 86400}}
+      {{else if eq $BID 19}} {{dbSetExpire $UID "Buy19" 0 86400}}
 
       {{else if eq $BID 21}}
         {{if (dbGet 21 "Buy")}}
@@ -122,7 +122,7 @@
           {{sendMessage $ChG (print "Bien joué " $UM ", tu viens de gagner **1 000 Points** avec le Buy 22 !")}}
         {{end}}
 
-      {{else if eq $BID 26}} {{dbSetExpire 26 "Buy" "#" 600}}
+      {{else if eq $BID 26}} {{dbSetExpire 26 "Buy" 0 600}}
 
       {{end}}
 
