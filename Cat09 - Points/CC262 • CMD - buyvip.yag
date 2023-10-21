@@ -29,7 +29,7 @@
           {{if eq $b13ID $UID}} {{$b13msg = print $b13msg "… sauf que le Karma l'a rattrapé."}}
           {{else}} {{$b13msg = print $b13msg " et que <@" $UID "> en a payé les frais."}} {{end}}
           {{sendMessage $ChG (print $b13msg "\nEt les **" $pr "** Points de son achat ? Aux oubliettes bien évidemment…")}}
-          {{sendMessage $ChB (print "Buy 13 : <@" $UID ">")}}
+          {{sendMessage $ChB (print "Buy 13 : <@" $b13ID "> (Piégeur) · <@" $UID "> (Piégé)")}}
           {{dbDel 13 "Buy"}} {{dbSet $UID "points" (cslice (sub $uPts $pr) $UTS)}}
           {{execCC 320 nil 0 (sdict "sancUsr" $UID "sancRes" "AutoSanc.Buy13" "sancDur" (toDuration "5m") "sancMod" 204255221017214977)}}
         {{end}}
@@ -60,7 +60,7 @@
         {{else if ge $BID 5}}
           {{if not (targetHasRoleID $UID 1079418386511040572)}} {{$pr = 0}}{{$DM = print $bErr "Vous n'êtes pas <:VIP2_v2:1080311144285229106> **Membre VIP 2**."}}
           {{else}}
-            {{if eq $BID 5}} {{dbSet 10005 "Buy" (toString $UID)}} {{dbSetExpire $UID "BuyVIP5" "#" 7200}}
+            {{if eq $BID 5}} {{dbSet 10005 "Buy" (toString $UID)}} {{dbSetExpire $UID "BuyVIP5" 0 7200}}
 
             {{else if eq $BID 8}} {{$pr = 0}}{{$DM = print $bErr "Item indisponible."}}
 
@@ -96,7 +96,7 @@
           {{end}}
 
           {{$LPcr := " <:CrownLP_v2:1080310392850493550>"}}
-          {{$crcl := (sdict "1" "" "2" "" "3" "" "4" $LPcr "5" "" "6" $LPcr "7" $LPcr "8" $LPcr).Get (toString $BID)}}
+          {{$crcl := or ((sdict "4" $LPcr "6" $LPcr "7" $LPcr "8" $LPcr).Get (toString $BID)) ""}}
 
           {{sendMessage 783745583785181214 (print .User.Mention " vient d'acheter l'élément vip" $BID $crcl " pour la modique somme de **" (reReplace "," (humanizeThousands $pr) " ") " Points**.")}}
         {{end}}
