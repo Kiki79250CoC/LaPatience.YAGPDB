@@ -12,9 +12,9 @@
 {{$optArgs := or .ExecData.OptArgs ($args.Get 3) ""}}
 {{$rMbr := ""}}
 
-{{if and .ExecData (in (cslice "AutoSanc.Banword" "AutoSanc.Bomb" "AutoSanc.Buy11" "AutoSanc.Buy13" "AutoSanc.Buy14" "AutoSanc.Buy17" "AutoSanc.Buy26" "AutoSanc.BuyVIP3") $sancRes)}} {{$isTrollG = true}} {{end}}
+{{if and .ExecData (in (cslice "AutoSanc.Banword" "AutoSanc.Bomb" "AutoSanc.Buy11" "AutoSanc.Buy13" "AutoSanc.Buy14" "AutoSanc.Buy17" "AutoSanc.Buy26" "Buy27" "AutoSanc.BuyVIP3") $sancRes)}} {{$isTrollG = true}} {{end}}
 {{if eq $sancMod 204255221017214977}} {{$isMinedG = true}} {{end}}
-{{if (reFind `(?i)(\bBuy\s*1?2?9\b)` $sancRes)}} {{$isMinedG = true}} {{end}}
+{{range $k, $v := cslice "Buy19" "Buy 19" "Buy29" "Buy 29"}} {{if (reFind (joinStr "" `(?i)(\b` $v `\b)`) $sancRes)}} {{$isMinedG = true}} {{end}} {{end}}
 {{if eq (lower (toString $optArgs)) "--force-as-mine"}} {{$isMinedG = true}} {{end}}
 
 {{$readableSancDur := (reReplace "second" (reReplace "hour" (reReplace "day" (reReplace "week" (reReplace "month" (reReplace "year" (reReplace "and" (humanizeDurationSeconds $sancDur) "et") "an") "mois") "semaine") "jour") "heure") "seconde")}}
