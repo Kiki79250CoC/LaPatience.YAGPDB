@@ -25,8 +25,7 @@
   {{end}}
 
   {{/* ---------- BuyVIP 5 ---------- */}}
-  {{if $bvip5 := dbGet 10005 "Buy"}}
-    {{if eq .User.ID (toInt $bvip5.Value)}}
+  {{if and ($bvip5 := dbGet 10005 "Buy") (eq .User.ID (toInt $bvip5.Value))}}
     {{dbDel 10005 "Buy"}}
     {{sendMessage nil (print "Tiens, on dirait que " .User.Mention " viens de se faire voler 200 points par… une bombe ?!")}}
     {{$Pts := dbGet .User.ID "points"}}
@@ -63,7 +62,7 @@
 {{end}}
 
 {{/* ---------- Banword Boutique ---------- */}}
-{{if $banwordToggle := true}}
+{{if $banwordToggle := false}}
   {{$bBWList := cslice "mais" "banword" "bw"}}
   {{$btBanwTrigger := false}}
   {{range $k, $v := $bBWList}} {{if (reFind (joinStr "" `(?i)(\b` $v `\b)`) $.Message.Content)}} {{$btBanwTrigger = true}} {{end}} {{end}}
