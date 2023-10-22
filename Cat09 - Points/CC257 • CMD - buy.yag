@@ -12,9 +12,9 @@
 {{$bErr := ">>> **Erreur :**\nImpossible de procéder à l'achat : "}}
 {{$BOKCldw := true}}
 
-{{$PrLst := sdict "1" 2 "2" 15 "3" 15 "4" 25 "5" 40 "6" 50 "7" 120 "8" 150 "9" 200 "10" 190 "11" 250 "12" 300 "13" 450 "14" 500 "15" 550 "16" 600 "17" 650 "18" 700 "19" 800 "20" 900 "21" 1000 "22" 1200 "23" 1400 "24" 1600 "25" 5000 "26" 10000}}
+{{$PrLst := sdict "1" 2 "2" 15 "3" 15 "4" 25 "5" 40 "6" 50 "7" 120 "8" 150 "9" 200 "10" 190 "11" 250 "12" 300 "13" 450 "14" 500 "15" 550 "16" 600 "17" 650 "18" 700 "19" 800 "20" 900 "21" 1000 "22" 1200 "23" 1400 "24" 1600 "25" 5000 "26" 10000 "27" 0 "28" 50 "29" 175}}
 
-{{if gt $BID 26}} {{$DM = print $bErr "L'item sélectionné n'existe pas."}}
+{{if gt $BID 29}} {{$DM = print $bErr "L'item sélectionné n'existe pas."}}
 {{else}}
   {{$uPts := 0}} {{if $bAcc := dbGet $UID "points"}} {{$uPts = index $bAcc.Value 0}} {{end}}
   {{$pr := or ($PrLst.Get (toString $BID)) 0}}
@@ -124,6 +124,12 @@
 
       {{else if eq $BID 26}} {{dbSetExpire 26 "Buy" 0 600}}
 
+      {{else if eq $BID 27}} {{$pr = 0}}{{$DM = print $bErr "Pourquoi tu viens là après la fête ?! Va-t'en !"}}
+
+      {{else if eq $BID 28}} {{addRoleID 1165268999437824111}} {{removeRoleID 1165268999437824111 86400}}
+
+      {{else if eq $BID 29}} {{$DM = print $DM "\nBuy29 : Contacte un 🔴 **Médiateur** pour rename quelqu'un pour 2 heures !"}}
+
       {{end}}
 
       {{if gt $pr 0}}
@@ -154,7 +160,7 @@
         {{end}}
 
         {{$p := .User.Mention}} {{if eq $BID 5}} {{$p = "**Quelqu'un**"}} {{end}}
-        {{$crcl := or ((sdict "8" " 🔵" "9" " 🟣" "15" " 🔵" "18" " 🟣" "19" " 🔴" "20" " 🟣" "23" "﻿﻿ ⚙️" "24" " 🟣" "25" " 🔴").Get (toString $BID)) ""}}
+        {{$crcl := or ((sdict "8" " 🔵" "9" " 🟣" "15" " 🔵" "18" " 🟣" "19" " 🔴" "20" " 🟣" "23" "﻿﻿ ⚙️" "24" " 🟣" "25" " 🔴" "29" " 🔴").Get (toString $BID)) ""}}
 
         {{sendMessage 783745583785181214 (print $p " vient d'acheter l'élément " $BID $crcl " pour la modique somme de **" (reReplace "," (humanizeThousands $pr) " ") " Points**." $vip)}}
       {{end}}
