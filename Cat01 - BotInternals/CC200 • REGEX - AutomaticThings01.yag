@@ -27,7 +27,7 @@
 
   {{/* ---------- Buy 14 ---------- */}}
   {{if and ($buy14 := dbGet 14 "Buy") (gt (toInt $buy14.Value) 0) (not (in $IsImmun .User.ID))}}
-    {{if gt (sub (toInt $buy14.Value) 1)}} {{dbSet 14 "Buy" (sub (toInt $buy14.Value) 1)}} {{else}} {{dbDel 14 "Buy"}} {{end}}
+    {{if gt (sub (toInt $buy14.Value) 1) 0}} {{dbSet 14 "Buy" (sub (toInt $buy14.Value) 1)}} {{else}} {{dbDel 14 "Buy"}} {{end}}
     {{sendMessage 618851288825856010 (print "Buy 14 : " .User.Mention)}}
     {{execCC 320 nil 0 (sdict "sancUsr" .User.ID "sancRes" "AutoSanc.Buy14" "sancDur" (toDuration "5m") "sancMod" 204255221017214977)}}
     {{sendDM "Tu viens de te faire Goulag par le Buy 14 !"}}
