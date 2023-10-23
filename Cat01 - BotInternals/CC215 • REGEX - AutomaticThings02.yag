@@ -1,4 +1,4 @@
-{{if (reFind (joinStr "" `(\[.+\]\(.+\))`) $.Message.Content)}} {{deleteTrigger 0}} {{end}}
+{{if (reFind `(\[.+\]\(.+\))` $.Message.Content)}} {{deleteTrigger 0}} {{end}}
 
 {{if eq .Message.ChannelID 496010398848253965}}
 
