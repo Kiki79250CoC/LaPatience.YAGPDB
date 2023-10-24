@@ -25,7 +25,7 @@
   {{end}}
 
   {{/* ---------- BuyVIP 5 ---------- */}}
-  {{if and ($bvip5 := dbGet 10005 "Buy") (eq .User.ID (toInt $bvip5.Value))}}
+  {{if and ($bvip5 := dbGet 10005 "Buy") (not (eq .User.ID (toInt $bvip5.Value)))}}
     {{dbDel 10005 "Buy"}}
     {{sendMessage nil (print "Tiens, on dirait que " .User.Mention " viens de se faire voler 200 points par… une bombe ?!")}}
     {{$Pts := dbGet .User.ID "points"}}
@@ -39,8 +39,9 @@
     {{if $DBentry := dbGet 211 "Buy"}} {{$entries = $DBentry.Value}} {{end}}
     {{if or (dbGet 210 "Buy") (le (len $entries) 2)}} {{if not (in $entries (toString .User.ID))}} {{dbSet 211 "Buy" ($entries.Append (toString .User.ID))}} {{end}}
     {{else}}
-      {{sendMessage nil (print "🔥 <@" (index (shuffle $entries) (randInt 0 (len $entries))) ">, tu gagnes " $pt " Points gratuitement comme ça.")}}
-      {{dbSet .User.ID "points" (cslice (add (index (dbGet .User.ID "points").Value 0) $pt) .Message.Timestamp.Parse.Unix)}}
+      {{$win := toInt (index (shuffle $entries) (randInt 0 (len $entries)))}}
+      {{sendMessage nil (print "🔥 <@" $win ">, tu gagnes " $pt " Points gratuitement comme ça.")}}
+      {{dbSet $win "points" (cslice (add (index (dbGet $win "points").Value 0) $pt) .Message.Timestamp.Parse.Unix)}}
       {{dbDel 211 "Buy"}}
       {{dbSetExpire 210 "Buy" "#" (randInt 55 80)}}
       {{return}}
@@ -57,8 +58,8 @@
     {{sendMessage nil (print "Désolé " .User.Mention ", mais il semblerait que **La Sainte Bombe** viens de t'exploser à la gueule... Cheh. <a:risitas_boom:1056315066653364346>")}}
     {{execCC 320 nil 0 (sdict "sancUsr" .User.ID "sancRes" "AutoSanc.Bomb" "sancDur" (toDuration "5m") "sancMod" 204255221017214977)}}
     {{sendDM "Tu es l'élu(e) ! **La Sainte Bombe** vient de péter sur toi !\nUn sincère merci (de la part des autres) pour le sacrifice."}}
+    {{return}}
   {{end}}
-  {{return}}
 {{end}}
 
 {{/* ---------- Banword Boutique ---------- */}}
