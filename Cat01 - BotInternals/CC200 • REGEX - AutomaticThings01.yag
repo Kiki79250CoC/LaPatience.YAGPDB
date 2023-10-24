@@ -19,7 +19,7 @@
       {{$win := index (shuffle $entries) (randInt (len $entries))}}
       {{dbDel 11 "Buy"}} {{dbDel 110 "Buy"}}
       {{sendMessage 618851288825856010 (print "Buy 11 : <@" $win ">")}}
-      {{execCC 320 nil 0 (sdict "sancUsr" $win "sancRes" "AutoSanc.Buy11" "sancDur" (toDuration "5m") "sancMod" 204255221017214977)}}
+      {{execCC 320 nil 0 (sdict "sancUsr" (toInt $win) "sancRes" "AutoSanc.Buy11" "sancDur" (toDuration "5m") "sancMod" 204255221017214977)}}
       {{sendMessage nil (print "Le Buy 11 à frappé sur <@" $win "> !")}}
       {{return}}
     {{end}}
