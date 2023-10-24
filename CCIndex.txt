@@ -183,7 +183,7 @@ DISCLAIMER : Elements in ‹quotation marks› are variable arguments (IE: User 
           › Roles     : Not limited
           › Channels  : Not limited
 
-          › Revision  : 1.02
+          › Revision  : 2.002
 
         • 247 - INTERVAL (40h)
           › Trigger   : n/a (Channel : Général)
