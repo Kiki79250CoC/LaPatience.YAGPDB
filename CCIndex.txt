@@ -201,18 +201,18 @@ DISCLAIMER : Elements in ‹quotation marks› are variable arguments (IE: User 
           › Arguments : n/a
 
           › Enabled   : No
-          › Name      : Commande de fin de période du Buy Légendaire
+          › Name      : Drops de Points
           › Roles     : Not limited
           › Channels  : Not limited
 
-          › Revision  : 1.02
+          › Revision  : 2.00
 
         • 269 - INTERVAL (1h)
           › Trigger   : n/a (Channel : Général)
           › Arguments : n/a
 
           › Enabled   : Yes
-          › Name      : Drops de Points
+          › Name      : Automatic task for "Drops de Points"
           › Roles     : Not limited
           › Channels  : Not limited
 
