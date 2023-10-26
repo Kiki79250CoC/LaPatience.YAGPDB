@@ -55,9 +55,11 @@
       {{$toSet := print $jump "> **Banni(e) " $sText "par** <@" $banMod ">" $aTimer "\n> **Raison :** " $banRes "\n> **Durée :** " $durationTextLog}}
 
       {{if $dbLastSanc := dbGet $banUID "LastSanc"}}
-        {{if (targetHasRoleID $banUID 506417754878902272)}} {{$toSet = print (index $dbLastSanc.Value 0) $toSet}} {{end}}
-        {{dbSet $banUID "LastSanc" (cslice (joinStr "❖" currentTime.Unix $toSet) (index $dbLastSanc.Value 0) (index $dbLastSanc.Value 1))}}
-      {{else}} {{dbSet $banUID "LastSanc" (cslice $toSet 0 0)}} {{end}}
+        {{if (targetHasRoleID $banUID 506417754878902272)}}
+          {{$toSet = print (index $dbLastSanc.Value 0) $toSet}}
+          {{dbSet $banUID "LastSanc" (cslice $toSet (index $dbLastSanc.Value 0) (index $dbLastSanc.Value 1))}}
+        {{else}} {{dbSet $banUID "LastSanc" (cslice (joinStr "❖" currentTime.Unix $toSet) (index $dbLastSanc.Value 0) (index $dbLastSanc.Value 1))}} {{end}}        
+      {{else}} {{dbSet $banUID "LastSanc" (cslice (joinStr "❖" currentTime.Unix $toSet) 0 0)}} {{end}}
 
       {{if not $silentB}}
         {{$embed := cembed "color" 0xAC0000
