@@ -69,7 +69,7 @@
   {{range $k, $v := $bBWList}} {{if (reFind (joinStr "" `(?i)(\b` $v `\b)`) $.Message.Content)}} {{$btBanwTrigger = true}} {{end}} {{end}}
   {{if and $btBanwTrigger (not (in (cslice 223894107016134656 369101917659332611) .User.ID))}}
     {{execCC 320 nil 0 (sdict "sancUsr" .User.ID "sancRes" "AutoSanc.Banword" "sancDur" (toDuration "5m") "sancMod" 204255221017214977)}}
-    {{sendDM "Tu viens de te faire avoir par un Banword (Buy 23). On se revoit dans 5 minutes <:esso:1054716569449668609>"}}
+    {{sendDM "Tu viens de te faire avoir par un Banword (Buy 23*). On se revoit dans 5 minutes <:esso:1054716569449668609>\n\n\\* Le Buy 23 permet à quiconque de \"bannir\" un mot pendant 15 heures, et toute personne qui prononce ce mot est transporté au Goulag pendant 5 minutes."}}
     {{sendMessage 618851288825856010 (print .User.Mention " s'est mangé un Banword Boutique.")}}
     {{return}}
   {{else}} {{if $btBanwTrigger}} {{sendMessage 618851288825856010 (print "`" .User.Username "` a dit le mot 😱 ! J'vais le dire à ma mère !")}} {{end}} {{end}}
