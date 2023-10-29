@@ -128,7 +128,7 @@
 
       {{else if eq $BID 28}} {{addRoleID 1165268999437824111}} {{removeRoleID 1165268999437824111 86400}}
 
-      {{else if eq $BID 29}} {{$DM = print $DM "\nBuy29 : Contacte un 🔴 **Médiateur** pour rename quelqu'un pour 2 heures !"}}
+      {{else if eq $BID 29}} {{$pr = 0}}{{$DM = print $bErr "Cet item n'est plus disponible à compter du 30 Octobre 2023, 00h00 (UTC+1)"}}
 
       {{end}}
 
