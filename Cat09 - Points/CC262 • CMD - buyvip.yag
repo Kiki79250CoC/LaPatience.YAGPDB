@@ -2,7 +2,7 @@
 {{$args := parseArgs 1 "`-buyvip ‹#› ‹\"Text\" or @UserOrID›`" (carg "int" "BuyID") (carg "string" "Arg") (carg "string" "Arg2")}}
 {{$ChG := 496010398848253965}}
 {{$UTP := 531170764183830528}}
-{{$ChB := 618851288825856010}}
+{{$ChB := 1168339319124131871}}
 {{$UTS := .Message.Timestamp.Parse.Unix}}
 {{$UID := .User.ID}}
 {{$BID := $args.Get 0}}
