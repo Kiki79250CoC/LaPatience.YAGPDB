@@ -31,7 +31,7 @@
 {{end}}
 {{dbSet $sancUID3 "SancRoles" $rMbr3}}
 
-{{sendMessage 618851288825856010 (print "BuyVIP 1 : <@" $sancUID1 "> (Acheteur) **·** <@" $sancUID2 "> <@" $sancUID3 "> (Victimes)")}}
+{{sendMessage 1168339319124131871 (print "BuyVIP 1 : <@" $sancUID1 "> (Acheteur) **·** <@" $sancUID2 "> <@" $sancUID3 "> (Victimes)")}}
 
 {{$msg := sendMessageRetID 550364083195609089 (print "<@" $sancUID1 "> <@" $sancUID2 "> <@" $sancUID3 "> Vous avez été Goulag par le BuyVIP 1 !\nPas de panique, vous serez tous dégoulag une fois les 30 minutes passées.\n### *Ce message s'autodétruira une fois les goulags levés.*")}}
 {{deleteMessage 550364083195609089 $msg 1805}}
