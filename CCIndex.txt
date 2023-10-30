@@ -216,7 +216,7 @@ DISCLAIMER : Elements in ‹quotation marks› are variable arguments (IE: User 
           › Roles     : Not limited
           › Channels  : Not limited
 
-          › Revision  : 1.04
+          › Revision  : 1.05
 
         • 290 - NONE
           › Trigger   : buyvip1p1
