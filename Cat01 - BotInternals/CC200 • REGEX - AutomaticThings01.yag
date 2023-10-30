@@ -18,7 +18,7 @@
     {{else}}
       {{$win := index (shuffle $entries) (randInt (len $entries))}}
       {{dbDel 11 "Buy"}} {{dbDel 110 "Buy"}}
-      {{sendMessage 618851288825856010 (print "Buy 11 : <@" $win ">")}}
+      {{sendMessage 1168339319124131871 (print "Buy 11 : <@" $win ">")}}
       {{execCC 320 nil 0 (sdict "sancUsr" (toInt $win) "sancRes" "AutoSanc.Buy11" "sancDur" (toDuration "5m") "sancMod" 204255221017214977)}}
       {{sendMessage nil (print "Le Buy 11 à frappé sur <@" $win "> !")}}
       {{return}}
@@ -28,7 +28,7 @@
   {{/* ---------- Buy 14 ---------- */}}
   {{if and ($buy14 := dbGet 14 "Buy") (gt (toInt $buy14.Value) 0) (not (in $IsImmun .User.ID))}}
     {{if gt (sub (toInt $buy14.Value) 1) 0}} {{dbSet 14 "Buy" (sub (toInt $buy14.Value) 1)}} {{else}} {{dbDel 14 "Buy"}} {{end}}
-    {{sendMessage 618851288825856010 (print "Buy 14 : " .User.Mention)}}
+    {{sendMessage 1168339319124131871 (print "Buy 14 : " .User.Mention)}}
     {{execCC 320 nil 0 (sdict "sancUsr" .User.ID "sancRes" "AutoSanc.Buy14" "sancDur" (toDuration "5m") "sancMod" 204255221017214977)}}
     {{sendDM "Tu viens de te faire Goulag par le Buy 14 !"}}
     {{return}}
@@ -36,14 +36,14 @@
 
   {{/* ---------- Buy 17 ---------- */}}
   {{if and (dbGet 17 "Buy") (not (in $IsImmun .User.ID))}}
-    {{sendMessage 618851288825856010 (print "Buy 17 : " .User.Mention)}}
+    {{sendMessage 1168339319124131871 (print "Buy 17 : " .User.Mention)}}
     {{execCC 320 nil 0 (sdict "sancUsr" .User.ID "sancRes" "AutoSanc.Buy17" "sancDur" (toDuration "2m") "sancMod" 204255221017214977)}}
     {{sendDM "Oups... Tu as été assommé et transporté au Goulag par un Buy 17."}}
   {{end}}
 
   {{/* ---------- Buy 26 ---------- */}}
   {{if and (dbGet 26 "Buy") (not (in $IsImmun .User.ID))}}
-    {{sendMessage 618851288825856010 (print "Buy 26 : " .User.Mention)}}
+    {{sendMessage 1168339319124131871 (print "Buy 26 : " .User.Mention)}}
     {{sendDM "Oups... Tu as été assommé et transporté au Goulag par un Buy 26."}}
     {{execCC 320 nil 0 (sdict "sancUsr" .User.ID "sancRes" "AutoSanc.Buy26" "sancDur" (toDuration "1h") "sancMod" 204255221017214977)}}
   {{end}}
