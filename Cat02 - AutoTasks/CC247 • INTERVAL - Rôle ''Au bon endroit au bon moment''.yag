@@ -1,3 +1,3 @@
 {{$randsec := randInt 3600 25201}}
 {{scheduleUniqueCC 246 nil $randsec "ptndodezizi" (sdict)}}
-{{sendMessage 618851288825856010 (print ">>> 🍀 Déclenchement du message pour \"Au bon endroit au bon moment\" dans **" (reReplace "second" (reReplace "hour" (reReplace "and" (humanizeDurationSeconds (mult $randsec 1000000000)) "et") "heure") "seconde") "** (" $randsec " secondes).\nLe message apparaîtra donc le <t:" (add currentTime.Unix $randsec) ":D> à <t:" (add currentTime.Unix $randsec) ":T>")}}
+{{sendMessage 1168339319124131871 (print ">>> 🍀 Déclenchement du message pour \"Au bon endroit au bon moment\" dans **" (reReplace "second" (reReplace "hour" (reReplace "and" (humanizeDurationSeconds (mult $randsec 1000000000)) "et") "heure") "seconde") "** (" $randsec " secondes).\nLe message apparaîtra donc le <t:" (add currentTime.Unix $randsec) ":D> à <t:" (add currentTime.Unix $randsec) ":T>")}}

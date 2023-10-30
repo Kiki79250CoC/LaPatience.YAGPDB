@@ -194,7 +194,7 @@ DISCLAIMER : Elements in ‹quotation marks› are variable arguments (IE: User 
           › Roles     : Not limited
           › Channels  : Not limited
 
-          › Revision  : 1.21
+          › Revision  : 1.22
 
         • 268 - NONE
           › Trigger   : n/a
