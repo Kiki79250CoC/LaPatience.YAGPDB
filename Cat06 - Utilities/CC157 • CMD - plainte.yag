@@ -22,6 +22,6 @@
 
 {{$msgID := sendMessageNoEscapeRetID 691741487213445231 (complexMessage "content" (print (mentionRoleID 1078386211472805998) "\nVous avez reçu une nouvelle plainte.") "embed" (cembed $embed))}}
 {{sendMessageNoEscape 693795482639794276 (complexMessage "content" (print "__Logging de Plainte :__\n\n> **Utilisateur :** " .User.Mention " (" .User.String ")\n> **ID :** `" .User.ID "`") "embed" (cembed $embed))}}
-{{sendMessage 618851288825856010 (print "#" (add $reportNbr.Value 1) "." currentTime.Unix "." $msgID "." .User.ID)}}
+{{sendMessage 1168339319124131871 (print "#" (add $reportNbr.Value 1) "." currentTime.Unix "." $msgID "." .User.ID)}}
 
 {{dbSet 0 "PlainteCount" (add $reportNbr.Value 1)}}
