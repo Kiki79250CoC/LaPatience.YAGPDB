@@ -872,17 +872,6 @@ DISCLAIMER : Elements in ‹quotation marks› are variable arguments (IE: User 
 
           › Revision  : 2.01
 
-        • 307 - COMMAND
-          › Trigger   : -buyscore
-          › Arguments : ‹[1|2|3]›
-
-          › Enabled   : Yes
-          › Name      : n/a
-          › Roles     : Not limited
-          › Channels  : Limited (02) › "Commandes Bots", "Gestion Bots"
-
-          › Revision  : 1
-
         • 309 - COMMAND
           › Trigger   : -leaderboard
           › Arguments : ‹Page›
