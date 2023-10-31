@@ -50,7 +50,7 @@
       {{if eq $BID 1}}
         {{if not (dbGet 1 "Buy")}}
           {{dbSetExpire 1 "Buy" 0 (randInt 245600 388800)}} {{giveRoleID $UID 985645140699918356}}
-          {{$DM = "Bravo ! Tu repars avec le badge du Buy 1 🎲 !"}} {{sendMessage 618851288825856010 (print "Buy 1 : " $UM)}}
+          {{$DM = "Bravo ! Tu repars avec le badge du Buy 1 🎲 !"}} {{sendMessage $ChB (print "Buy 1 : " $UM)}}
         {{end}}
 
       {{else if eq $BID 2}} {{addRoleID 784090664580415508}}
