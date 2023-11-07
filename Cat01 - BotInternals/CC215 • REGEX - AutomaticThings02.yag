@@ -13,10 +13,11 @@
       {{if $DBViAct := dbGet .User.ID "points"}} {{$ViAct = index $DBViAct.Value 0}} {{end}}
       {{if or (lt $ViAct 600) (targetHasRoleID .User.ID 1165268999437824111)}}
         {{sendMessage nil (print $toSend ", sauf qu'un flic l'a vu...\n Du coup sur les **600 points**, 300 se sont envolés vers les cieux et le reste vont dans la poche de " .User.Mention ". 💸")}}
+        {{sendMessage 808035430410092544 (print "Buy 16 **raté** : <@" $thiefID "> (Voleur) · " .User.Mention " (Victime)")}}
         {{dbSet .User.ID "points" (cslice (add $ViAct 300) .Message.Timestamp.Parse.Unix)}}
       {{else}}
         {{sendMessage nil (print $toSend " et a trouvé **600 Points** dans l'une d'elles… 💸")}}
-        {{sendMessage 1168339319124131871 (print "Buy 16 : <@" $thiefID "> (Voleur) · " .User.Mention " (Victime)")}}
+        {{sendMessage 808035430410092544 (print "Buy 16 **réussi** : <@" $thiefID "> (Voleur) · " .User.Mention " (Victime)")}}
         {{dbSet .User.ID "points" (cslice (sub $ViAct 600) .Message.Timestamp.Parse.Unix)}}
         {{dbSet $thiefID "points" (cslice (add (index (dbGet $thiefID "points").Value 0) 1200) .Message.Timestamp.Parse.Unix)}}
       {{end}}
