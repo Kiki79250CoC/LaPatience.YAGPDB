@@ -60,7 +60,7 @@
         {{else if ge $BID 5}}
           {{if not (targetHasRoleID $UID 1079418386511040572)}} {{$pr = 0}}{{$DM = print $bErr "Vous n'êtes pas <:VIP2_v2:1080311144285229106> **Membre VIP 2**."}}
           {{else}}
-            {{if eq $BID 5}} {{dbSet 10005 "Buy" (toString $UID)}} {{dbSetExpire $UID "BuyVIP5" 0 7200}}
+            {{if eq $BID 5}} {{if $BOKCldw}} {{dbSet 10005 "Buy" (toString $UID)}} {{dbSetExpire $UID "BuyVIP5" 0 7200}} {{end}}
 
             {{else if eq $BID 8}} {{$pr = 0}}{{$DM = print $bErr "Item indisponible."}}
 
