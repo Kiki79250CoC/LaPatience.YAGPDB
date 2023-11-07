@@ -122,8 +122,6 @@
           {{sendMessage $ChG (print "Bien joué " $UM ", tu viens de gagner **1 000 Points** avec le Buy 22 !")}}
         {{end}}
 
-      {{else if eq $BID 23}} {{$pr = 0}}{{$DM = print $bErr "Cet item n'est actuellement pas disponible."}}
-
       {{else if eq $BID 26}} {{dbSetExpire 26 "Buy" 0 600}}
 
       {{else if eq $BID 27}} {{addRoleID 1165268999437824111}} {{removeRoleID 1165268999437824111 86400}}
