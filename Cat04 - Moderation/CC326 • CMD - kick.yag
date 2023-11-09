@@ -9,7 +9,7 @@
 
 {{$trappedIDs := cslice 223894107016134656}}
 
-{{if (reFind `\b--silent\b` $.Message.Content)}} {{$silentK = true}} {{end}}
+{{if (reFind `--silent` $.Message.Content)}} {{$silentK = true}} {{end}}
 
 {{$sText := ""}}
 {{if $silentK}} {{$sText = "silencieusement "}} {{if not (eq (lower $kickRes) "--silent")}} {{$kickRes = or ($args.Get 1) "Aucune raison fournie"}} {{else}} {{$kickRes = "Aucune raison fournie"}} {{end}} {{end}}
