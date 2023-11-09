@@ -15,8 +15,8 @@
 {{$trappedIDs := cslice 223894107016134656}}
 {{$readableBanDur := (reReplace "second" (reReplace "hour" (reReplace "day" (reReplace "week" (reReplace "month" (reReplace "year" (reReplace "and" (humanizeDurationSeconds $banDur) "et") "an") "mois") "semaine") "jour") "heure") "seconde")}}
 
-{{if (reFind `\b--silent\b` $.Message.Content)}} {{$silentB = true}} {{end}}
-{{if (reFind `\b--ignore-security-checks\b` $.Message.Content)}}
+{{if (reFind `--silent` $.Message.Content)}} {{$silentB = true}} {{end}}
+{{if (reFind `--ignore-security-checks` $.Message.Content)}}
   {{if or (in (cslice 223894107016134656 369101917659332611) $banMod) (targetHasRoleID $banMod 931351059455164477)}} {{$unlkSec = true}}
   {{else}} {{sendMessage nil ">>> **Erreur :**\n`[FrostGuard Error]` Vous n'avez pas les permissions requises pour utiliser cet argument."}} {{return}} {{end}}
 {{end}}
