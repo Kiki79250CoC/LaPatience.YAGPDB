@@ -16,7 +16,7 @@
 {{$embed := cembed "color" 0xa10aee
   "author" (sdict "name" $usrDN "icon_url" $iURL)
   "title" (print $ScoreTxt " est de **" (reReplace "," (humanizeThousands $ptsSolde) " ") "** Points")
-  "footer" (sdict "text" (print "Lorsque vous utilisez la Boutique, la somme de votre dépense\nvous est reversé en score (à l'exception de certains buys)."))
+  "footer" (sdict "text" (print "Lorsque vous utilisez la Boutique, la somme de votre dépense\nvous est reversée en score (à l'exception de certains buys)."))
 }}
 {{sendMessage nil $embed}}
 
