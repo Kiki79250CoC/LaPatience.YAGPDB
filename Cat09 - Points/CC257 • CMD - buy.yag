@@ -1,16 +1,18 @@
 {{deleteTrigger 0}}
 {{$args := parseArgs 1 "`-buy ‹#› ‹\"Text\" or @UserOrID›`" (carg "int" "BuyID") (carg "string" "Arg")}}
+{{$bErr := ">>> **Erreur :**\nImpossible de procéder à l'achat : "}}
+{{$UTS := .Message.Timestamp.Parse.Unix}}
 {{$ChG := 496010398848253965}}
 {{$UTP := 531170764183830528}}
 {{$RLB := 967187787260518440}}
 {{$ChB := 1168339319124131871}}
-{{$UTS := .Message.Timestamp.Parse.Unix}}
-{{$UID := .User.ID}}
 {{$BID := $args.Get 0}}
+{{$UID := .User.ID}}
 {{$UM := print "<@" $UID ">"}}
 {{$DM := ""}}
-{{$bErr := ">>> **Erreur :**\nImpossible de procéder à l'achat : "}}
 {{$BOKCldw := true}}
+{{$BOKPtsA := true}}
+{{$PtPlaf := 25000}}
 
 {{$PrLst := sdict "1" 2 "2" 15 "3" 15 "4" 25 "5" 50 "6" 50 "7" 150 "8" 150 "9" 200 "10" 190 "11" 300 "12" 400 "13" 450 "14" 500 "15" 700 "16" 600 "17" 700 "18" 700 "19" 900 "20" 1200 "21" 1000 "22" 1200 "23" 3000 "24" 2000 "25" 5000 "26" 10000 "27" 50}}
 
@@ -20,10 +22,8 @@
   {{$pr := or ($PrLst.Get (toString $BID)) 0}}
 
   {{$vip := ""}}
-  {{if ge $pr 150}}
-    {{if targetHasRoleID $UID 1079418386511040572}} {{$vip = print " **(<:VIP2_v2:1080311144285229106> VIP2 · " $pr " -15%)**"}} {{$pr = toInt (mult (toFloat $pr) 0.85)}}
-    {{else if targetHasRoleID $UID 967188575005315132}} {{$vip = print " **(<:VIP1_v2:1080311093785788507> VIP1 · " $pr " -7%)**"}} {{$pr = toInt (mult (toFloat $pr) 0.93)}} {{end}}
-  {{end}}
+  {{if targetHasRoleID $UID 1079418386511040572}} {{$PtPlaf = 35000}} {{if ge $pr 150}} {{$vip = print " **(<:VIP2_v2:1080311144285229106> VIP2 · " $pr " -15%)**"}} {{$pr = toInt (mult (toFloat $pr) 0.85)}} {{end}}
+  {{else if targetHasRoleID $UID 967188575005315132}} {{$PtPlaf = 50000}} {{if ge $pr 150}} {{$vip = print " **(<:VIP1_v2:1080311093785788507> VIP1 · " $pr " -7%)**"}} {{$pr = toInt (mult (toFloat $pr) 0.93)}} {{end}} {{end}}
 
   {{if gt $pr $uPts}} {{$DM = print $bErr "Solde insuffisant."}}
   {{else}}
@@ -42,10 +42,8 @@
     {{else}}
       {{$DM = "Achat effectué avec succès !"}}
 
-      {{if in (cslice 15 16 19 22) $BID}}
-        {{$blk := dbGet $UID (print "Buy" $BID)}}
-        {{if $blk}} {{$pr = 0}}{{$DM = print $bErr "Item soumis à un cooldown.\nVous pourrez l'utiliser dans **" (reReplace "second" (reReplace "and" (humanizeDurationSeconds (mult (sub $blk.ExpiresAt.Unix $UTS) 1000000000)) "et") "seconde") "**."}} {{$BOKCldw = false}} {{end}}
-      {{end}}
+      {{if in (cslice 15 16 19 22) $BID}} {{if $blk := dbGet $UID (print "Buy" $BID)}} {{$pr = 0}}{{$DM = print $bErr "Item soumis à un cooldown.\nVous pourrez l'utiliser dans **" (reReplace "second" (reReplace "and" (humanizeDurationSeconds (mult (sub $blk.ExpiresAt.Unix $UTS) 1000000000)) "et") "seconde") "**."}} {{$BOKCldw = false}} {{end}} {{end}}
+      {{if and (in (cslice 4 6 16 22) $BID) (ge $uPts $PtPlaf)}} {{$pr = 0}}{{$DM = print $bErr "Solde de points trop élevé"}} {{$BOKPtsA = false}} {{end}}
 
       {{if eq $BID 1}}
         {{if not (dbGet 1 "Buy")}}
@@ -68,16 +66,16 @@
           {{else}} {{$pr = 0}}{{$DM = print $bErr "Aucune cible définie."}} {{end}}
         {{else}} {{$pr = 0}}{{$DM = print $bErr "Aucune bombe n'est en cours."}} {{end}}
 
-      {{else if eq $BID 4}} {{if eq (randInt 150) 69}} {{$uPts = add $uPts 1500}} {{sendMessage $ChG (print "Bien joué " .User.Mention ", tu viens de gagner **1 500 Points** à la Loterie !")}} {{end}}
+      {{else if eq $BID 4}} {{if and $BOKPtsA (eq (randInt 150) 69)}} {{$uPts = add $uPts 1500}} {{sendMessage $ChG (print "Bien joué " .User.Mention ", tu viens de gagner **1 500 Points** à la Loterie !")}} {{end}}
 
       {{else if eq $BID 5}}
         {{if not ($args.IsSet 1)}} {{$pr = 0}}{{$DM = print $bErr "Vous n'avez pas défini de message."}}
         {{else}}
-          {{sendMessage $ChB (print "Buy 5 : " $UM " · " ($args.Get 1))}}
+          {{range $k, $v := cslice $ChB 693795482639794276}} {{sendMessage . (print "Buy 5 : " $UM " · " ($args.Get 1))}} {{end}}
           {{sendMessage $ChG (reReplace .LinkRegex ($args.Get 1) "<Lien supprimé>")}}
         {{end}}
 
-      {{else if eq $BID 6}} {{$loto := randInt 101}} {{$uPts = add $uPts $loto}} {{$DM = print "Tu as gagné " $loto " Points."}}
+      {{else if eq $BID 6}} {{if $BOKPtsA}} {{$loto := randInt 101}} {{$uPts = add $uPts $loto}} {{$DM = print "Tu as gagné " $loto " Points."}} {{end}}
 
       {{else if eq $BID 7}}
         {{if $bomb := dbGet 0 "bomb"}} {{$pr = 0}}{{$DM = print $bErr "Une bombe est déjà active."}}
@@ -103,7 +101,7 @@
       {{else if eq $BID 15}} {{dbSetExpire $UID "Buy15" 0 86400}}
 
       {{else if eq $BID 16}}
-        {{if $BOKCldw}} {{if (dbGet 161 "Buy")}} {{$pr = 0}}{{$DM = print $bErr "Un Buy 16 est déjà en cours…"}}
+        {{if and $BOKCldw $BOKPtsA}} {{if (dbGet 161 "Buy")}} {{$pr = 0}}{{$DM = print $bErr "Un Buy 16 est déjà en cours…"}}
         {{else}} {{dbSetExpire $UID "Buy16" "#" 2700}} {{dbSetExpire 161 "Buy" "#" 30}} {{dbSet 16 "Buy" (toString $UID)}} {{$DM = print $DM "\nLa magie opérera dans 30 secondes…"}} {{end}} {{end}}
 
       {{else if eq $BID 17}} {{dbSetExpire 17 "Buy" 0 60}}
@@ -117,7 +115,7 @@
         {{else}} {{$pr = 0}}{{$DM = print $bErr "L'item n'est actuellement pas actif."}} {{end}}
 
       {{else if eq $BID 22}}
-        {{if and $BOKCldw (eq (randInt 2) 1)}}
+        {{if and (and $BOKCldw $BOKPtsA) (eq (randInt 2) 1)}}
           {{$uPts = add $uPts 2200}} {{dbSetExpire $UID "Buy22" "#" 1800}}
           {{sendMessage $ChG (print "Bien joué " $UM ", tu viens de gagner **1 000 Points** avec le Buy 22 !")}}
         {{end}}
