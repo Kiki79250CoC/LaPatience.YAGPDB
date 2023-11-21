@@ -1,14 +1,16 @@
 {{deleteTrigger 0}}
 {{$args := parseArgs 1 "`-buyvip ‹#› ‹\"Text\" or @UserOrID›`" (carg "int" "BuyID") (carg "string" "Arg") (carg "string" "Arg2")}}
+{{$bErr := ">>> **Erreur :**\nImpossible de procéder à l'achat : "}}
+{{$UTS := .Message.Timestamp.Parse.Unix}}
 {{$ChG := 496010398848253965}}
 {{$UTP := 531170764183830528}}
 {{$ChB := 1168339319124131871}}
-{{$UTS := .Message.Timestamp.Parse.Unix}}
-{{$UID := .User.ID}}
 {{$BID := $args.Get 0}}
+{{$UID := .User.ID}}
 {{$DM := ""}}
-{{$bErr := ">>> **Erreur :**\nImpossible de procéder à l'achat : "}}
 {{$BOKCldw := true}}
+{{$BOKPtsA := true}}
+{{$PtPlaf := 35000}}
 
 {{$PrLst := sdict "1" 400 "2" 1000 "3" 2000 "4" 4000 "5" 200 "6" 2000 "7" 3000 "8" 5000}}
 
@@ -16,6 +18,8 @@
 {{else}}
   {{$uPts := 0}} {{if $bAcc := dbGet $UID "points"}} {{$uPts = index $bAcc.Value 0}} {{end}}
   {{$pr := or ($PrLst.Get (toString $BID)) 0}}
+
+  {{if targetHasRoleID $UID 1079418386511040572}} {{$PtPlaf = 50000}} {{end}}
 
   {{if not (or (targetHasRoleID $UID 967188575005315132) (targetHasRoleID $UID 1079418386511040572))}} {{$DM = print $bErr "Vous n'êtes pas VIP."}}
   {{else}}
@@ -37,6 +41,7 @@
         {{$DM = "Achat effectué avec succès !"}}
 
         {{if in (cslice 5) $BID}} {{if $blk := dbGet $UID (print "BuyVIP" $BID)}} {{$pr = 0}}{{$DM = print "Item soumis à un cooldown.\nVous pourrez l'utiliser dans **" (reReplace "hour" (reReplace "second" (reReplace "and" (humanizeDurationSeconds (mult (sub $blk.ExpiresAt.Unix $UTS) 1000000000)) "et") "seconde") "heure") "**."}} {{$BOKCldw = false}} {{end}} {{end}}
+        {{if and (in (cslice 2) $BID) (ge $uPts $PtPlaf)}} {{$pr = 0}}{{$DM = print $bErr "Solde de points trop élevé"}} {{$BOKPtsA = false}} {{end}}
 
         {{if eq $BID 1}}
           {{if not (and ($args.IsSet 1) ($args.IsSet 2))}} {{$pr = 0}}{{$DM = print $bErr "Les deux cibles n'ont pas été correctement définies."}}
@@ -49,8 +54,8 @@
           {{end}}
 
         {{else if eq $BID 2}}
-          {{if eq (randInt 1 11) 5}}
-            {{$uPts = add $uPts 10000}}
+          {{if and $BOKPtsA (eq (randInt 10) 4)}}
+            {{$uPts = add $uPts 11000}}
             {{sendMessage $ChG (print "Bien joué <@" $UID ">, tu viens de gagner **10 000 Points** à la Loterie VIP !")}}
           {{end}}
 
