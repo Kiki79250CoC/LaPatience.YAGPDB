@@ -33,7 +33,7 @@
 {{if $dbGetIsMined}}
   {{$isMinedTitle = (print "🟠  Une mine à l'encontre de " $usrStr " est actuellement active")}}
   {{$mineSlice := split $dbGetIsMined.Value "™"}}
-  {{$isMinedText = (print ">>> **Mine posée le <t:" $dbGetIsMined.CreatedAt.Unix ":f> par** <@" (index $mineSlice 3) ">\n**Raison :** " (index $mineSlice 1) "\n**Durée :** " (reReplace "second" (reReplace "hour" (reReplace "day" (reReplace "week" (reReplace "month" (reReplace "year" (reReplace "and" (humanizeDurationSeconds (index $mineSlice 2)) "et") "an") "mois") "semaine") "jour") "heure") "seconde"))}}
+  {{$isMinedText = (print ">>> **Mine posée le <t:" $dbGetIsMined.UpdatedAt.Unix ":f> par** <@" (index $mineSlice 3) ">\n**Raison :** " (index $mineSlice 1) "\n**Durée :** " (reReplace "second" (reReplace "hour" (reReplace "day" (reReplace "week" (reReplace "month" (reReplace "year" (reReplace "and" (humanizeDurationSeconds (index $mineSlice 2)) "et") "an") "mois") "semaine") "jour") "heure") "seconde"))}}
 {{end}}
 
 {{/* Pre-ban */}}
@@ -45,7 +45,7 @@
   {{if ne $dbGetHasPreBan.ExpiresAt.Unix -62135596800}}{{$hasPreBanExpiry = print "\n\n**Cet avertissement expire le <t:" $dbGetHasPreBan.ExpiresAt.Unix ":f>**"}}{{end}}
   {{$hasPreBanTitle = (print "🟠  " $usrStr " fait l'objet d'un Avertissement Pré-ban")}}
   {{$hasPreBanSlice := split $dbGetHasPreBan.Value "➷"}}
-  {{$hasPreBanText = (print ">>> **Avertissement ajouté le <t:" $dbGetHasPreBan.CreatedAt.Unix ":f> par** <@" (index $hasPreBanSlice 1) ">\n**Raison :** " (index $hasPreBanSlice 0) $hasPreBanExpiry)}}
+  {{$hasPreBanText = (print ">>> **Avertissement ajouté le <t:" $dbGetHasPreBan.UpdatedAt.Unix ":f> par** <@" (index $hasPreBanSlice 1) ">\n**Raison :** " (index $hasPreBanSlice 0) $hasPreBanExpiry)}}
 {{end}}
 
 {{/* Goulag Count */}}
