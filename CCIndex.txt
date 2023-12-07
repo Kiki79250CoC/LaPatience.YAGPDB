@@ -311,37 +311,15 @@ DISCLAIMER : Elements in ‹quotation marks› are variable arguments (IE: User 
           › Revision  : 1.02
 
         • 264 - COMMAND
-          › Trigger   : -setprono
-          › Arguments : ‹MiseMax› "‹1:côte1,2:côte2,3:côte3,...›"
+          › Trigger   : -prono
+          › Arguments : ‹[create|close|winner]› ‹[MinBet/WinnerOID]› ‹MaxBet› "‹1:côte1,2:côte2,3:côte3,...›"
 
           › Enabled   : Yes
-          › Name      : Lancement Prono
+          › Name      : n/a
           › Roles     : Not limited
           › Channels  : Limited (01) › "Gestion Bots"
 
           › Revision  : 1.21
-
-        • 266 - COMMAND
-          › Trigger   : -close
-          › Arguments : n/a
-
-          › Enabled   : Yes
-          › Name      : Fermeture Prono
-          › Roles     : Not limited
-          › Channels  : Limited (01) › "Gestion Bots"
-
-          › Revision  : Unavailable
-
-        • 267 - COMMAND
-          › Trigger   : -winner
-          › Arguments : ‹WinOption›
-
-          › Enabled   : Yes
-          › Name      : Gagnant Prono
-          › Roles     : Not limited
-          › Channels  : Limited (01) › "Gestion Bots"
-
-          › Revision  : Unavailable
 
         • 273 - COMMAND
           › Trigger   : -removetrigger
@@ -791,7 +769,7 @@ DISCLAIMER : Elements in ‹quotation marks› are variable arguments (IE: User 
 
           › Revision  : 2.13.2
 
-        • 257 - COMMAND
+        • 251 - COMMAND
           › Trigger   : -buy
           › Arguments : ‹ItemID› ‹[@UserOrID|"Text"]*›
 
@@ -800,9 +778,9 @@ DISCLAIMER : Elements in ‹quotation marks› are variable arguments (IE: User 
           › Roles     : Not limited
           › Channels  : Limited (02) › "Boutique", "Gestion Bots"
 
-          › Revision  : 2.72.13
+          › Revision  : 2.72.18
 
-        • 262 - COMMAND
+        • 252 - COMMAND
           › Trigger   : -buyvip
           › Arguments : ‹ItemID› ‹[@UserOrID|"Text"]*›
 
@@ -811,7 +789,18 @@ DISCLAIMER : Elements in ‹quotation marks› are variable arguments (IE: User 
           › Roles     : Not limited
           › Channels  : Limited (02) › "Boutique", "Gestion Bots"
 
-          › Revision  : 1.26.6
+          › Revision  : 1.26.8
+
+        • 254 - REGEX
+          › Trigger   : (?i)\A(?:-|<@!?204255221017214977>)(buy|buyvip|)\z
+          › Arguments : n/a
+
+          › Enabled   : Yes
+          › Name      : n/a
+          › Roles     : Not limited
+          › Channels  : Limited (02) › "Boutique", "Gestion Bots"
+
+          › Revision  : 1.00
 
         • 265 - COMMAND
           › Trigger   : -mise
