@@ -7,7 +7,7 @@
 {{$ChB := 1168339319124131871}}
 {{$UM := ($BM := print "<@" ($IDS := toString ($UID := .User.ID)) ">")}}
 {{$DM := ($EM := ($VIP := ($blk := ($r := ($prm := "")))))}}
-{{$BOKCldw := ($BOKPtsA := true)}}
+{{$BOKCldw := ($BOKPtsA := ($BOKReduc := true))}}
 {{$PtPlaf := 25000}}
 
 {{$prLst := sdict "1" 2 "2" 15 "3" 15 "4" 25 "5" 50 "6" 50 "7" 150 "8" 150 "9" 200 "10" 190 "11" 300 "12" 400 "13" 450 "14" 500 "15" 700 "16" 600 "17" 700 "18" 700 "19" 900 "20" 1200 "21" 1000 "22" 1200 "23" 3000 "24" 2000 "25" 5000 "26" 10000 "27" 50}}
@@ -15,14 +15,14 @@
 
 {{if $uPts := or (toInt (dbGet $UID "Points").Value) 0}}
 
-  {{if and (not (in (cslice 4 6 16 22) $BID)) (ge $pr 150)}}
-    {{if targetHasRoleID $UID 1079418386511040572}} {{$prm = 0.85}} {{$PtPlaf = 50000}} {{$VIP = print " **(<:VIP2_v2:1080311144285229106> VIP2 · " $prx " -15%)**"}}
-    {{else if targetHasRoleID $UID 967188575005315132}} {{$prm = 0.93}} {{$PtPlaf = 35000}} {{$VIP = print " **(<:VIP1_v2:1080311093785788507> VIP1 · " $prx " -7%)**"}} {{end}}
-    {{$prx = reReplace "," (humanizeThousands ($pr = toInt (mult (toFloat $pr) (or $prm 1)))) " "}}
-  {{end}}
+  {{if in (cslice 4 6 16 22) $BID}} {{$BOKReduc = false}} {{end}}
+  {{if in (cslice 15 16 19 22) $BID}} {{$BOKCldw = not ($blk = dbGet $UID (print "Buy" $BID))}} {{end}}
 
-  {{if and (in (cslice 4 6 16 22) $BID) (ge $uPts $PtPlaf)}} {{$BOKPtsA = false}} {{end}}
-  {{if in (cslice 15 16 19 22) $BID}} {{if $blk = dbGet $UID (print "Buy" $BID)}} {{$BOKCldw = false}} {{end}} {{end}}
+  {{if targetHasRoleID $UID 1079418386511040572}} {{$PtPlaf = 50000}} {{if and $BOKReduc (ge $pr 150)}} {{$prm = 0.85}} {{$VIP = print " **(<:VIP2_v2:1080311144285229106> VIP2 · " $prx " -15%)**"}} {{end}}
+  {{else if targetHasRoleID $UID 967188575005315132}} {{$PtPlaf = 35000}} {{if and $BOKReduc (ge $pr 150)}} {{$prm = 0.93}} {{$VIP = print " **(<:VIP1_v2:1080311093785788507> VIP1 · " $prx " -7%)**"}} {{end}} {{end}}
+  {{$prx = reReplace "," (humanizeThousands ($pr = toInt (mult (toFloat $pr) (or $prm 1)))) " "}}
+
+  {{if in (cslice 4 6 16 22) $BID}} {{$BOKPtsA = lt $uPts $PtPlaf}} {{end}}
 
   {{if and (ge $BID 1) (le $BID 27) $BOKPtsA $BOKCldw}}
     {{if le $pr $uPts}}
@@ -109,7 +109,7 @@
     {{else}} {{$EM = "Solde insuffisant"}} {{end}}
   {{else}}
     {{if not $BOKPtsA}} {{$EM = "Solde de points trop élevé"}}
-    {{else if not $BOKCldw}} {{$EM = "Item soumis à un cooldown. Vous pourrez l'utiliser dans **" (reReplace "second" (reReplace "and" (humanizeDurationSeconds (mult (sub $blk.ExpiresAt.Unix $UTS) 1000000000)) "et") "seconde") "**"}}
+    {{else if not $BOKCldw}} {{$EM = print "Item soumis à un cooldown. Vous pourrez l'utiliser dans **" (reReplace "second" (reReplace "and" (humanizeDurationSeconds (mult (sub $blk.ExpiresAt.Unix $UTS) 1000000000)) "et") "seconde") "**"}}
     {{else}} {{$EM = "L'item sélectionné n'existe pas"}} {{end}}
   {{end}}
 
