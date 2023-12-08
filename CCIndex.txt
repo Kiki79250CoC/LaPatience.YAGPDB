@@ -792,7 +792,7 @@ DISCLAIMER : Elements in ‹quotation marks› are variable arguments (IE: User 
           › Revision  : 1.26.8
 
         • 254 - REGEX
-          › Trigger   : (?i)\A(?:-|<@!?204255221017214977>)(buy|buyvip|)\z
+          › Trigger   : (?i)\A(?:-|<@!?204255221017214977>)(buy|buyvip)\b
           › Arguments : n/a
 
           › Enabled   : Yes
