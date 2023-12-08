@@ -47,7 +47,7 @@ DISCLAIMER : Elements in ‹quotation marks› are variable arguments (IE: User 
           › Roles     : Not limited
           › Channels  : Limited (20) › "Livre Platine", "Livre d'argent", "Général", "Sport", "Jeux-Vidéo", "Anime-Films", "Débats", "Actualités", "Anecdotes libres", "Screen Serveur", "Channel Jeux", "Antre des anciens", "Humour", "Humour Noir", "Tchat Noir", "Pubs et Partage", "No Micro", "Commandes Bot", "Tchat Gérants", "Gestion Bots"
 
-          › Revision  : 2.48.7
+          › Revision  : 2.50
 
         • 218 - REGEX
           › Trigger   : .*
