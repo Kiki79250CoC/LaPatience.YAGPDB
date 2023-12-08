@@ -1,25 +1,62 @@
-{{$toIncrease := 1}}
-{{$bankSolde := 0}}
-{{$CanBypass := cslice 369101917659332611 531170764183830528}}
+{{$IsImmun := cslice 531170764183830528 369101917659332611}}
+{{$PtToAdd := 1}}
+{{$TimeGap := 120}}
+{{$TaxMinA := 7000}}
+{{$TaxMinB := 13000}}
+{{$TaxMinC := 20000}}
+{{$TaxT3PM := 0.50}}
+{{$TaxT2PM := 0.35}}
+{{$TaxPM := 0.20}}
+{{$PtSld := ($TaxAmnt := ($PremLv := 0))}}
+{{$IDS := toString ($UID := .User.ID)}}
 
-{{$plafPremLvl := 0}}
-{{if targetHasRoleID .User.ID 1079418386511040572}} {{$plafPremLvl = 2}}
-{{else if targetHasRoleID .User.ID 967188575005315132}} {{$plafPremLvl = 1}} {{end}}
-{{$plaf := toInt (dbGet $plafPremLvl "points").Value}}
+{{if targetHasRoleID $UID 1079418386511040572}} {{$PremLv = 2}}
+{{else if targetHasRoleID $UID 967188575005315132}} {{$PremLv = 1}} {{end}}
 
-{{$userPts := dbGet .User.ID "points"}}
-{{if $userPts}}
-  {{$bankSolde = (index ($userPts.Value) 0)}}
-  {{if ge (sub .Message.Timestamp.Parse.Unix (index ($userPts.Value) 1)) 120}}
-    {{if or (lt $bankSolde $plaf) (in $CanBypass .User.ID)}}
-      {{dbSet .User.ID "points" (cslice (add $bankSolde $toIncrease) .Message.Timestamp.Parse.Unix)}}
-    {{else}}
-      {{$TP := index (dbGet 531170764183830528 "points").Value 0}}
-      {{dbSet 531170764183830528 "points" (cslice (add $TP $toIncrease) .Message.Timestamp.Parse.Unix)}}
+{{$PtPlaf := toInt (dbGet $PremLv "PremPlaf").Value}}
+
+
+
+{{$CanUseV3System := cslice 223894107016134656 531170764183830528 369101917659332611}}
+{{if or (in $CanUseV3System $UID) ($V3SystemGA := true)}}
+
+  {{if $PtSldDB := dbGet $UID "Points"}}
+    {{if ge (sub .Message.Timestamp.Parse.Unix $PtSldDB.UpdatedAt.Unix) $TimeGap}}
+      {{if or (lt (toInt $PtSldDB.Value) $PtPlaf) (in $IsImmun $UID)}} {{$PtSld = toInt (dbIncr $UID "Points" $PtToAdd)}}
+      {{else}} {{$PtSld = toInt (dbIncr 531170764183830528 "Points" $PtToAdd)}} {{end}}
     {{end}}
+  {{else}}
+    {{if $OldPtsSystemDB := dbGet $UID "points"}}
+      {{$PtSld = toInt (dbIncr $UID "Points" (add (index $OldPtsSystemDB.Value 0) $PtToAdd))}}
+      {{dbDel $UID "points"}}
+      {{sendMessage 1180340984626806884 (print .User.Mention " (`" (or .Member.nick .User.Globalname .User.String) "`) a migré son solde de Points · Solde au moment de la migration : " (reReplace "," (humanizeThousands $PtSld)  " ") " Points")}}
+    {{else}} {{dbSet $UID "Points" $PtToAdd}} {{end}}
+  {{end}}
+
+  {{/* Taxes */}}
+  {{if ge $PtSld $TaxMinA}}
+    {{if ge $PtSld $TaxMinB}} {{$TaxPM = $TaxT2PM}} {{end}}
+    {{if ge $PtSld $TaxMinC}} {{$TaxPM = $TaxT3PM}} {{end}}
+    {{$TaxAmnt := toInt (mult (toFloat $PtSld) $TaxPM)}}
+
+    {{if $TaxDB := dbGet 0 "Taxes"}}
+      {{$TaxSlice := $TaxDB.Value}}
+      {{if not ($TaxSlice.Get $IDS)}} {{$TaxSlice.Set $IDS (cslice $TaxAmnt 0)}} {{dbSet 0 "Taxes" $TaxSlice}} {{end}}
+    {{else}} {{dbSet 0 "Taxes" (sdict $IDS (cslice $TaxAmnt 0))}} {{end}}
   {{end}}
 
 {{else}}
-  {{dbSet .User.ID "points" (cslice (add $bankSolde $toIncrease) .Message.Timestamp.Parse.Unix)}}
+
+  {{if $userPts := dbGet $UID "points"}}
+    {{$PtSld = (index ($userPts.Value) 0)}}
+    {{if ge (sub .Message.Timestamp.Parse.Unix (index ($userPts.Value) 1)) 120}}
+      {{if or (lt $PtSld $PtPlaf) (in $IsImmun $UID)}} {{dbSet $UID "points" (cslice (add $PtSld $PtToAdd) .Message.Timestamp.Parse.Unix)}}
+      {{else}}
+        {{if $db := dbGet 531170764183830528 "Points"}} {{$PtSld = dbIncr 531170764183830528 "Points" $PtToAdd}}
+        {{else}} {{$TP := index (dbGet 531170764183830528 "points").Value 0}} {{dbSet 531170764183830528 "points" (cslice (add $TP $PtToAdd) .Message.Timestamp.Parse.Unix)}} {{end}}
+      {{end}}
+    {{end}}
+  {{else}} {{dbSet $UID "points" (cslice (add $PtSld $PtToAdd) .Message.Timestamp.Parse.Unix)}}
+  {{end}}
 
 {{end}}
