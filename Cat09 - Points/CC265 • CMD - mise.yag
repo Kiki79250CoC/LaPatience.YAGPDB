@@ -1,57 +1,47 @@
-{{$args := parseArgs 2 "-mise [mise] [nombre]" (carg "int" "int") (carg "int" "int")}}
-{{$id := toInt64 .User.ID}}
-{{$sendDM := ""}}
-{{$paried := $args.Get 1}}
-{{$points := dbGet $id "points"}}
-{{$pronos := dbGet 0 "cotes"}}
-{{if or (not $points) (not $pronos)}}
-  {{$sendDM = "Pas de pronos en cours AAYAAAAA"}} 
-{{else}}
-  {{$value := $points.Value}} 
-  {{$value2 := $pronos.Value}}
-  {{if or (not $value) (eq $value2 "")}} 
-    {{$sendDM = "La BDD est vide ayaaa"}} 
-  {{else}} 
-    {{$pronaw := (split ($value2) "-")}}
-    {{$max := toInt (index $pronaw 1)}}
-    {{$true := eq (index $pronaw 0) "true"}}
-    {{$parieurs := dbGet 0 "parieurs"}}
-    {{if $parieurs}}
-     {{if (reFind (toString .User.ID) $parieurs.Value)}}
-      {{$true = false}}
-     {{end}}
-    {{end}}
-    {{$pronawListIndex := len (split (index $pronaw 2) ",")}}
-    {{if or (gt $paried $pronawListIndex) (not $true)}}
-      {{$sendDM = "Impossible de parier !"}}
-    {{else}}
-      {{$ptime := $value}}
-      {{$uToSet := $value}}
-      {{if not $ptime}}
-        {{$sendDM = "Tu n'es pas enregistré dans la base de données ! Parle dans le général pour le devenir !"}} 
+{{$args := parseArgs 2 "`-mise ‹Amount› ‹ItemID›`" (carg "int" "Amount") (carg "int" "BetID")}}
+{{$BetAmt := $args.Get 0}}
+{{$BetOID := $args.Get 1}}
+{{$IDS := toString ($UID := .User.ID)}}
+{{$DM := ($EM := "")}}
+
+{{$PtSld := or (toInt ($PtSldDB := dbGet $UID "Points").Value) 0}}
+{{$BetDB := (dbGet 0 "Pronos").Value}}
+{{$BetLs := (dbGet 0 "Parieurs").Value}}
+
+{{$MinAmt := toInt ($BetDB.Get "MinAmnt")}}
+{{$MaxAmt := toInt ($BetDB.Get "MaxAmnt")}}
+
+{{if $BetDB}}
+  {{if $BetDB.Get "Open"}}
+    {{if (ge $PtSld $BetAmt)}}
+      {{if and (ge $BetAmt $MinAmt) (le $BetAmt $MaxAmt)}}
+        {{$BetValid := $BetDB.Get "State"}}
+        {{if $BetLs}} {{if reFind $IDS $BetLs}} {{$BetValid = false}} {{end}} {{end}}
+
+        {{if and $BetValid (and (gt $BetOID 0) (le $BetOID (len (split ($BetDB.Get "Odds") ","))))}}
+
+          {{$BetList := print $IDS ":" (toString $BetOID) ";" (toString $BetAmt)}}
+          {{if $BetLs}} {{$BetList = print $BetLs "," $BetList}} {{end}}
+          {{dbSet 0 "Parieurs" $BetList}}
+
+          {{dbSet $UID "Points" (sub $PtSld $BetAmt)}}
+          {{$DM = "Mise effectuée avec succès !"}}
+          {{sendMessage 808035430410092544 (print "<@" $UID "> a misé **" (reReplace "," (humanizeThousands $BetAmt) " ") " Points** sur **" $BetOID "**.")}}
+
+        {{else}}
+          {{if $BetValid}} {{$EM = "Vous avez tenté de parier pour un item inexistant"}}
+          {{else}}
+            {{if $BetLs.Get $IDS}} {{$EM = "Vous avez déjà parié"}}
+              {{else}} {{$EM = "Le temps imparti pour miser est terminé."}} {{end}}
+            {{end}}
+        {{end}}
       {{else}}
-       {{$userPoints := (index $ptime 0)}}
-       {{$newTimestamp := (index $ptime 1)}}
-       {{$price := $args.Get 0}}
-       {{if or (gt $price $userPoints) (gt $price $max) (lt $price 100)}} 
-         {{$sendDM = "Soit tu n'as pas assez pour miser, soit ta mise dépasse le maximum, soit tu es stupide et tu as désigné un nombre négatif !"}} 
-       {{else}}
-         {{$userPoints = (sub $userPoints $price)}} 
-         {{$uToSet = (cslice $userPoints $newTimestamp)}}
-         {{dbSet $id "points" $uToSet}}
-         {{$sendDM = "Mise effectué avec succès !"}} 
-         {{sendMessage 808035430410092544 (joinStr "" .User.Mention " vient de miser " $price " points sur le " $paried "!\n-----")}} 
-         {{$toSetVal := joinStr "" (toString .User.ID) ":" (toString $paried) ";" (toString $price)}}
-	 {{if $parieurs}}
-	   {{$value3 := $parieurs.Value}}
-           {{if ne $value3 ""}}
-             {{$toSetVal = (joinStr "" ($value3) "," (toString .User.ID) ":" (toString $paried) ";" (toString $price))}}
-           {{end}}
-         {{end}}
-         {{dbSet 0 "parieurs" $toSetVal}}
-       {{end}}
-     {{end}}
-   {{end}}
- {{end}}
-{{end}}
-{{sendDM $sendDM}}
+        {{if (lt $BetAmt $MinAmt)}} {{$EM = print "Le montant de votre mise est en dessous du minimum autorisé (" (reReplace "," (humanizeThousands $MinAmt) " ") " Points)"}}
+        {{else}} {{$EM = print "Le montant de votre mise dépasse le maximum autorisé (" (reReplace "," (humanizeThousands $MaxAmt) " ") " Points)"}} {{end}}
+      {{end}}
+    {{else}} {{$EM = "Solde de points insuffisant"}} {{end}}
+  {{else}} {{$EM = "Aucun prono n'est en cours"}} {{end}}
+{{else}} {{$EM = "Aucun prono n'est en cours"}} {{end}}
+
+{{if $EM}} {{$DM = print ">>> **Erreur :**\nImpossible de parier : " $EM "."}} {{end}}
+{{sendDM $DM}}
