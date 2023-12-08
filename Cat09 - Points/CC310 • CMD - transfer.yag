@@ -1,70 +1,69 @@
-{{$args := parseArgs 2 "`-transfer ‹@UserOrID› ‹Amount›`" (carg "userid" "user") (carg "int" "int")}}
+{{$args := parseArgs 2 "`-transfer ‹@UserOrID› ‹Amount›`" (carg "userid" "UID") (carg "int" "Amount")}}
 {{$CanBypass := cslice 369101917659332611 531170764183830528}}
 
-{{$plafPremLvl := 0}}
-{{if targetHasRoleID ($args.Get 0) 1079418386511040572}} {{$plafPremLvl = 2}}
-{{else if targetHasRoleID ($args.Get 0) 967188575005315132}} {{$plafPremLvl = 1}} {{end}}
-{{$plaf := toInt (dbGet $plafPremLvl "points").Value}}
+{{$PremLvl := 0}}
+{{if targetHasRoleID ($args.Get 0) 1079418386511040572}} {{$PremLvl = 2}}
+{{else if targetHasRoleID ($args.Get 0) 967188575005315132}} {{$PremLvl = 1}} {{end}}
+{{$Plaf := toInt (dbGet $PremLvl "PremPlaf").Value}}
 
-{{$ptsFromUsr := dbGet .User.ID "points"}}
-{{$ptsDestUsr := dbGet ($args.Get 0) "points"}}
+{{$Usr1SV3 := true}} {{$PtsFU := 0}}
+{{if $PtsFUDB := dbGet .User.ID "Points"}} {{$PtsFU = toInt $PtsFUDB.Value}}
+{{else}} {{$Usr1SV3 = false}} {{$PtsFU = index (dbGet .User.ID "points").Value 0}} {{end}}
 
-{{if and (not (eq ($args.Get 0) .User.ID)) (gt ($args.Get 1) 0) (ge (index $ptsFromUsr.Value 0) ($args.Get 1))}}
-  {{$destUsrSld := 0}}
-  {{if $ptsDestUsr}}
-    {{$destUsrSld = index $ptsDestUsr.Value 0}}
-  {{end}}
+{{$Usr2SV3 := true}} {{$PtsDU := 0}}
+{{if $PtsDUDB := dbGet ($args.Get 0) "Points"}} {{$PtsDU = toInt $PtsDUDB.Value}}
+{{else}} {{$Usr2SV3 = false}} {{$PtsDU = index (dbGet ($args.Get 0) "points").Value 0}} {{end}}
 
-  {{$newAmount := ($args.Get 1)}}
-  {{if and (ge (add $destUsrSld $newAmount) $plaf) (not (getMember ($args.Get 0)).User.Bot)}}
-    {{$OvrfAmnt := (sub (add $destUsrSld $newAmount) $plaf)}}
-    {{$newAmount = (sub $newAmount $OvrfAmnt)}}
-  {{end}}
-  {{if lt $newAmount 1}} {{$newAmount = 0}} {{end}}
-  {{if in $CanBypass ($args.Get 0)}} {{$newAmount = ($args.Get 1)}} {{end}}
+{{if lt .Message.Timestamp.Parse.Unix 1704063600}}
+  {{if and (not (eq ($args.Get 0) .User.ID)) (gt ($args.Get 1) 0) (ge $PtsFU ($args.Get 1))}}
+    {{$VirAmt := $args.Get 1}}
+    {{if and (ge (add $PtsDU $VirAmt) $Plaf) (not (getMember ($args.Get 0)).User.Bot) (not (in $CanBypass ($args.Get 0)))}} {{$VirAmt = (sub $VirAmt (sub (add $PtsDU $VirAmt) $Plaf))}} {{end}}
 
-  {{if eq $newAmount 0}}
-    {{sendDM ">>> **Erreur :**\nImpossible d'effectuer la transaction car la cible a atteint son plafond de points."}}
+    {{if lt $VirAmt 1}} {{sendDM ">>> **Erreur :**\nImpossible d'effectuer la transaction car la cible a atteint son plafond de points."}}
+    {{else}}
 
-  {{else}}
-    {{dbSet .User.ID "points" (cslice (sub (index $ptsFromUsr.Value 0) $newAmount) .Message.Timestamp.Parse.Unix)}}
-    {{dbSet ($args.Get 0) "points" (cslice (add $destUsrSld $newAmount) .Message.Timestamp.Parse.Unix)}}
+      {{if $Usr1SV3}} {{dbSet .User.ID "Points" (sub $PtsFU $VirAmt)}} {{else}} {{dbSet .User.ID "points" (cslice (sub $PtsFU $VirAmt) .Message.Timestamp.Parse.Unix)}} {{end}}
+      {{if $Usr2SV3}} {{dbSet ($args.Get 0) "Points" (add $PtsDU $VirAmt)}} {{else}} {{dbSet ($args.Get 0) "points" (cslice (add $PtsDU $VirAmt) .Message.Timestamp.Parse.Unix)}} {{end}}
 
-    {{$embed := cembed
-      "title" (print "✓ Le transfert a été effectué avec succès")
-      "color" 0x00b04f
-      "fields" (cslice
-        (sdict "name" (or .User.Globalname .User.Username) "value" (print "> ~~" (reReplace "," (humanizeThousands (index $ptsFromUsr.Value 0)) " ") "~~ › **" (reReplace "," (humanizeThousands (sub (index $ptsFromUsr.Value 0) $newAmount)) " ") "**") "inline" true)
-        (sdict "name" "** › **" "value" " " "inline" true)
-        (sdict "name" (or (getMember ($args.Get 0)).User.Globalname (getMember ($args.Get 0)).User.Username) "value" (print "> ~~" (reReplace "," (humanizeThousands $destUsrSld) " ") "~~ › **" (reReplace "," (humanizeThousands (add $destUsrSld $newAmount)) " ") "**") "inline" true)
-    )}}
-    {{$embed2 := cembed "color" 0xda373c
-        "title" "Attention !"
-        "footer" (sdict "text" (print "Le plafond du destinataire a été atteint. Le montant de la transaction a donc été tronqué à " $newAmount " Points pour ne pas dépasser le plafond."))
-    }}
+      {{$embed := cembed
+        "title" (print "✓ Le transfert a été effectué avec succès")
+        "color" 0x00b04f
+        "fields" (cslice
+          (sdict "name" (or .User.Globalname .User.Username) "value" (print "> ~~" (reReplace "," (humanizeThousands $PtsFU) " ") "~~ › **" (reReplace "," (humanizeThousands (sub $PtsFU $VirAmt)) " ") "**") "inline" true)
+          (sdict "name" "** › **" "value" " " "inline" true)
+          (sdict "name" (or (getMember ($args.Get 0)).User.Globalname (getMember ($args.Get 0)).User.Username) "value" (print "> ~~" (reReplace "," (humanizeThousands $PtsDU) " ") "~~ › **" (reReplace "," (humanizeThousands (add $PtsDU $VirAmt)) " ") "**") "inline" true)
+      )}}
+      {{$embed2 := cembed "color" 0xda373c
+          "title" "Attention !"
+          "footer" (sdict "text" (print "Le plafond du destinataire a été atteint. Le montant de la transaction a donc été tronqué à " (reReplace "," (humanizeThousands $VirAmt) " ") " Points pour ne pas dépasser le plafond."))
+      }}
+      {{$embed3 := cembed "color" 0xda373c
+          "title" "Information · Migration Points"
+          "footer" (sdict "text" (print "L'une des personnes n'a pas migré ses points. À partir du 01 Janvier 2024, 00h00 (UTC+1), il ne sera plus possible de transférer des points avec des personnes qui n'ont pas migré leurs points vers le système v3."))
+      }}
 
-    {{sendMessage nil $embed}}
-  
-    {{if and (ge (add $destUsrSld $newAmount) $plaf) (not (getMember ($args.Get 0)).User.Bot) (not (in $CanBypass ($args.Get 0)))}}
-      {{sendMessage nil $embed2}}
+      {{$toSend := cslice $embed}}
+      {{if and (ge (add $PtsDU $VirAmt) $Plaf) (not (getMember ($args.Get 0)).User.Bot) (not (in $CanBypass ($args.Get 0)))}} {{$toSend = $toSend.Append $embed2}} {{end}}
+      {{if or (not $Usr1SV3) (not $Usr2SV3)}} {{$toSend = $toSend.Append $embed3}} {{end}}
+
+      {{sendMessage nil (complexMessage "embed" $toSend)}}
+
+      {{$plural := ""}} {{if gt $VirAmt 1}} {{$plural = "s"}} {{end}}
+      {{sendMessage 1135570896959066112 (print .User.Mention " a transféré **" $VirAmt " Point" $plural "** à <@" ($args.Get 0) ">")}}
     {{end}}
 
-    {{$plural := ""}} {{if gt $newAmount 1}} {{$plural = "s"}} {{end}}
-    {{sendMessage 1135570896959066112 (print .User.Mention " a transféré **" $newAmount " Point" $plural "** à " (getMember ($args.Get 0)).User.Mention ".")}}
-
+  {{else}}
+    {{$err := ""}}
+    {{if (eq ($args.Get 0) .User.ID)}} {{$err = "Vous ne pouvez pas vous envoyer des points à vous-même."}}
+    {{else if (le ($args.Get 1) 0)}} {{$err = "Le montant du transfert est invalide."}}
+    {{else if (lt $PtsFU ($args.Get 1))}} {{$err = "Votre solde de Points est insuffisant pour le transfert."}}
+    {{else}} {{$err = "Une erreur inconnue est survenue."}} {{end}}
+    {{sendDM (print ">>> **Erreur :**\n" $err)}}
   {{end}}
 
 {{else}}
-  {{$err := ">>> **Erreur :**\n"}}
-  {{if (eq ($args.Get 0) .User.ID)}}
-    {{$err = (print $err "Vous ne pouvez pas vous envoyer des points à vous-même.")}}
-  {{else if (le ($args.Get 1) 0)}}
-    {{$err = (print $err "Le montant du transfert est invalide.")}}
-  {{else if (lt (index $ptsFromUsr.Value 0) ($args.Get 1))}}
-    {{$err = (print $err "Votre solde de Points est insuffisant pour le transfert.")}}
-  {{else}}
-    {{$err = (print $err "Une erreur inconnue est survenue.")}}
-  {{end}}
-  {{sendDM $err}}
-  
+  {{$embed := cembed "color" 0xda373c
+      "title" "Le système v2 n'est plus pris en charge !"
+      "footer" (sdict "text" (print "Il n'est plus possible de créditer les comptes qui n'ont pas encore été migrés au système v3.\nVeuillez contacter la personne pour lui demander de migrer ses points."))
+  }} {{sendMessage nil $embed}}
 {{end}}
