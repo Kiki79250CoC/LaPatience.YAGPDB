@@ -1,0 +1,52 @@
+{{$TaxMinA := 7000}}
+{{$TaxMinB := 13000}}
+{{$TaxMinC := 20000}}
+{{$TaxT3PM := 0.50}}
+{{$TaxT2PM := 0.35}}
+{{$TaxPM := 0.20}}
+{{$UM := print "<@" ($IDS := toString ($UID := .User.ID)) ">"}}
+
+{{if $BuyData := (dbGet $UID "Buy").Value}}
+  {{$isBVIP := $BuyData.Get "IsBVIP"}}
+  {{$uPts := toInt ($BuyData.Get "UserPts")}}
+  {{$BID := toInt ($BuyData.Get "ItemID")}}
+  {{$pr := toInt ($BuyData.Get "Price")}}
+
+  {{if (eq (toInt (dbIncr $UID "BuyCt" 1)) 500)}} {{giveRoleID $UID 1159813369587564655}} {{end}}
+
+  {{if or (and (not $isBVIP) (not (in (cslice 1 6 16 21 22) $BID))) (and $isBVIP (not (in (cslice 2) $BID)))}}
+    {{$em := toInt (sub ($e := toInt (dbIncr $UID "score" $pr)) $pr)}}
+
+    {{if and (lt $em 1000) (ge $e 1000)}} {{giveRoleID $UID 1060949245433229373}} {{end}}
+    {{if and (lt $em 5000) (ge $e 5000)}} {{giveRoleID $UID 1060949252601294940}} {{end}}
+    {{if and (lt $em 15000) (ge $e 15000)}} {{giveRoleID $UID 1060949258917924934}} {{end}}
+    {{if and (lt $em 25000) (ge $e 25000)}} {{giveRoleID $UID 1060949256170643558}} {{end}}
+    {{if and (lt $em 40000) (ge $e 40000)}} {{giveRoleID $UID 1060949819302084678}} {{end}}
+
+    {{if gt ($nPal := (roundFloor (div $e 5000))) (roundFloor (div $em 5000))}} {{sendMessage 1060966843667460166 (print "Bien joué " $UM ", tu viens de passer au **Palier " $nPal "** !")}} {{end}}
+  {{end}}
+
+  {{if or (and (not $isBVIP) (not (in (cslice 6 16 21 22) $BID))) (and $isBVIP (not (in (cslice 2) $BID)))}}
+    {{$sl := (dbGet 0 "Buy").Value}}
+    {{if (ge (add ($BLA := index $sl 0) $pr) ($BLT := index $sl 1))}}
+      {{dbSet 0 "Buy" (cslice (sub (add $BLA $pr) $BLT) (randInt 45000 50000))}} {{dbSetExpire 21 "Buy" 0 900}}
+      {{sendMessage 783725584336420906 "🔥 Allez piailler vos points bande de rats… ⭐\nBref… **Buy Légendaire activé**."}} {{sendMessage 1168339319124131871 (print "# Activ.BL : " $UM)}}
+      {{editChannelName 496010398848253965 "【🔥】général"}} {{scheduleUniqueCC 300 nil 900 "EndBL" "#"}}
+    {{else}} {{dbSet 0 "Buy" (cslice (add $BLA $pr) $BLT)}} {{end}}
+
+    {{if ge $uPts $TaxMinB}} {{$TaxPM = $TaxT2PM}} {{end}}
+    {{if ge $uPts $TaxMinC}} {{$TaxPM = $TaxT3PM}} {{end}}
+    {{$TaxAmnt := toInt (mult (toFloat $uPts) $TaxPM)}}
+
+    {{if $TaxDB := dbGet 0 "Taxes"}}
+      {{$TaxSlice := $TaxDB.Value}}
+      {{if $TaxAcct := $TaxSlice.Get $IDS}}
+        {{$CurTaxProg := toInt (or (index $TaxAcct 1) 0)}}
+        {{$TaxAmnt = toInt (index $TaxAcct 0)}}
+        {{$TaxSlice.Set $IDS (cslice $TaxAmnt (add $CurTaxProg $pr))}}
+        {{dbSet 0 "Taxes" $TaxSlice}}
+      {{else}} {{if ge $uPts $TaxMinA}} {{$TaxSlice.Set $IDS (cslice $TaxAmnt $pr)}} {{dbSet 0 "Taxes" $TaxSlice}} {{end}} {{end}}
+    {{else}} {{if ge $uPts $TaxMinA}} {{dbSet 0 "Taxes" (sdict $IDS (cslice $TaxAmnt $pr))}} {{end}} {{end}}
+  {{end}}
+
+{{end}}

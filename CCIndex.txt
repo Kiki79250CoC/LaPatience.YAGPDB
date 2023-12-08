@@ -796,7 +796,7 @@ DISCLAIMER : Elements in ‹quotation marks› are variable arguments (IE: User 
           › Arguments : n/a
 
           › Enabled   : Yes
-          › Name      : n/a
+          › Name      : Boutique - Common process rail
           › Roles     : Not limited
           › Channels  : Limited (02) › "Boutique", "Gestion Bots"
 
