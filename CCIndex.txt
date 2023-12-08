@@ -135,7 +135,7 @@ DISCLAIMER : Elements in ‹quotation marks› are variable arguments (IE: User 
           › Roles     : Not limited
           › Channels  : Limited (01) › "Gestion Bots"
 
-          › Revision  : 1.05
+          › Revision  : 1.06
 
         • 297 - COMMAND
           › Trigger   : -dbGet

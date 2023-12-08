@@ -21,11 +21,11 @@
 {{$fields := cslice (sdict "name" "• Infos de la recherche :" "value" (print $resultText " pour la clé \"" ($args.Get 0) "\"") "inline" true)}}
 
   {{- range (dbTopEntries ($args.Get 0) 5 $page)}}
-  {{- $value := json .Value}}
-  {{- $userm := .UserID}}
-  {{- with (getMember .UserID)}}{{$userm = print .User.Mention " `" .User.String "`"}}{{end}}
-  {{- $fields = $fields.Append (sdict "name" (print "• Résultat de la recherche " $count " :") "value" (print "**`ID         :`** " $userm "\n**`ID valeur  :`** " .ID "\n**`Type       :`** " (printf "%T" .Value) "\n**`Caractères :`** " (len (reReplace `\\` (json .Value) ``)) "/100000\n**`Taille     :`** " (printf "%.2f" (fdiv (len (json .Value)) 1000)) " Ko\n**`Valeur     :`**\n```json\n" (reReplace `\\` (json $value) ``) "```") "inline" false)}}
-  {{- $count = add $count 1}}
+    {{- $value := json .Value}}
+    {{- $userm := .UserID}}
+    {{- with (getMember .UserID)}}{{$userm = print .User.Mention " `" .User.String "`"}}{{end}}
+    {{- $fields = $fields.Append (sdict "name" (print "• Résultat de la recherche " $count " :") "value" (print "**`ID         :`** " $userm "\n**`ID valeur  :`** " .ID "\n**`Type       :`** " (printf "%T" .Value) "\n**`Caractères :`** " (len (reReplace `\\` (json .Value) ``)) "/100000\n**`Taille     :`** " (printf "%.2f" (fdiv (len (json .Value)) 1000)) " Ko\n**`Valeur     :`**\n```json\n" (reReplace `\\` (json $value) ``) "```") "inline" false)}}
+    {{- $count = add $count 1}}
   {{- end}}
 
 {{$embed := sdict "title" "🔎 Recherche dans la base de données par entrée" "color" 0x00D66C "fields" $fields}}
