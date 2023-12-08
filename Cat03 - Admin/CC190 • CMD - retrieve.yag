@@ -1,14 +1,32 @@
-{{$args := parseArgs 2 "-retrieve @User#1234 points" (carg "userid" "userid") (carg "int" "int")}}
-{{$userid := $args.Get 0}}
-{{$toRetrieve := $args.Get 1}}
-{{$entry := dbGet $userid "points"}}
-{{$toSet := cslice (sub 0 $toRetrieve) .Message.Timestamp.Parse.Unix}}
-{{$oldPoints := 0}}
-{{if $entry}}
-  {{$pointos := (index ($entry.Value) 0)}}
-  {{$oldPoints = $pointos}}
-  {{$newPointos := sub $pointos $toRetrieve}}
-  {{$toSet = cslice $newPointos .Message.Timestamp.Parse.Unix}}
+{{$args := parseArgs 2 "`-retrieve ‹@UserOrID› ‹Amount›`" (carg "userid" "UID") (carg "int" "value")}}
+{{$UID := $args.Get 0}}
+{{$Amt := $args.Get 1}}
+
+{{if $v3Chk := dbGet $UID "Points"}}
+  {{$a := dbIncr $UID "Points" $Amt}}
+  {{$embed := cembed
+    "color" 0x0080ff
+    "title" (print "✓ Solde de Points mis à jour")
+    "fields" (cslice (sdict "name" (or (getMember $UID).User.Globalname (getMember $UID).User.Username) "value" (print "> ~~" (reReplace "," (humanizeThousands (sub $a $Amt)) " ") "~~ › **" (reReplace "," (humanizeThousands $a) " ") "**") "inline" true))
+  }} {{sendMessage nil $embed}}
+
+{{else}}
+  {{if lt .Message.Timestamp.Parse.Unix 1704063600}}
+    {{$PtSld := 0}}
+    {{if $v2 := dbGet $UID "points"}} {{$PtSld = index $v2.Value 0}} {{end}}
+    {{dbSet $UID "points" (cslice (add $PtSld $Amt) .Message.Timestamp.Parse.Unix)}}
+
+    {{$embed := cembed
+      "color" 0x0080ff
+      "title" (print "✓ Solde de Points mis à jour")
+      "fields" (cslice (sdict "name" (or (getMember $UID).User.Globalname (getMember $UID).User.Username) "value" (print "> ~~" (reReplace "," (humanizeThousands $PtSld) " ") "~~ › **" (reReplace "," (humanizeThousands (add $PtSld $Amt)) " ") "**") "inline" true))
+      "footer" (sdict "text" (print "Cette personne n'a pas encore migré ses Points.\nÀ partir du 01 Janvier 2024, 00h00 (UTC+1), il ne sera\nplus possible de créditer des Points sur le système v2.") "icon_url" "https://cdn.discordapp.com/emojis/1156596295352467507.webp?quality=lossless")
+    }} {{sendMessage nil $embed}}
+  {{else}}
+    {{$embed := cembed "color" 0xda373c
+        "title" "Le système v2 n'est plus pris en charge !"
+        "footer" (sdict "text" (print "Il n'est plus possible de créditer les comptes qui n'ont pas encore été migrés au système v3.\nVeuillez contacter la personne pour lui demander de migrer ses points."))
+    }} {{sendMessage nil $embed}}
+  {{end}}
+
 {{end}}
-{{dbSet $userid "points" $toSet}}
-{{sendMessage nil (joinStr "" (getMember $userid).User.Username " : " $oldPoints " -> " (sub $oldPoints $toRetrieve))}}
