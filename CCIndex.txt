@@ -319,7 +319,7 @@ DISCLAIMER : Elements in ‹quotation marks› are variable arguments (IE: User 
           › Roles     : Not limited
           › Channels  : Limited (01) › "Gestion Bots"
 
-          › Revision  : 1.21
+          › Revision  : 2.00
 
         • 273 - COMMAND
           › Trigger   : -removetrigger
