@@ -1,0 +1,80 @@
+{{deleteTrigger 0}}
+{{$args := parseArgs 1 "`-buyvip ‹#› ‹\"Text\" or @UserOrID›`" (carg "int" "BuyID") (carg "string" "Arg") (carg "string" "Arg2")}}
+{{$BIDS := toString ($BID := $args.Get 0)}}
+{{$UTS := .Message.Timestamp.Parse.Unix}}
+{{$ChG := 496010398848253965}}
+{{$RLV := 1079418386511040572}}
+{{$ChB := 1168339319124131871}}
+{{$UM := print "<@" ($IDS := toString ($UID := .User.ID)) ">"}}
+{{$DM := ($EM := ($VIP := ($blk := ($r := ""))))}}
+{{$BOKCldw := ($BOKPtsA := true)}}
+{{$PtPlaf := 35000}}
+
+{{$PrLst := sdict "1" 400 "2" 1000 "3" 2000 "4" 3000 "5" 200 "6" 2000 "7" 3000 "8" 5000}}
+{{$prx := reReplace "," (humanizeThousands ($pr := or ($PrLst.Get $BIDS) 0)) " "}}
+
+{{if $uPts := or (toInt (dbGet $UID "Points").Value) 0}}
+
+  {{$BOKuVIP := or (targetHasRoleID $UID 967188575005315132) (targetHasRoleID $UID $RLV)}}
+  {{if targetHasRoleID $UID $RLV}} {{$PtPlaf = 50000}} {{end}}
+
+  {{if and (in (cslice 2) $BID) (ge $uPts $PtPlaf)}} {{$BOKPtsA = false}} {{end}}
+  {{if in (cslice 2 5) $BID}} {{if $blk = dbGet $UID (print "BuyVIP" $BID)}} {{$BOKCldw = false}} {{end}} {{end}}
+
+  {{if and (ge $BID 1) (le $BID 8) $BOKuVIP $BOKPtsA $BOKCldw}}
+    {{if le $pr $uPts}}
+      {{if and ($b13 := toInt (dbGet 13 "Buy").Value) (ne $BID 1) (not (in (cslice 223894107016134656 369101917659332611) $UID))}}
+        {{$DM = "Désolé, la Boutique a été piégée… Du coup tu finis au Goulag, dépouillé des points de ton achat…"}}
+        {{$b13msg := print " et que " $UM " en a payé les frais."}} {{if eq $b13 $UID}} {{$b13msg = "… sauf que le Karma l'a rattrapé."}}	{{end}}
+        {{sendMessage $ChG (print "Tiens, on dirait que <@" $b13 "> a piégé la Boutique" $b13msg "\nEt les **" $prx "** Points de son achat ? Boh ! Aux oubliettes bien évidemment…")}}
+        {{sendMessage $ChB (print "Buy 13 : <@" $b13 "> (Piégeur) · " $UM " (Piégé) · " $prx " (Somme perdue)")}}
+        {{dbDel 13 "Buy"}} {{dbSet $UID "Points" (sub $uPts $pr)}}
+        {{execCC 320 nil 0 (sdict "sancUsr" $UID "sancRes" "AutoSanc.Buy13" "sancDur" (toDuration "5m") "sancMod" 0)}}
+
+      {{else}}
+        {{$DM = "Achat effectué avec succès !"}}
+
+        {{if eq $BID 1}}
+          {{if and ($args.IsSet 1) ($args.IsSet 2) (not (eq ($u1 := $args.Get 1) ($u2 := $args.Get 2)))}}
+            {{if not (and (eq $u1 $IDS) (eq $u2 $IDS))}}
+              {{if or (targetHasRoleID $UID ($r = 506417754878902272)) (targetHasRoleID $u1 $r) (targetHasRoleID $u2 $r)}} {{$EM = "L'une des deux cibles se trouve déjà au Goulag."}}
+              {{else}} {{execCC 290 $ChB 0 (sdict "sancUsr1" $IDS "sancUsr2" (toString (getMember $u1).User.ID) "sancUsr3" (toString (getMember $u2).User.ID))}} {{end}}
+            {{else}} {{$EM = "L'une des deux cibles n'est autre que vous-même"}} {{end}}
+          {{else}} {{$EM = "Les cibles n'ont pas été correctement définies"}} {{end}}
+
+        {{else if and (eq $BID 2) (eq (randInt 11) 4)}} {{dbSetExpire $UID "BuyVIP2" 0 2700}} {{$uPts = add $uPts 11000}} {{sendMessage $ChG (print "Bien joué " $UM ", tu viens de gagner **10 000 Points** à la Loterie VIP !")}}
+        {{else if eq $BID 3}} {{dbSet 10003 "Buy" (cslice 496010398848253965 504683776149028865 517331312877633553 731509213687185480 552913229399982091 575108485990055947 719209393475813396 1075244209986076692 561926517290958868 496012052406468639 506544049763909634 828011798086418513)}}
+
+        {{else if and (ge $BID 5) (targetHasRoleID $UID $RLV)}}
+          {{if eq $BID 5}}
+            {{if not (dbGet 10005 "Buy")}} {{dbSet 10005 "Buy" (cslice $IDS (add $UTS 30))}} {{dbSetExpire $UID "BuyVIP5" 0 7200}} {{$DM = print $DM "\nLa magie opérera dans 30 secondes…"}}
+            {{else}} {{$EM = "Un BuyVIP 5 est déjà en attente"}} {{end}}
+
+          {{else if eq $BID 8}} {{$EM = "Item indisponible"}} {{end}}
+
+        {{else}} {{$EM = "Vous n'êtes pas <:VIP2_v2:1080311144285229106> **Membre VIP 2**"}} {{end}}
+
+        {{if not $EM}}
+          {{dbSet $UID "points" (cslice (sub $uPts $pr) $UTS)}}
+          {{$a := dbIncr 531170764183830528 "Points" $pr}}
+
+          {{$LPcr := " <:CrownLP_v2:1080310392850493550>"}}
+          {{sendMessage 783745583785181214 (print $UM " vient d'acheter l'élément vip" $BID (or ((sdict "4" $LPcr "6" $LPcr "7" $LPcr "8" $LPcr).Get $BIDS) "") " pour la modique somme de **" $prx " Points**.")}}
+
+          {{dbSet $UID "Buy" (sdict "IsBVIP" true "UserPts" $uPts "ItemID" $BID "Price" $pr)}}
+
+        {{end}}
+
+      {{end}}
+    {{else}} {{$EM = "Solde insuffisant"}} {{end}}
+  {{else}}
+    {{if not $BOKuVIP}} {{$EM = "Vous n'êtes pas VIP"}}
+    {{else if not $BOKPtsA}} {{$EM = "Solde de points trop élevé"}}
+    {{else if not $BOKCldw}} {{$EM = "Item soumis à un cooldown. Vous pourrez l'utiliser dans **" (reReplace "second" (reReplace "and" (humanizeDurationSeconds (mult (sub $blk.ExpiresAt.Unix $UTS) 1000000000)) "et") "seconde") "**"}}
+    {{else}} {{$EM = "L'item sélectionné n'existe pas"}} {{end}}
+  {{end}}
+
+{{else}} {{$EM = "Impossible de trouver votre compte. Veuillez parler sur le Général pour migrer votre solde de Points"}} {{end}}
+
+{{if $EM}} {{$DM = print ">>> **Erreur :**\nImpossible de procéder à l'achat : " $EM "."}} {{end}}
+{{sendDM $DM}}
