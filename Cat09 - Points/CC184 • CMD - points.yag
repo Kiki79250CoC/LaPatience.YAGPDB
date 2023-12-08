@@ -1,43 +1,58 @@
 {{$args := parseArgs 0 "`-points ‹@UserOrID›`" (carg "userid" "user")}}
 {{$CanBypass := cslice 369101917659332611 531170764183830528}}
-{{$userID := or ($args.Get 0) .User.ID}}
+{{$StatText := ($iURL := ($tx := ($BuysShop := ($PtsSysT := ($Plural := "")))))}}
+{{$PremLvl := 0}}
+{{$PtsSysV := 3}}
+{{$UsrDN := (toString ($UID := or ($args.Get 0) .User.ID))}}
+{{$PlafT := "Votre"}}
+{{$PtsT := "Vous possédez"}}
 
-{{$tx := ""}} {{$plafPremLvl := 0}}
-{{if targetHasRoleID $userID 1079418386511040572}} {{$plafPremLvl = 2}} {{$tx = " (VIP2)"}}
-{{else if targetHasRoleID $userID 967188575005315132}} {{$plafPremLvl = 1}} {{$tx = " (VIP1)"}} {{end}}
-{{$plaf := toInt (dbGet $plafPremLvl "points").Value}}
+{{if targetHasRoleID $UID 1079418386511040572}} {{$PremLvl = 2}} {{$tx = " (VIP2)"}}
+{{else if targetHasRoleID $UID 967188575005315132}} {{$PremLvl = 1}} {{$tx = " (VIP1)"}} {{end}}
+{{$Plaf := toInt (dbGet $PremLvl "PremPlaf").Value}}
+{{$PlafText := print (reReplace "," (humanizeThousands $Plaf) " ") " Points" $tx}}
 
-{{$plafText := print (reReplace "," (humanizeThousands $plaf) " ") " Points" $tx}}
-{{$usrDN := (toString $userID)}} {{$iURL := ""}}
-{{$subText := ""}}
-{{if (getMember $userID)}}
-  {{if or (getMember $userID).User.Bot (in $CanBypass $userID)}} {{$plafText = "Illimité"}} {{end}}
-  {{$usrDN = or (getMember $userID).Nick (getMember $userID).User.Username}}
-  {{$iURL = print "https://cdn.discordapp.com/avatars/" $userID "/" (getMember $userID).User.Avatar ".png"}}
+{{$PtSld := 0}}
+{{if $PtSldDB := dbGet $UID "Points"}} {{$PtSld = toInt $PtSldDB.Value}}
+{{else}} {{if $PtSldDB := dbGet $UID "points"}} {{$PtsSysV = 2}} {{$PtSld = index ($PtSldDB.Value) 0}} {{end}} {{end}}
+{{if or (lt $PtSld -1) (gt $PtSld 1)}} {{$Plural = "s"}} {{end}}
+
+{{if (getMember $UID)}}
+  {{$iURL = print "https://cdn.discordapp.com/avatars/" $UID "/" (getMember $UID).User.Avatar ".png"}}
+  {{$UsrDN = or (getMember $UID).Nick (getMember $UID).User.Username}}
+
+  {{if or (getMember $UID).User.Bot (in $CanBypass $UID)}} {{$PlafText = "Illimité"}} {{end}}
+  {{if not (getMember $UID).User.Bot}} {{$BuysShop = print " · Achats Boutique : " (reReplace "," (humanizeThousands (or (dbGet $UID "BuyCt").Value 0)) " ")}} {{end}}
+
+  {{$StatText = print $PlafT " plafond : " $PlafText $BuysShop "\n"}}
+  {{$PtsSysT = print "\n\nPtsSystemV" $PtsSysV}}
 {{end}}
+{{if ne .User.ID $UID}} {{$PlafT = "Son"}} {{$PtsT = print $UsrDN " possède"}} {{end}}
 
-{{$vp := "Votre"}} {{$hasPtsTxt := "Vous possédez"}}
-{{if ne .User.ID $userID}}
-  {{$vp = "Son"}}
-  {{$hasPtsTxt = print $usrDN " possède"}}
-{{end}}
-
-{{if (getMember $userID)}}
-  {{$subText = print "\n\n" $vp " plafond : " $plafText "\nNombre d'achats effectués : " (reReplace "," (humanizeThousands (or (dbGet $userID "BuyCt").Value 0)) " ")}}
-{{end}}
-
-{{$ptsSolde := 0}}
-{{if $bankAcct := dbGet $userID "points"}} {{$ptsSolde = index ($bankAcct.Value) 0}} {{end}}
-
-{{$embed := cembed "color" 0xffbf00
-  "author" (sdict "name" $usrDN "icon_url" $iURL)
-  "title" (print $hasPtsTxt " **" (reReplace "," (humanizeThousands $ptsSolde) " ") "** Points")
-  "footer" (sdict "text" (print "Lorsque vous discutez, vous gagnez 1 Point par tranche de 2 minutes." $subText))
+{{$pEmbed := sdict "color" 0xffbf00
+  "author" (sdict "name" $UsrDN "icon_url" $iURL)
+  "title" (print $PtsT " **" (reReplace "," (humanizeThousands $PtSld) " ") "** Point" $Plural)
+  "footer" (sdict "text" (print $StatText "Lorsque vous discutez, vous gagnez 1 Point par tranche de 2 minutes." $PtsSysT))
 }}
+{{$fields := $pEmbed.fields}}
+
+{{$Taxes := (dbGet 0 "Taxes").Value}}
+{{if $TaxAcct := $Taxes.Get (toString $UID)}}
+  {{$CurTaxProg := reReplace "," (humanizeThousands (toInt (or (index $TaxAcct 1) 0))) " "}}
+  {{$TaxAmnt := reReplace "," (humanizeThousands (toInt (index $TaxAcct 0))) " "}}
+
+  {{$fields = (cslice (sdict "name" " " "value" (print "**⋄  Taxes :**\nSomme à dépenser pour l'exemption : **" $CurTaxProg "/" $TaxAmnt " Points**") "inline" false) (sdict "name" " " "value" " " "inline" false))}}
+  {{$pEmbed.Set "fields" $fields}}
+{{end}}
+
+{{$embed := cembed $pEmbed}}
+
 {{$embed2 := cembed "color" 0xda373c
   "title" "Attention !"
-  "footer" (sdict "text" (print "Vous avez atteint votre plafond de " $plafText ".\nVous ne pouvez donc plus en gagner à moins de dépensier ceux que vous avez déjà."))
+  "footer" (sdict "text" (print "Vous avez atteint votre plafond de " $PlafText ".\nVous ne pouvez donc plus en gagner à moins de dépenser ceux que vous avez déjà."))
 }}
 
-{{sendMessage nil $embed}}
-{{if (getMember $userID)}} {{if and (ge $ptsSolde $plaf) (not (getMember $userID).User.Bot) (not (in $CanBypass $userID))}} {{sendMessage nil $embed2}} {{end}} {{end}}
+{{$toSend := cslice $embed}}
+{{if (getMember $UID)}} {{if and (ge $PtSld $Plaf) (not (getMember $UID).User.Bot) (not (in $CanBypass $UID))}} {{$toSend = $toSend.Append $embed2}} {{end}} {{end}}
+
+{{sendMessage nil (complexMessage "embed" $toSend)}}
