@@ -74,7 +74,11 @@
     {{else}} {{$EM = "L'item sélectionné n'existe pas"}} {{end}}
   {{end}}
 
-{{else}} {{$EM = "Impossible de trouver votre compte. Veuillez parler sur le Général pour migrer votre solde de Points"}} {{end}}
+{{else}}
+  {{$EM := "Impossible de trouver votre compte. Veuillez parler sur le Général pour "}}
+  {{if dbGet $UID "points"}} {{$EM = print $EM "migrer votre solde de Points"}}
+  {{else}} {{$EM = print $EM "commencer à ganger des points"}} {{end}}
+{{end}}
 
 {{if $EM}} {{$DM = print ">>> **Erreur :**\nImpossible de procéder à l'achat : " $EM "."}} {{end}}
 {{sendDM $DM}}
