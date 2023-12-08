@@ -45,14 +45,16 @@
         {{else if and (eq $BID 2) (eq (randInt 11) 4)}} {{dbSetExpire $UID "BuyVIP2" 0 2700}} {{$uPts = add $uPts 11000}} {{sendMessage $ChG (print "Bien joué " $UM ", tu viens de gagner **10 000 Points** à la Loterie VIP !")}}
         {{else if eq $BID 3}} {{dbSet 10003 "Buy" (cslice 496010398848253965 504683776149028865 517331312877633553 731509213687185480 552913229399982091 575108485990055947 719209393475813396 1075244209986076692 561926517290958868 496012052406468639 506544049763909634 828011798086418513)}}
 
-        {{else if and (ge $BID 5) (targetHasRoleID $UID $RLV)}}
-          {{if eq $BID 5}}
-            {{if not (dbGet 10005 "Buy")}} {{dbSet 10005 "Buy" (cslice $IDS (add $UTS 30))}} {{dbSetExpire $UID "BuyVIP5" 0 7200}} {{$DM = print $DM "\nLa magie opérera dans 30 secondes…"}}
-            {{else}} {{$EM = "Un BuyVIP 5 est déjà en attente"}} {{end}}
+        {{else if ge $BID 5}}
+          {{if targetHasRoleID $UID $RLV}}
+            {{if eq $BID 5}}
+              {{if not (dbGet 10005 "Buy")}} {{dbSet 10005 "Buy" (cslice $IDS (add $UTS 30))}} {{dbSetExpire $UID "BuyVIP5" 0 7200}} {{$DM = print $DM "\nLa magie opérera dans 30 secondes…"}}
+              {{else}} {{$EM = "Un BuyVIP 5 est déjà en attente"}} {{end}}
 
-          {{else if eq $BID 8}} {{$EM = "Item indisponible"}} {{end}}
+            {{else if eq $BID 8}} {{$EM = "Item indisponible"}} {{end}}
 
-        {{else}} {{$EM = "Vous n'êtes pas <:VIP2_v2:1080311144285229106> **Membre VIP 2**"}} {{end}}
+          {{else}} {{$EM = "Vous n'êtes pas <:VIP2_v2:1080311144285229106> **Membre VIP 2**"}} {{end}}
+        {{end}}
 
         {{if not $EM}}
           {{dbSet $UID "points" (cslice (sub $uPts $pr) $UTS)}}
@@ -70,7 +72,7 @@
   {{else}}
     {{if not $BOKuVIP}} {{$EM = "Vous n'êtes pas VIP"}}
     {{else if not $BOKPtsA}} {{$EM = "Solde de points trop élevé"}}
-    {{else if not $BOKCldw}} {{$EM = "Item soumis à un cooldown. Vous pourrez l'utiliser dans **" (reReplace "second" (reReplace "and" (humanizeDurationSeconds (mult (sub $blk.ExpiresAt.Unix $UTS) 1000000000)) "et") "seconde") "**"}}
+    {{else if not $BOKCldw}} {{$EM = print "Item soumis à un cooldown. Vous pourrez l'utiliser dans **" (reReplace "second" (reReplace "and" (humanizeDurationSeconds (mult (sub $blk.ExpiresAt.Unix $UTS) 1000000000)) "et") "seconde") "**"}}
     {{else}} {{$EM = "L'item sélectionné n'existe pas"}} {{end}}
   {{end}}
 
