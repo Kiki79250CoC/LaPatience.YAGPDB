@@ -29,7 +29,7 @@
     {{if $OldPtsSystemDB := dbGet $UID "points"}}
       {{$PtSld = toInt (dbIncr $UID "Points" (add (index $OldPtsSystemDB.Value 0) $PtToAdd))}}
       {{dbDel $UID "points"}}
-      {{sendMessage 1180340984626806884 (print .User.Mention " (`" (or .Member.Nick .User.Globalname .User.String) " - " .User.ID "`) a migré son solde de Points · Solde au moment de la migration : " (reReplace "," (humanizeThousands $PtSld)  " ") " Points")}}
+      {{sendMessage 1180340984626806884 (print .User.Mention " (`" (or .Member.Nick .User.Globalname .User.String) " - " .User.ID "`) a migré son solde de Points · Solde au moment de la migration : " (reReplace "," (humanizeThousands $PtSld) " ") " Points")}}
     {{else}} {{dbSet $UID "Points" $PtToAdd}} {{end}}
   {{end}}
 
