@@ -16,11 +16,10 @@
 {{/* Drops de Points lors d'évènements */}}
 {{if $PtDrop := dbGet 1 "MsgLuck"}}
   {{if and (eq .ReactionMessage.ID (toInt64 $PtDrop.Value)) (not (in $PtsBL $UID))}}
-    {{$PtsSolde := 0}}
-    {{if $SldChk := dbGet $UID "points"}} {{$PtsSolde = index $SldChk.Value 0}} {{end}}
+    {{$PtsSolde := or (dbGet $UID "Points").Value 0}}
     {{sendMessage nil (print "Bien joué <@" $UID ">, tu viens de gagner un pochon avec **" $PtsToAdd " Points** à l'intérieur !")}}
     {{sendMessage 618851288825856010 (print "Points récupérés par <@" $UID ">")}}
-    {{dbSet $UID "points" (cslice (add $PtsSolde $PtsToAdd) (sub .Message.Timestamp.Parse.Unix))}}
+    {{dbSet $UID "Points" (add $PtsSolde $PtsToAdd)}}
     {{dbDel 1 "MsgLuck"}}
   {{end}}
 {{end}}
