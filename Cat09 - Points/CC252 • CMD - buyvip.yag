@@ -57,7 +57,7 @@
         {{end}}
 
         {{if not $EM}}
-          {{dbSet $UID "points" (cslice (sub $uPts $pr) $UTS)}}
+          {{dbSet $UID "Points" (sub $uPts $pr)}}
           {{$a := dbIncr 531170764183830528 "Points" $pr}}
 
           {{$LPcr := " <:CrownLP_v2:1080310392850493550>"}}
