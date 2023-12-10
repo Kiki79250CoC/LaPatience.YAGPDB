@@ -1,13 +1,23 @@
-{{$args := parseArgs 1 "-leaderboard [page]" (carg "int" "int")}}
-{{$skip := mult (sub ($args.Get 0) 1) 20}}
-{{$message := ""}}
-{{$i := $skip}}
-{{range (dbTopEntries "score" 20 $skip)}}
-  {{$i = add $i 1}}
-  {{if (getMember .UserID)}}
-    {{$message = (joinStr "" $message "\n**" $i " :** " (getMember .UserID).User.Username " avec un score de **" .Value "** !")}}
-  {{else}}
-    {{$message = (joinStr "" $message "\n**" $i " :** `ID : " .UserID "` avec un score de **" .Value "** !")}}
-  {{end}}
-{{end}}
-{{sendMessage nil $message}}
+{{$args := parseArgs 0 "`-leaderboard ‹Page›`" (carg "int" "page")}}
+{{$LNbr := 10}}
+{{$PageSk := ($index := mult (sub ($PgNbr := or ($args.Get 0) 1) 1) $LNbr)}}
+{{$MEntry := add $index 1}}
+{{$PgLmt := dbCount "score"}}
+
+{{if le (add $index 10) $PgLmt}}
+  {{$TopList := ""}}
+  {{- range (dbTopEntries "score" $LNbr $PageSk)}}
+    {{- $inTxt := ($index = add $index 1)}}
+    {{- if or (lt $index 10) (and (ge $PgNbr 10) (lt $index 100)) (and (ge $PgNbr 100) (lt $index 1000))}} {{$inTxt = print " " $index}} {{end}}
+    {{- $User := .UserID}}
+    {{- $Sld := reReplace "," (humanizeThousands (toInt .Value)) " "}}
+    {{- with (getMember .UserID)}} {{$User = print (or .User.Globalname .User.Username)}} {{end}}
+    {{- $TopList = print $TopList "\n**⋄  `" $inTxt "`\t · " $User " :** " $Sld " Points"}}
+  {{- end}}
+  {{$embed := cembed "color" 0xa10aee
+    "title" "Points · Leaderboard des Scores"
+    "fields" (cslice (sdict "name" " " "value" " " "inline" false) (sdict "name" " " "value" $TopList "inline" false) (sdict "name" " " "value" " " "inline" false))
+    "footer" (sdict "text" ((print "Entrées " $MEntry " - " $index " sur " (reReplace "," (humanizeThousands $PgLmt) " "))))
+  }} {{sendMessage nil $embed}}
+
+{{else}} {{sendMessage nil (print ">>> **Erreur :**\nLa page " $PgNbr " n'existe pas.")}} {{end}}
