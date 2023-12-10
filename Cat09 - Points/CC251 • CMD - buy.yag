@@ -87,10 +87,7 @@
           {{if (dbGet 21 "Buy")}} {{if targetHasRoleID $UID ($r = 1098981009774628886)}} {{$EM = "Vous avez déjà le rôle"}} {{else}} {{giveRoleID $UID $r}} {{end}}
           {{else}} {{$EM = "L'item n'est actuellement pas actif"}} {{end}}
 
-        {{else if and (eq $BID 22) (eq (randInt 2) 1)}}
-          {{$uPts = add $uPts 2200}} {{dbSetExpire $UID "Buy22" "#" 1800}}
-          {{sendMessage $ChG (print "Bien joué " $UM ", tu viens de gagner **1 000 Points** avec le Buy 22 !")}}
-
+        {{else if eq $BID 22}} {{dbSetExpire $UID "Buy22" "#" 1800}} {{if eq (randInt 2) 1}} {{$uPts = add $uPts 2200}} {{sendMessage $ChG (print "Bien joué " $UM ", tu viens de gagner **1 000 Points** avec le Buy 22 !")}} {{end}}
         {{else if eq $BID 26}} {{dbSetExpire 26 "Buy" 0 600}}
         {{else if eq $BID 27}} {{addRoleID ($r = 1165268999437824111)}} {{removeRoleID $r 86400}}
 
