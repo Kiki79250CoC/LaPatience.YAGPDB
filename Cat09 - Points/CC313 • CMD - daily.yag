@@ -13,7 +13,7 @@
     {{if $UsrBA := dbGet .User.ID "Points"}}
       {{$UsrPS = $UsrBA.Value}}
       {{$UsrN = or .Member.Nick .User.Globalname .User.Username}}
-      {{dbSet .User.ID "Ppoints" (add $UsrPS $ptsToDonate)}}
+      {{dbSet .User.ID "Points" (add $UsrPS $ptsToDonate)}}
       {{dbSetExpire .User.ID "VIPdailyPoints" "cooldown" $dailyInvLmt}}
     {{else}}
       {{if lt .Message.Timestamp.Parse.Unix 1704063600}}
