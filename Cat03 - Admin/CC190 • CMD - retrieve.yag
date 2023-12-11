@@ -1,13 +1,15 @@
 {{$args := parseArgs 2 "`-retrieve ‹@UserOrID› ‹Amount›`" (carg "userid" "UID") (carg "int" "value")}}
-{{$UID := $args.Get 0}}
+{{$UNS := toString ($UID := $args.Get 0)}}
 {{$Amt := $args.Get 1}}
+
+{{if getMember $UID}} {{$UNS = or $UNS.User.GlobalName $UNS.User.Username}} {{end}}
 
 {{if $v3Chk := dbGet $UID "Points"}}
   {{$a := dbIncr $UID "Points" $Amt}}
   {{$embed := cembed
     "color" 0x0080ff
     "title" (print "✓ Solde de Points mis à jour")
-    "fields" (cslice (sdict "name" (or (getMember $UID).User.Globalname (getMember $UID).User.Username) "value" (print "> ~~" (reReplace "," (humanizeThousands (sub $a $Amt)) " ") "~~ › **" (reReplace "," (humanizeThousands $a) " ") "**") "inline" true))
+    "fields" (cslice (sdict "name" $UNS "value" (print "> ~~" (reReplace "," (humanizeThousands (sub $a $Amt)) " ") "~~ › **" (reReplace "," (humanizeThousands $a) " ") "**") "inline" true))
   }} {{sendMessage nil $embed}}
 
 {{else}}
@@ -19,7 +21,7 @@
     {{$embed := cembed
       "color" 0x0080ff
       "title" (print "✓ Solde de Points mis à jour")
-      "fields" (cslice (sdict "name" (or (getMember $UID).User.Globalname (getMember $UID).User.Username) "value" (print "> ~~" (reReplace "," (humanizeThousands $PtSld) " ") "~~ › **" (reReplace "," (humanizeThousands (add $PtSld $Amt)) " ") "**") "inline" true))
+      "fields" (cslice (sdict "name" $UNS "value" (print "> ~~" (reReplace "," (humanizeThousands $PtSld) " ") "~~ › **" (reReplace "," (humanizeThousands (add $PtSld $Amt)) " ") "**") "inline" true))
       "footer" (sdict "text" (print "Cette personne n'a pas encore migré ses Points.\nÀ partir du 01 Janvier 2024, 00h00 (UTC+1), il ne sera\nplus possible de créditer des Points sur le système v2.") "icon_url" "https://cdn.discordapp.com/emojis/1156596295352467507.webp?quality=lossless")
     }} {{sendMessage nil $embed}}
   {{else}}
