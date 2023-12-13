@@ -1,5 +1,5 @@
 {{$args := parseArgs 2 "`-retrieve ‹@UserOrID› ‹Amount›`" (carg "userid" "UID") (carg "int" "value")}}
-{{$UNS := ($IDS := toString ($UID := $args.Get 0))}}
+{{$IDS := toString ($UNS := ($UID := $args.Get 0))}}
 {{$Amt := $args.Get 1}}
 
 {{$TaxMinA := 7000}}
@@ -9,24 +9,26 @@
 {{$TaxT2PM := 0.35}}
 {{$TaxPM := 0.20}}
 
-{{if getMember $UID}} {{$UNS = or $UNS.User.GlobalName $UNS.User.Username}} {{end}}
+{{if getMember $UID}} {{$UNS = or (getMember $UID).User.Globalname (getMember $UID).User.Username}} {{end}}
 
 {{if $v3Chk := dbGet $UID "Points"}}
-  {{$a := dbIncr $UID "Points" $Amt}}
+  {{$a := toInt (dbIncr $UID "Points" $Amt)}}
   {{$embed := cembed
     "color" 0x0080ff
     "title" (print "✓ Solde de Points mis à jour")
     "fields" (cslice (sdict "name" $UNS "value" (print "> ~~" (reReplace "," (humanizeThousands (sub $a $Amt)) " ") "~~ › **" (reReplace "," (humanizeThousands $a) " ") "**") "inline" true))
   }} {{sendMessage nil $embed}}
 
-  {{if ge $a $TaxMinB}} {{$TaxPM = $TaxT2PM}} {{end}}
-  {{if ge $a $TaxMinC}} {{$TaxPM = $TaxT3PM}} {{end}}
-  {{$TaxAmnt := toInt (mult (toFloat $a) $TaxPM)}}
+  {{if ge $a $TaxMinA}}
+    {{if ge $a $TaxMinB}} {{$TaxPM = $TaxT2PM}} {{end}}
+    {{if ge $a $TaxMinC}} {{$TaxPM = $TaxT3PM}} {{end}}
+    {{$TaxAmnt := toInt (mult (toFloat $a) $TaxPM)}}
 
-  {{if $TaxDB := dbGet 0 "Taxes"}}
-    {{$TaxSlice := $TaxDB.Value}}
-    {{if not ($TaxSlice.Get $IDS)}} {{$TaxSlice.Set $IDS (cslice $TaxAmnt 0)}} {{dbSet 0 "Taxes" $TaxSlice}} {{end}}
-  {{else}} {{dbSet 0 "Taxes" (sdict $IDS (cslice $TaxAmnt 0))}} {{end}}
+    {{if $TaxDB := dbGet 0 "Taxes"}}
+      {{$TaxSlice := $TaxDB.Value}}
+      {{if not ($TaxSlice.Get $IDS)}} {{$TaxSlice.Set $IDS (cslice $TaxAmnt 0)}} {{dbSet 0 "Taxes" $TaxSlice}} {{end}}
+    {{else}} {{dbSet 0 "Taxes" (sdict $IDS (cslice $TaxAmnt 0))}} {{end}}
+  {{end}}
 
 {{else}}
   {{if lt .Message.Timestamp.Parse.Unix 1704063600}}

@@ -286,7 +286,7 @@ DISCLAIMER : Elements in ‹quotation marks› are variable arguments (IE: User 
           › Roles     : Limited (02) › "Dictateur Suprême", "Développeur"
           › Channels  : Not limited
 
-          › Revision  : 3.02
+          › Revision  : 3.03
 
         • 212 - COMMAND
           › Trigger   : -banword
