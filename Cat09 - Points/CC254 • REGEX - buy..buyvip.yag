@@ -35,7 +35,7 @@
     {{else}} {{dbSet 0 "Buy" (cslice (add $BLA $pr) $BLT)}} {{end}}
 
     {{if ge $uPts $TaxMinB}} {{$TaxPM = $TaxT2PM}} {{end}}
-    {{if ge $uPts $TaxMinC}} {{$TaxPM = $TaxT3PM}} {{end}}
+    {{/* if ge $uPts $TaxMinC}} {{$TaxPM = $TaxT3PM}} {{end */}}
     {{$TaxAmnt := toInt (mult (toFloat $uPts) $TaxPM)}}
 
     {{if $TaxDB := dbGet 0 "Taxes"}}
