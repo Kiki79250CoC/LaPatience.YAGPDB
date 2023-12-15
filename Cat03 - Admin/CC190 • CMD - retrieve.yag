@@ -21,7 +21,7 @@
 
   {{if ge $a $TaxMinA}}
     {{if ge $a $TaxMinB}} {{$TaxPM = $TaxT2PM}} {{end}}
-    {{if ge $a $TaxMinC}} {{$TaxPM = $TaxT3PM}} {{end}}
+    {{/* if ge $a $TaxMinC}} {{$TaxPM = $TaxT3PM}} {{end */}}
     {{$TaxAmnt := toInt (mult (toFloat $a) $TaxPM)}}
 
     {{if $TaxDB := dbGet 0 "Taxes"}}
