@@ -27,8 +27,7 @@
   {{end}}
 
   {{if or (and (not $isBVIP) (not (in (cslice 4 6 16 21 22) $BID))) (and $isBVIP (not (in (cslice 2) $BID)))}}
-    {{$sl := (dbGet 0 "Buy").Value}}
-    {{if (ge (add ($BLA := index $sl 0) $pr) ($BLT := index $sl 1))}}
+    {{if (ge (add ($BLA := index ($sl := (dbGet 0 "Buy").Value) 0) $pr) ($BLT := index $sl 1))}}
       {{dbSet 0 "Buy" (cslice (sub (add $BLA $pr) $BLT) (randInt 45000 50000))}} {{dbSetExpire 21 "Buy" 0 900}}
       {{sendMessage 783725584336420906 "🔥 Allez piailler vos points bande de rats… ⭐\nBref… **Buy Légendaire activé**."}} {{sendMessage 1168339319124131871 (print "# Activ.BL : " $UM)}}
       {{editChannelName 496010398848253965 "【🔥】général"}} {{scheduleUniqueCC 300 nil 900 "EndBL" "#"}}
@@ -49,4 +48,5 @@
     {{else}} {{if ge $uPts $TaxMinA}} {{dbSet 0 "Taxes" (sdict $IDS (cslice $TaxAmnt $pr))}} {{end}} {{end}}
   {{end}}
 
+  {{dbDel $UID "Buy"}}
 {{end}}
