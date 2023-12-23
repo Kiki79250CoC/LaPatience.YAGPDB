@@ -412,7 +412,7 @@ DISCLAIMER : Elements in ‹quotation marks› are variable arguments (IE: User 
           › Roles     : Limited (04) › "Dictateur Suprême", "Développeur", "Grand Modérateur", "Médiateur"
           › Channels  : Not Limited
 
-          › Revision  : 2.35.1
+          › Revision  : 2.35.2
 
         • 321 - COMMAND
           › Trigger   : -ungoulag
