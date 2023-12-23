@@ -1,0 +1,23 @@
+{{$args := parseArgs 0 "`-baltop ‹Page›`" (carg "int" "page")}}
+{{$LNbr := 10}}
+{{$PageSk := ($index := mult (sub ($PgNbr := or ($args.Get 0) 1) 1) $LNbr)}}
+{{$MEntry := add $index 1}}
+{{$PgLmt := dbCount "Points"}}
+
+{{if le (add $index 10) $PgLmt}}
+  {{$TopList := ""}}
+  {{- range (dbTopEntries "Points" $LNbr $PageSk)}}
+    {{- $inTxt := ($index = add $index 1)}}
+    {{- if or (lt $index 10) (and (ge $PgNbr 10) (lt $index 100)) (and (ge $PgNbr 100) (lt $index 1000))}} {{$inTxt = print " " $index}} {{end}}
+    {{- $User := .UserID}}
+    {{- $Sld := reReplace "," (humanizeThousands (toInt .Value)) " "}}
+    {{- with (getMember .UserID)}} {{$User = print (or .User.Globalname .User.Username)}} {{end}}
+    {{- $TopList = print $TopList "\n**⋄  `" $inTxt "`\t · " $User " :** " $Sld " Points"}}
+  {{- end}}
+  {{$embed := cembed "color" 0xffcf00
+    "title" "Points · Leaderboard des fortunes"
+    "fields" (cslice (sdict "name" " " "value" " " "inline" false) (sdict "name" " " "value" $TopList "inline" false) (sdict "name" " " "value" " " "inline" false))
+    "footer" (sdict "text" ((print "Entrées " $MEntry " - " $index " sur " (reReplace "," (humanizeThousands $PgLmt) " "))))
+  }} {{sendMessage nil $embed}}
+
+{{else}} {{sendMessage nil (print ">>> **Erreur :**\nLa page " $PgNbr " n'existe pas.")}} {{end}}

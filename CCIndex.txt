@@ -769,6 +769,17 @@ DISCLAIMER : Elements in ‹quotation marks› are variable arguments (IE: User 
 
           › Revision  : 3.00.1
 
+        • 212 - COMMAND
+          › Trigger   : -baltop
+          › Arguments : ‹Page*›
+
+          › Enabled   : Yes
+          › Name      : n/a
+          › Roles     : Not limited
+          › Channels  : Limited (02) › "Commandes Bots", "Gestion Bots"
+
+          › Revision  : 1.00
+
         • 251 - COMMAND
           › Trigger   : -buy
           › Arguments : ‹ItemID› ‹[@UserOrID|"Text"]*›
