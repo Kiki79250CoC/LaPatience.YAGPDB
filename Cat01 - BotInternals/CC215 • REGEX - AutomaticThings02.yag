@@ -20,7 +20,7 @@
 
       {{if $ThScr}} {{$ViAct = or (dbGet .User.ID "score") 0}} {{end}}
 
-      {{if or (lt $ViAct 600) (hasRoleID .User.ID 1165268999437824111) $b33}}
+      {{if or (lt $ViAct 600) (hasRoleID 1165268999437824111) $b33}}
         {{$MsgP2 = ", sauf qu'un flic l'a vu…\n"}} {{$ResSt = "raté"}}
         {{if $ThScr}} {{$MsgP3 = print "Suite à un malentendu avec l'autre là, bin pour l'emmerder je lui pique du Score. " .User.Mention ", c'est cadeau."}} {{$a := dbIncr $ThiefID "score" -300}} {{$a := dbIncr .User.ID "score" 300}} {{if not (targetHasRoleID $ThiefID $r)}} {{giveRoleID $ThiefID $r}} {{end}}
         {{else}} {{$MsgP3 = print "Du coup sur les **600 points**, 300 se sont envolés vers les cieux et le reste vont dans la poche de " .User.Mention ". 💸"}} {{$a := dbIncr .User.ID "Points" 300}} {{end}}
