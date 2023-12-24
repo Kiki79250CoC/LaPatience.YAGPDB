@@ -78,7 +78,7 @@
 
     {{end}}
   {{else}}
-    {{if le $pr $uPts}} {{$EM = "Solde insuffisant"}}
+    {{if gt $pr $uPts}} {{$EM = "Solde insuffisant"}}
     {{else if not $BOKPtsA}} {{$EM = "Solde de points trop élevé"}}
     {{else if not $BOKCldw}} {{$EM = print "Item soumis à un cooldown. Vous pourrez l'utiliser dans **" (reReplace "second" (reReplace "and" (humanizeDurationSeconds (mult (sub $BLK.ExpiresAt.Unix $UTS) 1000000000)) "et") "seconde") "**"}}
     {{else}} {{$EM = "L'item sélectionné n'existe pas"}} {{end}}
