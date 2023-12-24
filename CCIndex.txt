@@ -800,7 +800,7 @@ DISCLAIMER : Elements in ‹quotation marks› are variable arguments (IE: User 
           › Roles     : Not limited
           › Channels  : Limited (02) › "Boutique", "Gestion Bots"
 
-          › Revision  : 1.31
+          › Revision  : 1.31.1
 
         • 254 - REGEX
           › Trigger   : (?i)\A(?:-|<@!?204255221017214977>)(buy|buyvip)\b
