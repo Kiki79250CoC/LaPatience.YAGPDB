@@ -789,7 +789,7 @@ DISCLAIMER : Elements in ‹quotation marks› are variable arguments (IE: User 
           › Roles     : Not limited
           › Channels  : Limited (02) › "Boutique", "Gestion Bots"
 
-          › Revision  : 2.80.3
+          › Revision  : 2.81
 
         • 252 - COMMAND
           › Trigger   : -buyvip
