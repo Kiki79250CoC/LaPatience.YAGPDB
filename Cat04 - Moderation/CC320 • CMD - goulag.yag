@@ -3,8 +3,6 @@
 {{$chanMine := 925172096252936223}}
 {{$chanZonz := 550364083195609089}}
 {{$useLimit := 10}}
-{{$isTrollG := false}}
-{{$isMinedG := false}}
 {{$sancUID := or .ExecData.sancUsr ($args.Get 0)}}
 {{$sancRes := or .ExecData.sancRes ($args.Get 1)}}
 {{$sancDur := or .ExecData.sancDur ($args.Get 2)}}
@@ -12,8 +10,8 @@
 {{$optArgs := or .ExecData.OptArgs ($args.Get 3) ""}}
 {{$rMbr := ""}}
 
-{{if and .ExecData (in (cslice "AutoSanc.Banword" "AutoSanc.Bomb" "AutoSanc.Buy" "AutoSanc.BuyVIP") $sancRes)}} {{$isTrollG = true}} {{end}}
-{{if or (eq $sancMod 204255221017214977) (reFind `(?i)(\bBuy\s*19\b)` $sancRes) (reFind `--force-as-mine` $.Message.Content) (and (le (toInt (fdiv $sancDur 1000000000)) 900) (gt (toInt (fdiv $sancDur 1000000000)) 0))}} {{$isMinedG = true}} {{end}}
+{{$isTrollG := and .ExecData (in (cslice "AutoSanc.Banword" "AutoSanc.Bomb" "AutoSanc.Buy" "AutoSanc.BuyVIP") $sancRes)}}
+{{$isMinedG := or (eq $sancMod 204255221017214977) (reFind `(?i)(\bB(uy)?\s*(19|25)\b)` $sancRes) (reFind `--force-as-mine` $.Message.Content) (and (le (toInt (fdiv $sancDur 1000000000)) 900) (gt (toInt (fdiv $sancDur 1000000000)) 0))}}
 
 {{$readableSancDur := (reReplace "second" (reReplace "hour" (reReplace "day" (reReplace "week" (reReplace "month" (reReplace "year" (reReplace "and" (humanizeDurationSeconds $sancDur) "et") "an") "mois") "semaine") "jour") "heure") "seconde")}}
 
