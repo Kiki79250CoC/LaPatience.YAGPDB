@@ -20,7 +20,6 @@
   {{if or (in (cslice 223894107016134656 369101917659332611) $banMod) (targetHasRoleID $banMod 931351059455164477)}} {{$unlkSec = true}}
   {{else}} {{sendMessage nil ">>> **Erreur :**\n`[FrostGuard Error]` Vous n'avez pas les permissions requises pour utiliser cet argument."}} {{return}} {{end}}
 {{end}}
-{{if (reFind `(?i)(\bBuy\s*25\b)` $banRes)}} {{$isTroll = true}} {{end}}
 
 {{$sText := ""}}
 {{if $silentB}} {{$sText = "silencieusement "}}
