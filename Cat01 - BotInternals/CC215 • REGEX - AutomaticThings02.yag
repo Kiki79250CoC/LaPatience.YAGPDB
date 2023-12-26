@@ -77,7 +77,7 @@
   {{if and (eq (index $bomb 0) .User.ID) (lt (sub (index $bomb 1) $UTS) 0)}}
     {{dbDel 0 "bomb"}}
     {{removeRoleID 967187787260518440}}
-    {{sendMessage nil (print "Désolé " .User.Mention ", mais il semblerait que 💣 **La Sainte Bombe** viens de t'exploser à la gueule… À dans " ($dur := (reReplace "hour" (reReplace "and" (humanizeDurationSeconds (mult (toInt (index $bomb 2)) 60)) "et") "heure")) ". <a:risitas_boom:1056315066653364346>")}}
+    {{sendMessage nil (print "Désolé " .User.Mention ", mais il semblerait que 💣 **La Sainte Bombe** viens de t'exploser à la gueule… À dans " ($dur := (reReplace "hour" (reReplace "and" (humanizeDurationSeconds (toDuration (print (index $bomb 2) "m"))) "et") "heure")) ". <a:risitas_boom:1056315066653364346>")}}
     {{execCC 320 nil 0 (sdict "sancUsr" .User.ID "sancRes" "AutoSanc.Bomb" "sancDur" (toDuration (print (index $bomb 2) "m")) "sancMod" 0)}}
     {{sendDM "Tu es l'élu(e) ! 💣 **La Sainte Bombe** vient de péter sur toi !\nUn sincère merci (de la part des autres) pour le sacrifice.\nAllez, on se revoit dans " $dur "."}}
     {{return}}
