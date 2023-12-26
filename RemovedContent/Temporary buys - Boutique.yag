@@ -1,0 +1,23 @@
+// Buy 27 - Anniversaire 2023
+
+{{else if eq $BID 27}} {{$r := randInt 100}}
+{{if lt $r 1}} {{$uPts = add $uPts 10100}} {{$DM = print $DM "\nBuy27 : Tu as gagné 10 000 Points !"}}
+{{else if lt $r 5}} {{$uPts = add $uPts 2100}} {{$DM = print $DM "\nBuy27 : Tu as gagné 2 000 Points !"}}
+{{else if lt $r 10}} {{$p := 438059818813489162}}
+{{if targetHasRoleID $p 506417754878902272}} {{$DM = print $bErr "PingPong est déjà sur le bûcher. Pour compenser, voilà 200 Points."}} {{$uPts = add $uPts 300}}
+{{else}} {{$DM = print $DM "\nBuy27 : Tu as envoyé PingPong sur le bûcher ! 🔥"}} {{execCC 320 nil 0 (sdict "sancUsr" $p "sancRes" "Buy27" "sancDur" (toDuration "1m") "sancMod" 0)}} {{sendMessage $ChG "PingPong est parti faire un tour au bûcher… 🔥"}} {{end}}
+{{else if lt $r 20}} {{$uPts = add $uPts 1100}} {{$DM = print $DM "\nBuy27 : Tu as gagné 1 000 Points !"}}
+{{else if lt $r 30}} {{$uPts = add $uPts 300}} {{$DM = print $DM "\nBuy27 : Tu as gagné 200 Points !"}} {{end}} {{dbSetExpire $UID "Buy27" "#" 2400}} {{end}}
+
+
+// Buy 34 - Noël 2023
+
+{{else if eq $BID 34}} {{if and (ge $UTS 1703415600) (lt $UTS 1703566800)}} {{$win := "800 Points"}}
+  {{if lt ($rd := randInt 5) 1}} {{addRoleID ($r = 998383449008246824)}} {{removeRoleID $r 86400}} {{$win = "24h de Farm XP"}}
+  {{else if lt $rd 4}} {{$uPts = add $uPts 1300}}
+  {{else}} {{execCC 320 nil 0 (sdict "sancUsr" $UID "sancRes" "AutoSanc.Buy" "sancDur" (toDuration "10m") "sancMod" 0)}} {{$win = "10 minutes au Goulag (Grâcieusement offert par Poutine !)"}}
+  {{end}} {{$DM = print $DM "\nBuy de Noël 🎄 · Tu as gagné **" $win "** !"}}
+  {{else}} {{$EM = "La Boutique de Noël n'est disponible que **du <t:1703415600> au <t:1703566800>**"}} {{end}}
+
+
+// 
