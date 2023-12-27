@@ -71,7 +71,7 @@
     {{else if not $BOKuVIP}} {{$EM = "Vous n'êtes pas VIP"}}
     {{else if not $BOKPtsA}} {{$EM = "Solde de points trop élevé"}}
     {{else if not $BOKCldw}} {{$EM = print "Item soumis à un cooldown. Vous pourrez l'utiliser dans **" (reReplace "second" (reReplace "and" (humanizeDurationSeconds (mult (sub $blk.ExpiresAt.Unix $UTS) 1000000000)) "et") "seconde") "**"}}
-    {{else}} {{$EM = "L'item sélectionné n'existe pas"}} {{end}}
+    {{else}} {{$EM = "L'item sélectionné (" $BID ") n'existe pas"}} {{end}}
   {{end}}
 
 {{else}}
