@@ -14,7 +14,7 @@
 
   {{if (eq (toInt (dbIncr $UID "BuyCt" 1)) 500)}} {{giveRoleID $UID 1159813369587564655}} {{end}}
 
-  {{if or (and (not $isBVIP) (not (in (cslice 1 4 6 16 21 22 29 30 34) $BID))) (and $isBVIP (not (in (cslice 2) $BID)))}}
+  {{if or (and (not $isBVIP) (not (in (cslice 1 4 6 16 21 22 29 30) $BID))) (and $isBVIP (not (in (cslice 2) $BID)))}}
     {{$em := toInt (sub ($e := toInt (dbIncr $UID "score" $pr)) $pr)}}
 
     {{if and (lt $em 1000) (ge $e 1000)}} {{giveRoleID $UID 1060949245433229373}} {{end}}
@@ -24,9 +24,7 @@
     {{if and (lt $em 40000) (ge $e 40000)}} {{giveRoleID $UID 1060949819302084678}} {{end}}
 
     {{if gt ($nPal := (roundFloor (div $e 5000))) (roundFloor (div $em 5000))}} {{sendMessage 1060966843667460166 (print "Bien joué " $UM ", tu viens de passer au **Palier " $nPal "** !")}} {{end}}
-  {{end}}
 
-  {{if or (and (not $isBVIP) (not (in (cslice 4 6 16 21 22 29 30 34) $BID))) (and $isBVIP (not (in (cslice 2) $BID)))}}
     {{if (ge (add ($BLA := index ($sl := (dbGet 0 "Buy").Value) 0) $pr) ($BLT := index $sl 1))}}
       {{dbSet 0 "Buy" (cslice (sub (add $BLA $pr) $BLT) (randInt 55000 60000))}} {{dbSetExpire 21 "Buy" 0 900}}
       {{sendMessage 783725584336420906 "🔥 Allez piailler vos points bande de rats… ⭐\nBref… **Buy Légendaire activé**."}} {{sendMessage 1168339319124131871 (print "# Activ.BL : " $UM)}}
