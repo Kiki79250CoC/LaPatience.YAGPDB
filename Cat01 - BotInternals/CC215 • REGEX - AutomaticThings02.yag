@@ -2,7 +2,7 @@
 
 {{if and (reFind `(\[.+\]\(.+\))` ($Msg := $.Message.Content)) (not (or (in (cslice 223894107016134656 369101917659332611) .User.ID) (hasRoleID 1078386211472805998)))}}
   {{deleteTrigger 0}} {{sendDM "Les hyperliens sont prohibés sur le serveur pour des raisons de sécurité."}}
-  {{sendMessage 808035430410092544 (print "Message contenant un hyperlien intercepté. Contenu du message :\n\n" $Msg)}}
+  {{sendMessage 1168339319124131871 (print "Message de <@" .User.ID "> sur le <#" .Message.ChannelID "> contenant un hyperlien intercepté. Contenu du message :\n\n" $Msg)}}
 {{end}}
 
 {{/* -------------------- */}}
@@ -16,7 +16,7 @@
       {{dbDel 16 "Buy"}}
 
       {{$MsgP1 := print "Tiens, on dirait que <@" $ThiefID "> a tenté de faire les poches de " .User.Mention}} {{$MsgP2 := ($MsgP3 := ($ResSt := ""))}}
-      {{$ThScr := eq (randInt 30) 15}} {{$ViAct := or (toInt (dbGet .User.ID "Points").Value) 0}} {{$r := 1159817155567681577}} {{$b33 := (dbGet 33 "Buy").Value}}
+      {{$ThScr := eq (randInt 30) 15}} {{$ViAct := or (toInt (dbGet .User.ID "Points").Value) 0}} {{$r := 1159817155567681577}} {{$b33 := toInt (dbGet 33 "Buy").Value}}
 
       {{if $ThScr}} {{$ViAct = or (dbGet .User.ID "score") 0}} {{end}}
 
@@ -24,7 +24,7 @@
         {{$MsgP2 = ", sauf qu'un flic l'a vu…\n"}} {{$ResSt = "raté"}}
         {{if $ThScr}} {{$MsgP3 = print "Suite à un malentendu avec l'autre là, bin pour l'emmerder je lui pique du Score. " .User.Mention ", c'est cadeau."}} {{$a := dbIncr $ThiefID "score" -300}} {{$a := dbIncr .User.ID "score" 300}} {{if not (targetHasRoleID $ThiefID $r)}} {{giveRoleID $ThiefID $r}} {{end}}
         {{else}} {{$MsgP3 = print "Du coup sur les **600 points**, 300 se sont envolés vers les cieux et le reste vont dans la poche de " .User.Mention ". 💸"}} {{$a := dbIncr .User.ID "Points" 300}} {{end}}
-        {{if and $b33 (ge $ViAct 600)}} {{$a := dbIncr $b33 "Points" 600}} {{$MsgP3 = print $MsgP3 "\n\n*Au passage, si ce buy a raté, c'est à cause de <" $b33 "> et de son Buy 33.\nBuy 33 qui est donc remboursé.*"}} {{end}}
+        {{if and $b33 (ge $ViAct 600)}} {{$a := dbIncr $b33 "Points" 600}} {{dbDel 33 "Buy"}} {{$MsgP3 = print $MsgP3 "\n\n*Au passage, si ce buy a raté, c'est à cause de <@" $b33 "> et de son Buy 33.\nBuy 33 qui est donc remboursé.*"}} {{end}}
       {{else}}
         {{$MsgP2 = " et a trouvé "}} {{$ResSt = "réussi"}}
         {{if $ThScr}} {{$MsgP3 = "quelque chose dans l'une d'elles.\nÉtonamment ce n'était pas 600 Points, mais… **600 de Score** ?! <:jesus_what:1054829025161388063>"}} {{$a := dbIncr .User.ID "score" -600}} {{$a := dbIncr $ThiefID "score" 600}} {{if not (targetHasRoleID $ThiefID $r)}} {{giveRoleID $ThiefID $r}} {{end}}
@@ -39,12 +39,11 @@
 
   {{/* ---------- BuyVIP 5 ---------- */}}
   {{if $bvip5 := (dbGet 10005 "Buy").Value}}
-
     {{if and (lt (sub (index $bvip5 1) $UTS) 1) (not (eq .User.ID (toInt (index $bvip5 0))))}}
       {{dbDel 10005 "Buy"}} {{$r := 1158197672071680083}}
       {{sendMessage nil (print "Tiens, on dirait que " .User.Mention " viens de se faire voler 200 points par… une bombe ?!")}}
       {{$a := dbIncr .User.ID "Points" -200}}
-      {{if and (lt $a 0) (not (hasRoleID $r))}} {{addRoleID $r}} {{end}}
+      {{if and (lt (toInt $a) 0) (not (hasRoleID $r))}} {{addRoleID $r}} {{end}}
       {{return}}
 		{{end}}
   {{end}}
@@ -100,12 +99,12 @@
 {{/* ---------- BuyVIP 3 ---------- */}}
 {{if $buyvip3 := dbGet 10003 "Buy"}}
   {{$channelList := $buyvip3.Value}}
-  {{if and (in $channelList (toString .Message.ChannelID)) (not (dbGet .User.ID "gulag"))}}
+  {{if and (in $channelList .Message.ChannelID) (not (dbGet .User.ID "gulag"))}}
     {{sendMessage 1168339319124131871 (print "BuyVIP 3 : Mine déclenchée par <@" .User.ID "> sur le channel <#" .Message.ChannelID ">.")}}
     {{sendDM "Désolé, tu as noclip au Goulag à cause du BuyVIP 3."}}
     {{execCC 320 nil 0 (sdict "sancUsr" .User.ID "sancRes" "AutoSanc.BuyVIP" "sancDur" (toDuration "10m") "sancMod" 0)}}
     {{$newList := cslice}}
-    {{range $channelList}} {{if ne . (toString $.Message.ChannelID)}} {{$newList = $newList.Append .}} {{end}} {{end}}
+    {{range $channelList}} {{if ne . $.Message.ChannelID}} {{$newList = $newList.Append .}} {{end}} {{end}}
     {{if not (eq (len $newList) 0)}} {{dbSet 10003 "Buy" $newList}}
     {{else}} {{dbDel 10003 "Buy"}}
     {{end}}
