@@ -1,6 +1,6 @@
 {{$args := parseArgs 3 "`-setscore ‹[Add|Remove]› ‹@UserOrID› ‹Amount›`" (carg "string" "Action") (carg "userid" "UID") (carg "int" "Amount")}}
 {{$UID := $args.Get 1}}
-{{$DBScore := or (dbGet $UID "score").Value 0}}
+{{$DBScore := toInt (or (dbGet $UID "score").Value 0)}}
 {{$AftDBSc := 0}}
 
 {{if (in (cslice "add" "remove") (lower ($args.Get 0)))}}
@@ -13,7 +13,7 @@
     "title" (print "✓ Le Score a été mis à jour")
     "color" 0xa10aee
     "fields" (cslice
-      (sdict "name" (or .User.Globalname .User.Username) "value" (print "> ~~" (reReplace "," (humanizeThousands $DBScore) " ") "~~ › **" (reReplace "," (humanizeThousands $AftDBSc) " ") "**") "inline" true)
+      (sdict "name" (or (getMember $UID).User.Globalname (getMember $UID).User.Username) "value" (print "> ~~" (reReplace "," (humanizeThousands $DBScore) " ") "~~ › **" (reReplace "," (humanizeThousands $AftDBSc) " ") "**") "inline" true)
   )}}
   {{sendMessage nil $embed}}
 

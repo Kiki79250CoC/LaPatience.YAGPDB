@@ -870,7 +870,7 @@ DISCLAIMER : Elements in ‹quotation marks› are variable arguments (IE: User 
           › Roles     : Limited (02) › "Dictateur Suprême", "Développeur"
           › Channels  : Not limited
 
-          › Revision  : 2.01
+          › Revision  : 2.02
 
         • 309 - COMMAND
           › Trigger   : -leaderboard
