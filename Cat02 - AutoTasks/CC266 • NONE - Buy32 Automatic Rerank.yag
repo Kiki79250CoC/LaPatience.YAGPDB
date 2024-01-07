@@ -1,0 +1,5 @@
+{{$UID := toInt .ExecData.UID}}
+
+{{takeRoleID $UID 735813110224388118}}
+{{range $k,$v := (split (dbGet $UID "Buy32").Value "-")}} {{giveRoleID $UID (toInt $v)}} {{end}}
+{{dbDel $UID "Buy32"}}

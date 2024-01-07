@@ -196,6 +196,17 @@ DISCLAIMER : Elements in ‹quotation marks› are variable arguments (IE: User 
 
           › Revision  : 1.22
 
+        • 266 - NONE
+          › Trigger   : n/a
+          › Arguments : n/a
+
+          › Enabled   : No
+          › Name      : Buy 32 · Automatic re-rank
+          › Roles     : Not limited
+          › Channels  : Not limited
+
+          › Revision  : 1.00
+
         • 268 - NONE
           › Trigger   : n/a
           › Arguments : n/a
