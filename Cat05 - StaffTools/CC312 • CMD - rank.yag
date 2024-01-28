@@ -1,9 +1,11 @@
 {{$args := parseArgs 1 "`-rank ‹@userOrID›`" (carg "userid" "user")}}
-{{$id := ($args.Get 0)}}
-{{if and (not (targetHasRoleID $id 506417754878902272)) (targetHasRoleID $id 735813110224388118) }} 
-  {{giveRoleID $id 496010501990645799}}
-  {{takeRoleID $id 735813110224388118}} 
-  {{sendMessage nil "Personne rankée avec succès !"}}
+{{$UID := ($args.Get 0)}}
+{{if and (not (targetHasRoleID $UID 506417754878902272)) (targetHasRoleID $UID 735813110224388118)}} 
+  {{takeRoleID $UID 735813110224388118}}
+
+  {{if $b32 := (dbGet $UID "Buy32").Value}} {{range $k,$v := (split $b32 "-")}} {{giveRoleID $UID (toInt $v)}} {{end}} {{dbDel $UID "Buy32"}} {{cancelScheduledUniqueCC 266 $UID}} {{sendMessage nil "Victime de Buy 32 re-rankée avec succès…"}}
+  {{else}} {{giveRoleID $UID 496010501990645799}} {{sendMessage nil "Personne rankée avec succès !"}} {{end}}
+
 {{else}}
-  {{sendMessage nil (print "Dis " .User.Mention "...\nT'essaierais pas un peu de niquer le système là par hasard ?! <:jawad:1054718732620009512>")}}
+  {{sendMessage nil (print "Dis " .User.Mention "…\nT'essaierais pas un peu de niquer le système là par hasard ?! <:jawad:1054718732620009512>")}}
 {{end}}
