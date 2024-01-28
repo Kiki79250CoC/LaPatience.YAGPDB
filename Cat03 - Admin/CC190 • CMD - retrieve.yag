@@ -1,52 +1,53 @@
-{{$args := parseArgs 2 "`-retrieve ‹@UserOrID› ‹Amount›`" (carg "userid" "UID") (carg "int" "value")}}
-{{$IDS := toString ($UNS := ($UID := $args.Get 0))}}
-{{$Amt := $args.Get 1}}
+{{$args := parseArgs 2 "`-retrieve ‹Amount› ‹@UserOrID_1› ‹@UserOrID_2› ‹…› ‹@UserOrID_8›`" (carg "int" "value") (carg "userid" "UID1") (carg "userid" "UID2") (carg "userid" "UID3") (carg "userid" "UID4") (carg "userid" "UID5") (carg "userid" "UID6") (carg "userid" "UID7") (carg "userid" "UID8")}}
+{{$Amt := $args.Get 0}}
+{{$Fld := cslice}}
+{{$Err := cslice}}
+{{$Upd := false}}
 
-{{$TaxMinA := 7000}}
-{{$TaxMinB := 13000}}
-{{$TaxMinC := 20000}}
-{{$TaxT3PM := 0.50}}
-{{$TaxT2PM := 0.35}}
+{{$TaxMT3 := 20000}}
+{{$TaxPM3 := 0.50}}
+{{$TaxMT2 := 13000}}
+{{$TaxPM2 := 0.35}}
+{{$TaxMT1 := 7000}}
 {{$TaxPM := 0.20}}
 
-{{if getMember $UID}} {{$UNS = or (getMember $UID).User.Globalname (getMember $UID).User.Username}} {{end}}
+{{$UsrLst := cslice ($args.Get 1)}}
+{{range (cslice 2 3 4 5 6 7 8)}} {{if $args.IsSet .}} {{$UsrLst = $UsrLst.Append ($args.Get .)}} {{end}} {{end}}
 
-{{if $v3Chk := dbGet $UID "Points"}}
-  {{$a := toInt (dbIncr $UID "Points" $Amt)}}
-  {{$embed := cembed
-    "color" 0x0080ff
-    "title" (print "✓ Solde de Points mis à jour")
-    "fields" (cslice (sdict "name" $UNS "value" (print "> ~~" (reReplace "," (humanizeThousands (sub $a $Amt)) " ") "~~ › **" (reReplace "," (humanizeThousands $a) " ") "**") "inline" true))
-  }} {{sendMessage nil $embed}}
+{{$TaxDB := dbGet 0 "Taxes"}}
+{{$TaxSlice := $TaxDB.Value}}
 
-  {{if ge $a $TaxMinA}}
-    {{if ge $a $TaxMinB}} {{$TaxPM = $TaxT2PM}} {{end}}
-    {{/* if ge $a $TaxMinC}} {{$TaxPM = $TaxT3PM}} {{end */}}
-    {{$TaxAmnt := toInt (mult (toFloat $a) $TaxPM)}}
+{{- range $UsrLst}}
+  {{- $IDS := toString .}}
+  {{- $UNS := ""}}
+  {{- if getMember .}} {{- $UNS = or (getMember .).User.Globalname (getMember .).User.Username}} {{- end}}
 
-    {{if $TaxDB := dbGet 0 "Taxes"}}
-      {{$TaxSlice := $TaxDB.Value}}
-      {{if not ($TaxSlice.Get $IDS)}} {{$TaxSlice.Set $IDS (cslice $TaxAmnt 0)}} {{dbSet 0 "Taxes" $TaxSlice}} {{end}}
-    {{else}} {{dbSet 0 "Taxes" (sdict $IDS (cslice $TaxAmnt 0))}} {{end}}
-  {{end}}
+  {{- try}}
+    {{- $nVal := toInt (dbIncr . "Points" $Amt)}}
+    {{- $Fld = $Fld.Append (sdict "name" (or $UNS $IDS) "value" (reReplace "," (print "> ~~" (humanizeThousands (sub $nVal $Amt)) "~~ › **" (humanizeThousands $nVal) "**") " ") "inline" false)}}
 
-{{else}}
-  {{if lt .Message.Timestamp.Parse.Unix 1704063600}}
-    {{$PtSld := 0}}
-    {{if $v2 := dbGet $UID "points"}} {{$PtSld = index $v2.Value 0}} {{end}}
-    {{dbSet $UID "points" (cslice (add $PtSld $Amt) .Message.Timestamp.Parse.Unix)}}
+    {{- if and (ge $nVal $TaxMT1) (getMember .)}}
+      {{- if ge $nVal $TaxMT2}} {{- $TaxPM = $TaxPM2}}
+      {{/* - else if ge $nVal $TaxMT3}} {{- $TaxPM = $TaxPM3 */}} {{- end}}
+      {{- $TaxAmnt := toInt (mult (toFloat $nVal) $TaxPM)}}
+      {{- if and $TaxDB (not (getMember .).User.Bot)}} {{- $Upd = true}} {{- if and ($TaxSlice.Get $IDS)}} {{- $TaxSlice.Set $IDS (cslice $TaxAmnt 0)}} {{- end}}
+      {{- else if (not (getMember .).User.Bot)}} {{- $Upd = true}} {{- $TaxSlice = (sdict $IDS (cslice $TaxAmnt 0))}} {{- end}}
+    {{- end}}
+  {{- catch}} {{- $Err = $Err.Append (sdict "name" (print "**·** " (or $UNS $IDS)) "value" .Error "inline" false)}} {{- end}}
+{{- end}}
 
-    {{$embed := cembed
-      "color" 0x0080ff
-      "title" (print "✓ Solde de Points mis à jour")
-      "fields" (cslice (sdict "name" $UNS "value" (print "> ~~" (reReplace "," (humanizeThousands $PtSld) " ") "~~ › **" (reReplace "," (humanizeThousands (add $PtSld $Amt)) " ") "**") "inline" true))
-      "footer" (sdict "text" (print "Cette personne n'a pas encore migré ses Points.\nÀ partir du 01 Janvier 2024, 00h00 (UTC+1), il ne sera\nplus possible de créditer des Points sur le système v2.") "icon_url" "https://cdn.discordapp.com/emojis/1156596295352467507.webp?quality=lossless")
-    }} {{sendMessage nil $embed}}
-  {{else}}
-    {{$embed := cembed "color" 0xda373c
-        "title" "Le système v2 n'est plus pris en charge !"
-        "footer" (sdict "text" (print "Il n'est plus possible de créditer les comptes qui n'ont pas encore été migrés au système v3.\nVeuillez contacter la personne pour lui demander de migrer ses points."))
-    }} {{sendMessage nil $embed}}
-  {{end}}
+{{$embed := cembed
+  "color" 0x0080ff
+  "title" (print "✓ Solde de Points mis à jour")
+  "fields" $Fld
+}}
+{{$errEmbed := cembed "color" 0xda373c
+  "title" "Des erreurs se sont produites :"
+  "fields" $Err
+}}
 
-{{end}}
+{{$toSend := cslice $embed}}
+{{if ge (len $Err) 1}} {{$toSend = $toSend.Append $errEmbed}} {{end}}
+{{sendMessage nil (complexMessage "embed" $toSend)}}
+
+{{if $Upd}} {{dbSet 0 "Taxes" $TaxSlice}} {{end}}
