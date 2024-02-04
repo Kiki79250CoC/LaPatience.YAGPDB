@@ -25,7 +25,7 @@
   {{if not (getMember $UID).User.Bot}} {{$BuysShop = print " · Achats Boutique : " (reReplace "," (humanizeThousands (or (dbGet $UID "BuyCt").Value 0)) " ")}} {{end}}
 
   {{$StatText = print $PlafT " plafond : " $PlafText $BuysShop "\n"}}
-  {{if eq $PtsSysV 2}} {{$PtsSysT = print "\n\nPensez à migrer votre solde de Points en envoyant un message sur le Général.\nLe système V2 ne sera plus pris en charge à partir du 01 Janvier 2024."}} {{end}}
+  {{if eq $PtsSysV 2}} {{$PtsSysT = print "\n\nPensez à migrer votre solde de Points en envoyant un message sur le Général.\nLe système V2 n'est plus pris en charge depuis le 01 Janvier 2024."}} {{end}}
 {{end}}
 {{if ne .User.ID $UID}} {{$PlafT = "Son"}} {{$PtsT = print $UsrDN " possède"}} {{end}}
 
@@ -36,13 +36,12 @@
 }}
 {{$fields := $pEmbed.fields}}
 
-{{$Taxes := (dbGet 0 "Taxes").Value}}
-{{if $TaxAcct := $Taxes.Get (toString $UID)}}
-  {{$CurTaxProg := reReplace "," (humanizeThousands (toInt (or (index $TaxAcct 1) 0))) " "}}
-  {{$TaxAmnt := reReplace "," (humanizeThousands (toInt (index $TaxAcct 0))) " "}}
-
-  {{$fields = (cslice (sdict "name" " " "value" (print "**⋄  Taxes :**\nSomme à dépenser pour l'exemption : **" $CurTaxProg "/" $TaxAmnt " Points**") "inline" false) (sdict "name" " " "value" " " "inline" false))}}
-  {{$pEmbed.Set "fields" $fields}}
+{{if eq ($TaxSTgl := (dbGet 0 "TaxToggle").Value) "1"}}
+  {{$Taxes := (dbGet 0 "Taxes").Value}}
+  {{if $TaxAcct := $Taxes.Get (toString $UID)}}
+    {{$fields = (cslice (sdict "name" " " "value" (print "**⋄  Taxes :**\nSomme à dépenser pour l'exemption : **" (reReplace "," (print (humanizeThousands (toInt (or (index $TaxAcct 1) 0))) "/" (humanizeThousands (toInt (index $TaxAcct 0)))) " ") " Points**")) (sdict "name" " " "value" " "))}}
+    {{$pEmbed.Set "fields" $fields}}
+  {{end}}
 {{end}}
 
 {{$embed := cembed $pEmbed}}

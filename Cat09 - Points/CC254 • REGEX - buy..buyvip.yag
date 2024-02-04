@@ -1,3 +1,4 @@
+{{$IsImmun := cslice 531170764183830528 369101917659332611}}
 {{$TaxMinA := 7000}}
 {{$TaxMinB := 13000}}
 {{$TaxMinC := 20000}}
@@ -35,15 +36,17 @@
     {{/* if ge $uPts $TaxMinC}} {{$TaxPM = $TaxT3PM}} {{end */}}
     {{$TaxAmnt := toInt (mult (toFloat $uPts) $TaxPM)}}
 
-    {{if $TaxDB := dbGet 0 "Taxes"}}
-      {{$TaxSlice := $TaxDB.Value}}
-      {{if $TaxAcct := $TaxSlice.Get $IDS}}
-        {{$CurTaxProg := toInt (or (index $TaxAcct 1) 0)}}
-        {{$TaxAmnt = toInt (index $TaxAcct 0)}}
-        {{$TaxSlice.Set $IDS (cslice $TaxAmnt (add $CurTaxProg $pr))}}
-        {{dbSet 0 "Taxes" $TaxSlice}}
-      {{else}} {{if ge $uPts $TaxMinA}} {{$TaxSlice.Set $IDS (cslice $TaxAmnt $pr)}} {{dbSet 0 "Taxes" $TaxSlice}} {{end}} {{end}}
-    {{else}} {{if ge $uPts $TaxMinA}} {{dbSet 0 "Taxes" (sdict $IDS (cslice $TaxAmnt $pr))}} {{end}} {{end}}
+    {{if eq ($TaxSTgl := (dbGet 0 "TaxToggle").Value) "1"}}
+      {{if $TaxDB := dbGet 0 "Taxes"}}
+        {{$TaxSlice := $TaxDB.Value}}
+        {{if $TaxAcct := $TaxSlice.Get $IDS}}
+          {{$CurTaxProg := toInt (or (index $TaxAcct 1) 0)}}
+          {{$TaxAmnt = toInt (index $TaxAcct 0)}}
+          {{$TaxSlice.Set $IDS (cslice $TaxAmnt (add $CurTaxProg $pr))}}
+          {{dbSet 0 "Taxes" $TaxSlice}}
+        {{else}} {{if ge $uPts $TaxMinA}} {{$TaxSlice.Set $IDS (cslice $TaxAmnt $pr)}} {{dbSet 0 "Taxes" $TaxSlice}} {{end}} {{end}}
+      {{else}} {{if and (ge $uPts $TaxMinA) (not (getMember $UID).User.Bot) (not (in $IsImmun $UID))}} {{dbSet 0 "Taxes" (sdict $IDS (cslice $TaxAmnt $pr))}} {{end}} {{end}}
+    {{end}}
   {{end}}
 
   {{dbDel $UID "Buy"}}

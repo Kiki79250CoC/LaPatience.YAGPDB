@@ -14,6 +14,7 @@
 {{$UsrLst := cslice ($args.Get 1)}}
 {{range (cslice 2 3 4 5 6 7 8)}} {{if $args.IsSet .}} {{$UsrLst = $UsrLst.Append ($args.Get .)}} {{end}} {{end}}
 
+{{$TaxSTgl := (dbGet 0 "TaxToggle").Value}}
 {{$TaxDB := dbGet 0 "Taxes"}}
 {{$TaxSlice := $TaxDB.Value}}
 
@@ -26,12 +27,14 @@
     {{- $nVal := toInt (dbIncr . "Points" $Amt)}}
     {{- $Fld = $Fld.Append (sdict "name" (or $UNS $IDS) "value" (reReplace "," (print "> ~~" (humanizeThousands (sub $nVal $Amt)) "~~ › **" (humanizeThousands $nVal) "**") " ") "inline" false)}}
 
-    {{- if and (ge $nVal $TaxMT1) (getMember .)}}
-      {{- if ge $nVal $TaxMT2}} {{- $TaxPM = $TaxPM2}}
-      {{/* - else if ge $nVal $TaxMT3}} {{- $TaxPM = $TaxPM3 */}} {{- end}}
-      {{- $TaxAmnt := toInt (mult (toFloat $nVal) $TaxPM)}}
-      {{- if and $TaxDB (not (getMember .).User.Bot)}} {{- $Upd = true}} {{- if and ($TaxSlice.Get $IDS)}} {{- $TaxSlice.Set $IDS (cslice $TaxAmnt 0)}} {{- end}}
-      {{- else if (not (getMember .).User.Bot)}} {{- $Upd = true}} {{- $TaxSlice = (sdict $IDS (cslice $TaxAmnt 0))}} {{- end}}
+    {{- if eq $TaxSTgl "1"}}
+      {{- if and (ge $nVal $TaxMT1) (getMember .)}}
+        {{- if ge $nVal $TaxMT2}} {{- $TaxPM = $TaxPM2}}
+        {{/* - else if ge $nVal $TaxMT3}} {{- $TaxPM = $TaxPM3 */}} {{- end}}
+        {{- $TaxAmnt := toInt (mult (toFloat $nVal) $TaxPM)}}
+        {{- if and $TaxDB (not (getMember .).User.Bot)}} {{- $Upd = true}} {{- if and ($TaxSlice.Get $IDS)}} {{- $TaxSlice.Set $IDS (cslice $TaxAmnt 0)}} {{- end}}
+        {{- else if (not (getMember .).User.Bot)}} {{- $Upd = true}} {{- $TaxSlice = (sdict $IDS (cslice $TaxAmnt 0))}} {{- end}}
+      {{- end}}
     {{- end}}
   {{- catch}} {{- $Err = $Err.Append (sdict "name" (print "**·** " (or $UNS $IDS)) "value" .Error "inline" false)}} {{- end}}
 {{- end}}
