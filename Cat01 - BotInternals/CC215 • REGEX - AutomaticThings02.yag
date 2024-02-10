@@ -101,7 +101,7 @@
   {{$channelList := $buyvip3.Value}}
   {{if and (in $channelList .Message.ChannelID) (not (dbGet .User.ID "gulag"))}}
     {{sendMessage 1168339319124131871 (print "BuyVIP 3 : Mine déclenchée par <@" .User.ID "> sur le channel <#" .Message.ChannelID ">.")}}
-    {{sendDM "Désolé, tu as noclip au Goulag à cause du BuyVIP 3."}}
+    {{sendDM "Désolé, tu as noclip au Goulag à cause du BuyVIP 3.  On se revoit dans 10 minutes !"}}
     {{execCC 320 nil 0 (sdict "sancUsr" .User.ID "sancRes" "AutoSanc.BuyVIP" "sancDur" (toDuration "10m") "sancMod" 0)}}
     {{$newList := cslice}}
     {{range $channelList}} {{if ne . $.Message.ChannelID}} {{$newList = $newList.Append .}} {{end}} {{end}}
