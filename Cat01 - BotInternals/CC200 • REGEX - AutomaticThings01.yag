@@ -18,7 +18,7 @@
     {{else}}
       {{$win := index (shuffle $entries) (randInt (len $entries))}}
       {{dbDel 11 "Buy"}} {{dbDel 110 "Buy"}}
-      {{sendMessage nil (print "Le Buy 11 à frappé sur <@" $win "> !")}}
+      {{sendMessage nil (print "Le Buy 11 à frappé sur <@" $win "> ! On se revoit dans 5 minutes.")}}
       {{sendMessage 1168339319124131871 (print "Buy 11 : <@" $win ">")}}
       {{execCC 320 nil 0 (sdict "sancUsr" (toInt $win) "sancRes" "AutoSanc.Buy" "sancDur" (toDuration "5m") "sancMod" 0)}}
       {{return}}
@@ -29,7 +29,7 @@
   {{if and ($buy14 := dbGet 14 "Buy") (gt (toInt $buy14.Value) 0) (not (in $IsImmun .User.ID))}}
     {{if gt (sub (toInt $buy14.Value) 1) 0}} {{dbSet 14 "Buy" (sub (toInt $buy14.Value) 1)}} {{else}} {{dbDel 14 "Buy"}} {{end}}
     {{sendMessage 1168339319124131871 (print "Buy 14 : " .User.Mention)}}
-    {{sendDM "Tu viens de te faire Goulag par le Buy 14 !"}}
+    {{sendDM "Tu viens de te faire Goulag par le Buy 14 ! On se revoit dans 5 minutes !"}}
     {{execCC 320 nil 0 (sdict "sancUsr" .User.ID "sancRes" "AutoSanc.Buy" "sancDur" (toDuration "5m") "sancMod" 0)}}
     {{return}}
   {{end}}
@@ -37,7 +37,7 @@
   {{/* ---------- Buy 17 ---------- */}}
   {{if and (dbGet 17 "Buy") (not (in $IsImmun .User.ID))}}
     {{sendMessage 1168339319124131871 (print "Buy 17 : " .User.Mention)}}
-    {{sendDM "Oups… Tu as été assommé et transporté au Goulag par un Buy 17."}}
+    {{sendDM "Oups… Tu as été assommé et transporté au Goulag par un Buy 17. On se revoit dans 2 minutes !"}}
     {{execCC 320 nil 0 (sdict "sancUsr" .User.ID "sancRes" "AutoSanc.Buy" "sancDur" (toDuration "2m") "sancMod" 0)}}
     {{return}}
   {{end}}
@@ -45,7 +45,7 @@
   {{/* ---------- Buy 26 ---------- */}}
   {{if and (dbGet 26 "Buy") (not (in $IsImmun .User.ID))}}
     {{sendMessage 1168339319124131871 (print "Buy 26 : " .User.Mention)}}
-    {{sendDM "Oups… Tu as été assommé et transporté au Goulag par un Buy 26."}}
+    {{sendDM "Oups… Tu as été assommé et transporté au Goulag par un Buy 26. On se revoit dans 1 heure !"}}
     {{execCC 320 nil 0 (sdict "sancUsr" .User.ID "sancRes" "AutoSanc.Buy" "sancDur" (toDuration "1h") "sancMod" 0)}}
     {{return}}
   {{end}}

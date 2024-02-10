@@ -36,7 +36,7 @@ DISCLAIMER : Elements in ‹quotation marks› are variable arguments (IE: User 
           › Roles     : Not limited
           › Channels  : Not limited
 
-          › Revision  : 2.83.5
+          › Revision  : 2.83.6
 
         • 215 - REGEX
           › Trigger   : .*
