@@ -17,7 +17,7 @@
 {{$uPts := or (toInt (dbGet $UID "Points").Value) 0}}
 
 {{$BOKReduc := not (in (cslice 4 6 16 22) $BID)}}
-{{if in (cslice 9 15 16 19 22 34) $BID}} {{$BOKCldw = dbGet $UID (print "Buy" $BID)}} {{end}}
+{{if in (cslice 9 15 16 19 22 32 34) $BID}} {{$BOKCldw = dbGet $UID (print "Buy" $BID)}} {{end}}
 
 {{if hasRoleID 1079418386511040572}} {{$PtPlaf = 50000}} {{if and $BOKReduc (ge $pr 150)}} {{$PRM = 0.85}} {{$VIP = print " **(<:VIP2_v2:1080311144285229106> VIP2 · " $prx " -15%)**"}} {{end}}
 {{else if hasRoleID 967188575005315132}} {{$PtPlaf = 35000}} {{if and $BOKReduc (ge $pr 150)}} {{$PRM = 0.93}} {{$VIP = print " **(<:VIP1_v2:1080311093785788507> VIP1 · " $prx " -7%)**"}} {{end}} {{end}}
@@ -49,7 +49,7 @@
     {{else if in (cslice 9 19 22 34) $BID}} {{dbSetExpire $UID (print "Buy" $BID) 0 (or ((sdict "22" 1800 "34" 3600).Get $BIDS) 86400)}}
     {{else if in (cslice 11 13 14 28 33) $BID}} {{dbSet $BID "Buy" (or ((sdict "13" $IDS "14" 3 "33" $IDS).Get $BIDS) 0)}} {{if eq $BID 14}} {{sendMessage $ChG "C'est l'heure de faire boom-boom ! (Buy 14)"}} {{end}}
     {{else if in (cslice 17 26) $BID}} {{dbSetExpire $BID "Buy" 0 ((sdict "17" 60 "26" 600).Get $BIDS)}}
-    {{else if in (cslice 31 32) $BID}} {{if $Arg}} {{if eq $BID 31}} {{takeRoleID (toInt (dbGet 31 "Buy").Value) ($r = 1187580089064509611)}} {{giveRoleID ($a := (getMember $Arg).User.ID) $r}} {{dbSet 31 "Buy" (toString $a)}} {{else}} {{giveRoleID ($a := (getMember $Arg).User.ID) 735813110224388118}} {{range (cslice 496010501990645799 931351059455164477 496010603601854464 507301458853625879 1078386211472805998 1106395328447533077 1054107222856192172 925769441747296316 925767790034583552 925766056650362991 925745256207618139 925761123695886376 925758251662987264 925756577510748210 925745253087076392 925745243180118034 925745259290460210 589455096795103273)}} {{if targetHasRoleID $a .}} {{$r = (joinStr "-" $r .)}} {{takeRoleID $a .}} {{end}} {{end}} {{dbSet $a "Buy32" $r}} {{scheduleUniqueCC 266 $ChB 1200 $a (dict "UID" (toString (getMember $Arg).User.ID))}} {{end}} {{else}} {{$EM = "Aucune cible définie"}} {{end}}
+    {{else if in (cslice 31 32) $BID}} {{if $Arg}} {{if eq $BID 31}} {{takeRoleID (toInt (dbGet 31 "Buy").Value) ($r = 1187580089064509611)}} {{giveRoleID ($a := (getMember $Arg).User.ID) $r}} {{dbSet 31 "Buy" (toString $a)}} {{else}} {{giveRoleID ($a := (getMember $Arg).User.ID) 735813110224388118}} {{range (cslice 496010501990645799 931351059455164477 496010603601854464 507301458853625879 1078386211472805998 1106395328447533077 1054107222856192172 925769441747296316 925767790034583552 925766056650362991 925745256207618139 925761123695886376 925758251662987264 925756577510748210 925745253087076392 925745243180118034 925745259290460210 589455096795103273)}} {{if targetHasRoleID $a .}} {{$r = (joinStr "-" $r .)}} {{takeRoleID $a .}} {{end}} {{end}} {{dbSet $a "Buy32" $r}} {{scheduleUniqueCC 266 $ChB 1200 $a (dict "UID" (toString (getMember $Arg).User.ID))}} {{dbSetExpire $UID "Buy32" 0 1800}} {{end}} {{else}} {{$EM = "Aucune cible définie"}} {{end}}
 
     {{end}}
 
