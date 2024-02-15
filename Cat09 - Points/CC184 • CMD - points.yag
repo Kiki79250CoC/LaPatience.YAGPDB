@@ -19,7 +19,7 @@
 
 {{if (getMember $UID)}}
   {{$iURL = print "https://cdn.discordapp.com/avatars/" $UID "/" (getMember $UID).User.Avatar ".png"}}
-  {{$UsrDN = or (getMember $UID).Nick (getMember $UID).User.Username}}
+  {{$UsrDN = or (getMember $UID).Nick (getMember $UID).User.Globalname (getMember $UID).User.Username}}
 
   {{if or (getMember $UID).User.Bot (in $CanBypass $UID)}} {{$PlafText = "Illimité"}} {{end}}
   {{if not (getMember $UID).User.Bot}} {{$BuysShop = print " · Achats Boutique : " (reReplace "," (humanizeThousands (or (dbGet $UID "BuyCt").Value 0)) " ")}} {{end}}

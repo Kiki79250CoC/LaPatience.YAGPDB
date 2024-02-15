@@ -778,7 +778,7 @@ DISCLAIMER : Elements in ‹quotation marks› are variable arguments (IE: User 
           › Roles     : Not limited
           › Channels  : Limited (02) › "Commandes Bots", "Gestion Bots"
 
-          › Revision  : 3.00.2
+          › Revision  : 3.00.3
 
         • 212 - COMMAND
           › Trigger   : -baltop
