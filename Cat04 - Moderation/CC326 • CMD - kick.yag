@@ -15,7 +15,7 @@
 {{if $silentK}} {{$sText = "silencieusement "}} {{if not (eq (lower $kickRes) "--silent")}} {{$kickRes = or ($args.Get 1) "Aucune raison fournie"}} {{else}} {{$kickRes = "Aucune raison fournie"}} {{end}} {{end}}
 
 {{if lt ($modDailyKCount := (or (toInt (dbGet $kickMod "DailyKick").Value) 0)) $kickLmt}}
-  {{if and (not (in $trappedIDs (toString $kickUID))) (not (targetHasRoleID $kickUID 496010603601854464)) (not (targetHasRoleID $kickUID 628276701796892702)) (not (getMember ($args.Get 0)).User.Bot) (not (eq $kickUID $kickMod))}}
+  {{if and (not (in $trappedIDs $kickUID)) (not (targetHasRoleID $kickUID 496010603601854464)) (not (targetHasRoleID $kickUID 628276701796892702)) (not (getMember ($args.Get 0)).User.Bot) (not (eq $kickUID $kickMod))}}
     {{$usrSpec := " "}} {{$usrStr := print "`" $kickUID "`"}}
     {{if (getMember $kickUID)}}
       {{$usrSpec = (print "***" (getMember $kickUID).User.String "***\n" (or (print "" (getMember $kickUID).User.Globalname "") "<:Nothing:1066734470151024830>--"))}}
