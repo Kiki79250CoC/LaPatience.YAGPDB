@@ -1,33 +1,72 @@
-{{$args := parseArgs 1 "`-prono ‹[create|close|winner]›`" (carg "string" "Option") (carg "string" "OptArg")}}
+{{$args := parseArgs 1 "`-prono ‹[create|edit|close|reopen|winner]›`" (carg "string" "Option") (carg "string" "OptArg")}}
+{{$BetDB := (dbGet 0 "Pronos").Value}}
 
-{{if eq (lower ($args.Get 0)) "create"}}
+{{if eq ($CmdQuery := (lower ($args.Get 0))) "create"}}
   {{$args := parseArgs 4 "`-prono create ‹MiseMin› ‹MiseMax› \"‹1:côte1,2:côte2,3:côte3…›\"`" (carg "string" "Option") (carg "int" "MinBet") (carg "int" "MaxBet") (carg "string" "BetOdds")}}
 
   {{dbSet 0 "Pronos" (sdict "Open" true "State" true "MinAmnt" ($args.Get 1) "MaxAmnt" ($args.Get 2) "Odds" ($args.Get 3))}}
   {{dbDel 0 "Parieurs"}}
 
-  {{$plMin := ""}} {{if gt ($args.Get 1) 1}} {{$plMin = "s"}} {{end}}
-  {{$plMax := ""}} {{if gt ($args.Get 2) 1}} {{$plMax = "s"}} {{end}}
-
-  {{$embed := cembed
-    "title" (print "✓ Pronos lancés avec les côtes définies")
-    "color" 0x0080ff
+  {{sendMessage nil (cembed "color" 0x0080ff
+    "title" "✓ Pronos lancés avec les côtes définies"
     "fields" (cslice
-      (sdict "name" " " "value" (print "**⋄  Mise minimale :** " (reReplace "," (humanizeThousands ($args.Get 1)) " ") " Point" $plMin "\n**⋄  Mise maximale :** " (reReplace "," (humanizeThousands ($args.Get 2)) " ") " Point" $plMax) "inline" false)
-      (sdict "name" " " "value" (print "**⋄  Côtes**\n　**· Option " (reReplace "," (reReplace ":" ($args.Get 3) " :** ×") "\n　**· Option ")) "inline" false)
-  )}} {{sendMessage nil $embed}}
+      (sdict "name" " " "value" (print "**⋄  Mise minimale :** " (reReplace "," (humanizeThousands ($args.Get 1)) " ") " Points" "\n**⋄  Mise maximale :** " (reReplace "," (humanizeThousands ($args.Get 2)) " ") " Points"))
+      (sdict "name" " " "value" (print "**⋄  Côtes**\n　**· Option " (reReplace "," (reReplace ":" ($args.Get 3) " :** ×") "\n　**· Option ")))
+  ))}}
 
-{{else if eq (lower ($args.Get 0)) "close"}}
-  {{$embed := ""}}
 
-  {{if $BetDB := (dbGet 0 "Pronos").Value}}
-    {{$BetDB.Set "State" false}}
+{{else if eq $CmdQuery "edit"}}
+  {{if $BetDB.Get "Open"}}
+    {{$args := parseArgs 2 "`-prono edit ‹[minbet|maxbet|odds]›`" (carg "string" "Option") (carg "string" "SubOption") (carg "string" "OptArg")}}
+
+    {{if eq (lower ($args.Get 1)) "minbet"}}
+      {{$args := parseArgs 3 "`-prono edit minbet ‹MiseMin›`" (carg "string" "O1") (carg "string" "O2") (carg "int" "MinBet")}}
+
+      {{$BetDB.Set "MinAmnt" ($args.Get 2)}}
+      {{dbSet 0 "Pronos" $BetDB}}
+
+      {{sendMessage nil (cembed "color" 0x0080ff
+        "title" "✓ Options et côtes du prono redéfinis"
+        "fields" (cslice (sdict "name" " " "value" (print "**⋄  Mise minimale :** " (reReplace "," (humanizeThousands ($args.Get 2)) " ") " Points")))
+      )}}
+
+    {{else if eq (lower ($args.Get 1)) "maxbet"}}
+      {{$args := parseArgs 3 "`-prono edit maxbet ‹MiseMax›`" (carg "string" "O1") (carg "string" "O2") (carg "int" "MaxBet")}}
+
+      {{$BetDB.Set "MaxAmnt" ($args.Get 2)}}
+      {{dbSet 0 "Pronos" $BetDB}}
+
+      {{sendMessage nil (cembed "color" 0x0080ff
+        "title" "✓ Options et côtes du prono redéfinis"
+        "fields" (cslice (sdict "name" " " "value" (print "**⋄  Mise maximale :** " (reReplace "," (humanizeThousands ($args.Get 2)) " ") " Points")))
+      )}}
+
+    {{else if eq (lower ($args.Get 1)) "odds"}}
+      {{$args := parseArgs 3 "`-prono edit odds \"‹1:côte1,2:côte2,3:côte3…›\"`" (carg "string" "O1") (carg "string" "O2") (carg "string" "BetOdds")}}
+
+      {{$BetDB.Set "Odds" ($args.Get 2)}}
+      {{dbSet 0 "Pronos" $BetDB}}
+
+      {{sendMessage nil (cembed "color" 0x0080ff
+        "title" "✓ Options et côtes du prono redéfinis"
+        "fields" (cslice (sdict "name" " " "value" (print "**⋄  Côtes**\n　**· Option " (reReplace "," (reReplace ":" ($args.Get 2) " :** ×") "\n　**· Option "))))
+      )}}
+
+    {{else}} {{sendMessage nil ">>> **Erreur :**\nArgument invalide. Arguments autorisés : `minbet`, `maxbet`, `odds`"}} {{end}}
+  {{else}} {{sendMessage nil ">>> **Erreur :**\nAucun prono en cours."}} {{end}}
+
+
+{{else if or (eq $CmdQuery "close")}}
+  {{if $BetDB.Get "Open"}}
+    {{$BetDB.Set "State" true}}
     {{dbSet 0 "Pronos" $BetDB}}
+
+    {{$FMsg := ""}}
+    {{$TtPtsB := 0}}
+    {{$TtPplB := 0}}
 
     {{if $ParList := (dbGet 0 "Parieurs").Value}}
       {{$COutput := ""}}
-      {{$TtPtsB := 0}}
-      {{$TtPplB := 0}}
 
       {{- range $k,$v := split $ParList ","}}
         {{- $UsrBet := split $v ":"}}
@@ -43,8 +82,6 @@
         {{- else}} {{- $COutput = print $BetOID ":" $BetAmt ";1"}} {{- end}}
       {{- end}}
 
-      {{$FMsg := ""}}
-
       {{- range $k,$v := split $COutput ","}}
         {{- $BetOID := index (split $v ":") 0}}
         {{- $BetAmt := toInt (index (split (index (split $v ":") 1) ";") 0)}}
@@ -57,62 +94,66 @@
         {{- else}} {{- $FMsg = print "　**· " $BetPpl " personne" $Plural "** " $Have " parié **" (reReplace "," (humanizeThousands $BetAmt) " ") " Points** sur l'option **" $BetOID "**."}} {{- end}}
       {{- end}}
 
-      {{$embed = cembed
-        "title" (print "✓ Pronos fermés")
-        "color" 0x0080ff
-        "fields" (cslice
-          (sdict "name" " " "value" (print "**⋄  Nombre de personnes ayant parié :** " $TtPplB "\n**⋄  Nombre de Points pariés :** " (reReplace "," (humanizeThousands $TtPtsB) " ")) "inline" false)
-          (sdict "name" " " "value" (print "**⋄  Résumé fractionné**\n" $FMsg) "inline" false)
-      )}} {{sendMessage nil $embed}}
-
     {{end}}
-  {{end}}
-  {{if not $embed}} {{sendMessage nil "Pronos fermés."}} {{end}}
 
-{{else if eq (lower ($args.Get 0)) "winner"}}
+    {{sendMessage nil (cembed "color" 0x0080ff
+      "title" "✓ Pronos fermés"
+      "fields" (cslice
+        (sdict "name" " " "value" (print "**⋄  Nombre de personnes ayant parié :** " $TtPplB "\n**⋄  Nombre de Points pariés :** " (reReplace "," (humanizeThousands $TtPtsB) " ")) "inline" false)
+        (sdict "name" " " "value" (print "**⋄  Résumé fractionné**\n" (or $FMsg "　**·** Aucune donnée disponible : Personne n'a parié.")) "inline" false)
+    ))}}
+
+  {{else}} {{sendMessage nil ">>> **Erreur :**\nAucun prono en cours."}} {{end}}
+
+
+{{else if eq $CmdQuery "reopen"}}
+  {{if $BetDB.Get "Open"}}
+    {{if not ($BetDB.Get "State")}}
+      {{$BetDB.Set "State" true}}
+      {{dbSet 0 "Pronos" $BetDB}}
+
+      {{sendMessage nil (cembed "color" 0x0080ff "title" "✓ Prono réouvert")}}
+
+    {{else}} {{sendMessage nil ">>> **Erreur :**\nLe prono actuel n'est pas fermé."}} {{end}}
+  {{else}} {{sendMessage nil ">>> **Erreur :**\nAucun prono en cours."}} {{end}}
+
+
+{{else if eq $CmdQuery "winner"}}
   {{$args := parseArgs 2 "`-prono winner ‹WinnerItemID›`" (carg "string" "Option") (carg "int" "WinnerItemID")}}
 
-  {{$BetDB := (dbGet 0 "Pronos").Value}}
-  {{$embed := ""}}
-
-  {{$WinnerList := ""}}
-  {{$WinnerAmnt := 0}}
-  {{$WinPts := 0}}
-
-  {{if and $BetDB ($ParList := (dbGet 0 "Parieurs").Value)}}
-    {{$OddMult := toFloat (index (split (index (split ($BetDB.Get "Odds") ",") (sub ($args.Get 1) 1)) ":") 1)}}
-
-    {{- range $k,$v := split $ParList ","}}
-      {{- $BetUID := index (split $v ":") 0}}
-      {{- $BetOID := toInt (index (split (index (split $v ":") 1) ";") 0)}}
-      {{- $BetAmt := toInt (index (split (index (split $v ":") 1) ";") 1)}}
-
-      {{- if eq $BetOID ($args.Get 1)}}
-        {{- $WinnerAmnt = add $WinnerAmnt 1}}
-        {{- $WinPts = add $WinPts (roundFloor (mult (toFloat $BetAmt) $OddMult))}}
-        {{- if $WinnerList}} {{- $WinnerList = print $WinnerList "\n　**·** <@" $BetUID "> a gagné **" (reReplace "," (humanizeThousands (roundFloor (mult (toFloat $BetAmt) $OddMult))) " ") " Points**"}}
-        {{- else}} {{- $WinnerList = print "　**·** <@" $BetUID "> a gagné **" (reReplace "," (humanizeThousands (roundFloor (mult (toFloat $BetAmt) $OddMult))) " ") " Points**"}} {{- end}}
-      {{- end}}
-    {{- end}}
-
-    {{if not $WinnerList}} {{$WinnerList = "　**·** Personne n'a gagné de Points"}} {{end}}
-  {{else}}
-    {{$WinnerList = "Aucun prono n'est en cours"}}
-    {{if not $ParList}} {{$WinnerList = "Le prono a floppé comme jamais, personne n'a misé"}} {{end}}
-
-    {{sendMessage nil (print ">>> **Erreur :**\n" $WinnerList ".")}}
-  {{end}}
-
-  {{if gt $WinnerAmnt 0}}
-    {{$embed = cembed
-      "title" (print "✓ Prono terminé")
-      "color" 0xffbf00
-      "description" (print "**⋄  Liste des gains**\n" $WinnerList)
-      "fields" (cslice
-        (sdict "name" " " "value" (print "**⋄  Nombre de personnes ayant gagné des Points :** " $WinnerAmnt "\n**⋄  Total des gains de tous les vainqueurs :** " (reReplace "," (humanizeThousands $WinPts) " ") " Points") "inline" false)
-    )}} {{sendMessage nil $embed}}
-
+  {{if $BetDB.Get "Open"}}
     {{$BetDB.Set "Open" false}}
+    {{$BetDB.Set "State" false}}
     {{dbSet 0 "Pronos" $BetDB}}
-  {{end}}
-{{end}}
+
+    {{$WinnerList := ""}}
+    {{$WinnerAmnt := 0}}
+    {{$WinPts := 0}}
+
+    {{if $ParList := (dbGet 0 "Parieurs").Value}}
+      {{$OddMult := toFloat (index (split (index (split ($BetDB.Get "Odds") ",") (sub ($args.Get 1) 1)) ":") 1)}}
+
+      {{- range $k,$v := split $ParList ","}}
+        {{- $BetUID := index (split $v ":") 0}}
+        {{- $BetOID := toInt (index (split (index (split $v ":") 1) ";") 0)}}
+        {{- $BetAmt := toInt (index (split (index (split $v ":") 1) ";") 1)}}
+
+        {{- if eq $BetOID ($args.Get 1)}}
+          {{- $WinnerAmnt = add $WinnerAmnt 1}}
+          {{- $WinPts = add $WinPts (roundFloor (mult (toFloat $BetAmt) $OddMult))}}
+          {{- if $WinnerList}} {{- $WinnerList = print $WinnerList "\n　**·** <@" $BetUID "> a gagné **" (reReplace "," (humanizeThousands (roundFloor (mult (toFloat $BetAmt) $OddMult))) " ") " Points**"}}
+          {{- else}} {{- $WinnerList = print "　**·** <@" $BetUID "> a gagné **" (reReplace "," (humanizeThousands (roundFloor (mult (toFloat $BetAmt) $OddMult))) " ") " Points**"}} {{- end}}
+        {{- end}}
+      {{- end}}
+
+    {{end}}
+
+    {{sendMessage nil (cembed "color" 0xffbf00
+      "title" "✓ Prono terminé"
+      "description" (print "**⋄  Liste des gains**\n" (or $WinnerList "　**·** Aucun gain à redistribuer."))
+      "fields" (cslice (sdict "name" " " "value" (print "**⋄  Nombre de personnes ayant gagné des Points :** " $WinnerAmnt "\n**⋄  Total des gains de tous les vainqueurs :** " (reReplace "," (humanizeThousands $WinPts) " ") " Points") "inline" false))
+    )}}
+
+  {{else}} {{sendMessage nil ">>> **Erreur :**\nAucun prono en cours."}} {{end}}
+
+{{else}} {{sendMessage nil ">>> **Erreur :**\nArgument invalide. Arguments autorisés : `create`, `edit`, `close`, `repoen`, `winner`"}} {{end}}
