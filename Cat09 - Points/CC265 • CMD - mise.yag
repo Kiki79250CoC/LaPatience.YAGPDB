@@ -6,7 +6,7 @@
 
 {{$PtSld := or (toInt ($PtSldDB := dbGet $UID "Points").Value) 0}}
 {{$BetDB := (dbGet 0 "Pronos").Value}}
-{{$BetLs := (dbGet 0 "Parieurs").Value}}
+{{$BetLs := or (dbGet 0 "Parieurs").Value ""}}
 
 {{$MinAmt := toInt ($BetDB.Get "MinAmnt")}}
 {{$MaxAmt := toInt ($BetDB.Get "MaxAmnt")}}
@@ -16,7 +16,8 @@
     {{if (ge $PtSld $BetAmt)}}
       {{if and (ge $BetAmt $MinAmt) (le $BetAmt $MaxAmt)}}
         {{$BetValid := $BetDB.Get "State"}}
-        {{if $BetLs}} {{if reFind $IDS $BetLs}} {{$BetValid = false}} {{end}} {{end}}
+        {{$HasAlreadyBet := reFind $IDS $BetLs}}
+        {{if and $BetLs $HasAlreadyBet}} {{$BetValid = false}} {{end}}
 
         {{if and $BetValid (and (gt $BetOID 0) (le $BetOID (len (split ($BetDB.Get "Odds") ","))))}}
 
@@ -31,9 +32,9 @@
         {{else}}
           {{if $BetValid}} {{$EM = "Vous avez tenté de parier pour un item inexistant"}}
           {{else}}
-            {{if $BetLs.Get $IDS}} {{$EM = "Vous avez déjà parié"}}
-              {{else}} {{$EM = "Le temps imparti pour miser est terminé."}} {{end}}
-            {{end}}
+            {{if $HasAlreadyBet}} {{$EM = "Vous avez déjà parié"}}
+            {{else}} {{$EM = "Le prono actuel est verrouillé et ne peut plus accepter de nouvelles mises"}} {{end}}
+          {{end}}
         {{end}}
       {{else}}
         {{if (lt $BetAmt $MinAmt)}} {{$EM = print "Le montant de votre mise est en dessous du minimum autorisé (" (reReplace "," (humanizeThousands $MinAmt) " ") " Points)"}}
