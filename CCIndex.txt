@@ -380,17 +380,6 @@ DISCLAIMER : Elements in ‹quotation marks› are variable arguments (IE: User 
 
     • CATEGORY 04 - MODERATION
 
-        • 317 - COMMAND
-          › Trigger   : -clear
-          › Arguments : ‹Amount›
-
-          › Enabled   : Yes
-          › Name      : n/a
-          › Roles     : Limited (06) › "Dictateur Suprême", "Développeur", "Grand Modérateur", "Médiateur", "Gestionnaire", "Modération"
-          › Channels  : Not limited
-
-          › Revision  : 2.01
-
         • 318 - COMMAND
           › Trigger   : -exclude
           › Arguments : n/a
