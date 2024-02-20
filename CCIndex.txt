@@ -480,7 +480,7 @@ DISCLAIMER : Elements in ‹quotation marks› are variable arguments (IE: User 
           › Roles     : Limited (03) › "Dictateur Suprême", "Développeur", "Grand Modérateur", "Médiateur", "Gestionnaire"
           › Channels  : Not limited
 
-          › Revision  : 2.30.3
+          › Revision  : 2.40
 
         • 327 - COMMAND
           › Trigger   : -preban
