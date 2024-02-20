@@ -7,18 +7,24 @@
 
 {{if targetHasRoleID $sancUID 506417754878902272}}
   {{if not .ExecData}}
-    {{if not (eq (lower (toString $optArgs)) "--no-logs")}}
-      {{$ungoulagRes := or ($args.Get 1) "*Aucune raison fournie*"}}
-      {{$lastSanc := ""}}
-      {{$dbLastSanc := dbGet $sancUID "LastSanc"}}
-      {{if $dbLastSanc}}
-        {{$lastSanc = index $dbLastSanc.Value 0}}
-        {{dbSet $sancUID "LastSanc" (cslice (print $lastSanc "\n\n> **Dégoulag manuel** le <t:" currentTime.Unix ":f> par <@" .User.ID "> \n> **Raison :** " $ungoulagRes) (index $dbLastSanc.Value 1) (index $dbLastSanc.Value 2))}}
+    {{if not (reFind `(?i)--no-logs` $.Message.Content)}}
+
+      {{$toSet := cslice currentTime.Unix (getMember .User.ID).User.String "2U" "0" (or ($args.Get 1) "Aucune raison fournie")}}
+
+      {{if and ($dbLastSanc := dbGet $sancUID "SancHist") (targetHasRoleID $sancUID 506417754878902272)}}
+        {{$LastSancList := $dbLastSanc.Value}}
+        {{$SProc := index $LastSancList (sub (len $LastSancList) 1)}}
+        {{$SubSanc := index $SProc 5}}
+        {{$SubSanc = $SubSanc.Append $toSet}}
+        {{$SProc.Set 5 $SubSanc}}
+        {{$LastSancList.Set (sub (len $LastSancList) 1) $SProc}}
+        {{dbSet $sancUID "SancHist" $LastSancList}}
+
       {{end}}
 
       {{$embed := cembed "color" 0x7dffb7
         "fields" (cslice
-          (sdict "name" " " "value" (print (getMember $sancUID).User.Mention "\n*ID : `" $sancUID "`*\n\n> **Dégoulag manuel** par <@" .User.ID "> \n> **Raison :** " $ungoulagRes) "inline" false)
+          (sdict "name" " " "value" (print (getMember $sancUID).User.Mention "\n*ID : `" $sancUID "`*\n\n> **Dégoulag manuel** par <@" .User.ID "> \n> **Raison :** " (or ($args.Get 1) "*Aucune raison fournie*")) "inline" false)
           (sdict "name" " " "value" " " "inline" false)
         ) "timestamp" currentTime}}
       {{sendMessage $chnSanc $embed}}
