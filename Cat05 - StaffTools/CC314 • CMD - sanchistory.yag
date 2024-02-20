@@ -1,157 +1,124 @@
-{{$args := parseArgs 1 "`-sanchistory ‹@UserOrID›`" (carg "userid" "sancUsr")}}
-{{$UID := ($args.Get 0)}}
-
-{{$usrSpec := " "}}
-{{$usrStr := print "`" $UID "`"}}
-{{$isOnSvrTitle := (print $usrStr " n'est pas sur le serveur.")}}
-{{$isOnSvr := " "}}
-{{$usrRankTitle := " "}}
-{{$usrRank := " "}}
+{{$args := parseArgs 1 "`-sanchistory ‹@UserOrID›`" (carg "userid" "sancUsr") (carg "string" "OptArg")}}
 {{$rColor := 0x0}}
+{{$UsrST := print "`" ($UID := ($args.Get 0)) "`"}}
+{{$IsMinedTxt := ($HasAvPBTxt := ($IsFrozenTxt := " "))}}
+{{$UsrAR := ($UsrMR := ($UsrBR := ($IsMinedTtl := ($HasAvPBTtl := ($HasAvPBExp := ($IsFrozenTtl := ($IsFrozenExp := ($SProc := ""))))))))}}
+{{$EEmbV := sdict "name" " " "value" " "}}
+{{$SGLst := sdict "0" "Mise en sourdine" "0U" "Rétablissement" "1" "Gel de compte" "1U" "Dégel de compte manuel" "2" "Goulag" "2U" "Dégoulag manuel" "3" "Expulsion" "3S" "Expulsion silencieuse" "4" "Bannissement" "4S" "Bannissement silencieux" "4U" "Débannissement"}}
 
-{{if (getMember $UID)}}
-  {{$usrSpec = (print "***" (getMember $UID).User.String "***\n" (or (print "" (getMember $UID).User.Globalname "") "<:Nothing:1066734470151024830>--"))}}
-
-  {{if (getMember $UID).Nick}} {{$usrSpec = (print $usrSpec "\n*" (getMember $UID).Nick "*")}} {{end}}
-  {{$usrStr = or (getMember $UID).Nick (getMember $UID).User.Globalname (getMember $UID).User.Username}}
-
-  {{$isOnSvrTitle = "Date d'arrivée sur le Serveur :"}}
-  {{$isOnSvr = (print "> <t:" (getMember $UID).JoinedAt.Parse.Unix ":D> à <t:" (getMember $UID).JoinedAt.Parse.Unix ":T>")}}
-
-  {{$rankID := 496010501990645799}}
-  {{$roleList := cslice 925745259290460210 925745243180118034 925745253087076392 925756577510748210 925758251662987264 925761123695886376 925745256207618139 925766056650362991 925767790034583552 925769441747296316 1054107222856192172 1106395328447533077 506417754878902272 503892310862331905}}
-  {{range $roleList}}{{if targetHasRoleID $UID .}}{{$rankID = .}}{{end}}{{end}}
-  {{$usrRankTitle = "⋄  Rank :"}}
-  {{$usrRank = (print "> <@&" $rankID ">")}}
-  {{range .Guild.Roles}}{{- if eq .ID $rankID}}{{- $rColor = .Color}}{{- end}}{{- end}}
+{{define "TStD"}}
+  {{$DStr := ((timestampToTime .TS).In (loadLocation "Europe/Paris")).Format (or .Style "02 January 2006 15:04:05")}}
+  {{range $k, $v := sdict "uary" "vier" "ebruary" "évrier" "ch" "s" "pr" "vr" "ay" "ai" "une" "uin" "uly" "uillet" "ugus" "oû" "ber" "bre"}} {{$DStr = split $DStr $k | joinStr $v}} {{end}}
+  {{.Set "FTime" $DStr}}
 {{end}}
 
-{{/* Mine */}}
-{{$isMinedTitle := "🟢  Aucune mine active à son encontre"}}
-{{$isMinedText := " "}}
-{{$dbGetIsMined := dbGet $UID "gulag"}}
-{{if $dbGetIsMined}}
-  {{$isMinedTitle = (print "🟠  Une mine à l'encontre de " $usrStr " est actuellement active")}}
-  {{$mineSlice := split $dbGetIsMined.Value "™"}}
-  {{$isMinedText = (print ">>> **Mine posée le <t:" $dbGetIsMined.UpdatedAt.Unix ":f> par** <@" (index $mineSlice 3) ">\n**Raison :** " (index $mineSlice 1) "\n**Durée :** " (reReplace "second" (reReplace "hour" (reReplace "day" (reReplace "week" (reReplace "month" (reReplace "year" (reReplace "and" (humanizeDurationSeconds (index $mineSlice 2)) "et") "an") "mois") "semaine") "jour") "heure") "seconde"))}}
+{{$eFields := cslice $EEmbV (sdict "name" "🪪  •  Membre" "value" (print ">>> <@" $UID ">\nID : `" $UID "`") "inline" true)}}
+
+{{if $Mbr := getMember $UID}}
+  {{$UsrST = or $Mbr.Nick $Mbr.User.Globalname $Mbr.User.Username}}
+  {{$eFields = $eFields.Append (sdict "name" " " "value" (print "**" $Mbr.User.String "**\n" (or $Mbr.User.Globalname "　--") "\n" $Mbr.Nick) "inline" true)}}
+  {{$eFields = $eFields.Append $EEmbV}}
+
+  {{template "TStD" ($TC := sdict "TS" $Mbr.JoinedAt.Parse.Unix)}}
+  {{$eFields = $eFields.Append (sdict "name" "⋄  Date d'arrivée sur le Serveur" "value" (print "> " $TC.FTime) "inline" true)}}
+
+  {{$BRILst := sdict "496010501990645799" "<:r001:1194140826264150056> " "925745259290460210" "<:r005:1194140830127099957> " "925745243180118034" "<:r010:1194140833516105809> " "925745253087076392" "<:r020:1194140836359839774> " "925756577510748210" "<:r030:1194140839568490596> " "925758251662987264" "<:r040:1194140843544694824> " "925761123695886376" "<:r050:1104633687154380871> " "925745256207618139" "<:r060:1104633689436082186> " "925766056650362991" "<:r070:1104633692086870066> " "925767790034583552" "<:r080:1104633696134373387> " "925769441747296316" "<:r090:1104633698097307659> " "1054107222856192172" "<:r100:1104633701305950318> " "1106395328447533077" "<:r110:1106733647878426684> " "506417754878902272" "🪦 " "503892310862331905" "🤖 "}}
+  {{$MRILst := sdict "967188575005315132" "<:VIP1_v2:1080311093785788507> " "1079418386511040572" "<:VIP2_v2:1080311144285229106> "}}
+  {{$ARILst := sdict "589455096795103273" "👔 " "691413124053598359" "" "657756486759350303" "" "760115439468281905" "" "507301458853625879" "<:Gestionnaire_v2:1080310490246418432> " "496010603601854464" "<:Mediateur_v2:1080310621607829564> " "687019136240451638" "⚙️ " "931351059455164477" "<:GrandModo_v4:1080674932737982544> " "666687114326441989" "<:CrownLP_v2:1080310392850493550> "}}
+
+  {{range (cslice 496010501990645799 925745259290460210 925745243180118034 925745253087076392 925756577510748210 925758251662987264 925761123695886376 925745256207618139 925766056650362991 925767790034583552 925769441747296316 1054107222856192172 1106395328447533077 506417754878902272 503892310862331905)}} {{if targetHasRoleID $UID .}} {{$rColor = (getRole .).Color}} {{$UsrBR = print "> **" ($BRILst.Get (toString .)) (reReplace `\(\d{1,3}\+\)\s*` (getRole .).Name "") "**\n"}} {{if eq . 1106395328447533077}} {{$rColor = (getRole 1054107222856192172).Color}} {{end}} {{end}} {{end}}
+  {{range (cslice 967188575005315132 1079418386511040572)}} {{if targetHasRoleID $UID .}} {{$UsrMR = print "> " ($MRILst.Get (toString .)) (getRole .).Name "\n"}} {{end}} {{end}}
+  {{range (cslice 589455096795103273 691413124053598359 657756486759350303 760115439468281905 507301458853625879 496010603601854464 687019136240451638 931351059455164477 666687114326441989)}} {{if targetHasRoleID $UID .}} {{$UsrAR = print "> " ($ARILst.Get (toString .)) (reReplace `\s*\p{So}\x{fe0f}?[\x{1f3fb}-\x{1f3ff}]?(\x{200D}\p{So}\x{fe0f}?[\x{1f3fb}-\x{1f3ff}]?)*\s*` (getRole .).Name "")}} {{end}} {{end}}
+
+  {{$eFields = $eFields.Append (sdict "name" "⋄  Rank" "value" (print $UsrBR $UsrMR $UsrAR) "inline" true)}}
+
 {{end}}
+{{$eFields = $eFields.Append $EEmbV}}
 
-{{/* Pre-ban */}}
-{{$hasPreBanTitle := "🟢  Aucun Avertissement Pré-ban actif à son encontre"}}
-{{$hasPreBanText := " "}}
-{{$dbGetHasPreBan := dbGet $UID "AvPreBan"}}
-{{if $dbGetHasPreBan}}
-  {{$hasPreBanExpiry := ""}}
-  {{if ne $dbGetHasPreBan.ExpiresAt.Unix -62135596800}}{{$hasPreBanExpiry = print "\n\n**Cet avertissement expire le <t:" $dbGetHasPreBan.ExpiresAt.Unix ":f>**"}}{{end}}
-  {{$hasPreBanTitle = (print "🟠  " $usrStr " fait l'objet d'un Avertissement Pré-ban")}}
-  {{$hasPreBanSlice := split $dbGetHasPreBan.Value "➷"}}
-  {{$hasPreBanText = (print ">>> **Avertissement ajouté le <t:" $dbGetHasPreBan.UpdatedAt.Unix ":f> par** <@" (index $hasPreBanSlice 1) ">\n**Raison :** " (index $hasPreBanSlice 0) $hasPreBanExpiry)}}
+{{if $IsMined := dbGet $UID "gulag"}}
+  {{$MineSlc := split $IsMined.Value "™"}}
+  {{$IsMinedTtl = print "🟠  Une mine à l'encontre de " $UsrST " est active"}}
+  {{template "TStD" ($TC := sdict "TS" $IsMined.UpdatedAt.Unix)}}
+  {{$IsMinedTxt = print ">>> **Mine posée le " $TC.FTime " par <@" (index $MineSlc 3) ">**\n**Raison :** " (index $MineSlc 1) "\n**Durée :** " (reReplace "second" (reReplace "hour" (reReplace "day" (reReplace "week" (reReplace "month" (reReplace "year" (reReplace "and" (humanizeDurationSeconds (index $MineSlc 2)) "et") "an") "mois") "semaine") "jour") "heure") "seconde")}}
 {{end}}
+{{$eFields = $eFields.Append (sdict "name" (print "⋄  " (or $IsMinedTtl "🟢  Aucune mine active à son encontre")) "value" $IsMinedTxt)}}
 
-{{/* Goulag Count */}}
-{{$GoulagCount := 0}}
-{{$dbGoulagCT := dbGet $UID "GoulagCount"}}
-{{if $dbGoulagCT}} {{$GoulagCount = toInt $dbGoulagCT.Value}} {{end}}
+{{if $HasAvPB := dbGet $UID "AvPreBan"}}
+  {{if ne ($ExpT := $HasAvPB.ExpiresAt.Unix) -62135596800}} {{template "TStD" ($TC := sdict "TS" $ExpT)}} {{$HasAvPBExp = print "Expire le **" $TC.FTime "**"}} {{end}}
+  {{$PBSlc := split $HasAvPB.Value "➷"}}
+  {{$HasAvPBTtl = print "🟠  " $UsrST " fait l'objet d'un Avertissement Pré-ban"}}
+  {{template "TStD" ($TC := sdict "TS" $HasAvPB.UpdatedAt.Unix)}}
+  {{$HasAvPBTxt = print ">>> **Avertissement ajouté le " $TC.FTime " par <@" (index $PBSlc 1) ">**\n**Raison :** " (index $PBSlc 0) "\n\n**Expiration :** " (or $HasAvPBExp "*Aucune date d'expiration définie*")}}
+{{end}}
+{{$eFields = $eFields.Append (sdict "name" (print "⋄  " (or $HasAvPBTtl "🟢  Aucun Avertissement Pré-ban actif à son encontre")) "value" $HasAvPBTxt)}}
 
-{{/* Kick Count */}}
-{{$KickCount := 0}}
-{{$dbKickCT := dbGet $UID "KickCount"}}
-{{if $dbKickCT}} {{$KickCount = toInt $dbKickCT.Value}} {{end}}
+{{if $IsFrozen := dbGet $UID "AcctFreeze"}}
+  {{if ne ($ExpT := $IsFrozen.ExpiresAt.Unix) -62135596800}} {{template "TStD" ($TC := sdict "TS" $ExpT)}} {{$IsFrozenExp = print "Expire le **" $TC.FTime "**"}} {{end}}
+  {{$FrozenSlc := split $IsFrozen.Value "➷"}}
+  {{$IsFrozenTtl = print "🟠  " $UsrST " a des restrictions sur son compte en banque"}}
+  {{template "TStD" ($TC := sdict "TS" $IsFrozen.UpdatedAt.Unix)}}
+  {{$IsFrozenTxt = print ">>> **Compte gelé le " $TC.FTime " par <@" (index $FrozenSlc 1) ">**\n**Raison :** " (index $FrozenSlc 0) "\n\n**Expiration :** " (or $IsFrozenExp "*Aucune date d'expiration définie*")}}
+{{end}}
+{{$eFields = $eFields.Append (sdict "name" (print "⋄  " (or $IsFrozenTtl "🟢  Aucune restriction du compte en banque n'est actif")) "value" $IsFrozenTxt)}}
 
-{{/* Ban Count */}}
-{{$BanCount := 0}}
-{{$dbBanCT := dbGet $UID "BanCount"}}
-{{if $dbBanCT}} {{$BanCount = toInt $dbBanCT.Value}} {{end}}
+{{$eFields = $eFields.Append (sdict "name" "\b" "value" " ")}}
+{{$eFields = $eFields.Append (sdict "name" "📜  •  Historique" "value" " ")}}
 
-{{/* Mute Count */}}
-{{$MuteCount := 0}}
-{{$dbMuteCT := dbGet $UID "MuteCount"}}
-{{if $dbMuteCT}} {{$MuteCount = toInt $dbMuteCT.Value}} {{end}}
+{{$eFields = $eFields.Append (sdict "name" "⋄  Nombre de Goulags" "value" (print "> " (or (toInt (dbGet $UID "GoulagCount").Value) 0)) "inline" true)}}
+{{$eFields = $eFields.Append (sdict "name" "⋄  Nombre de Bans" "value" (print "> " (or (toInt (dbGet $UID "BanCount").Value) 0)) "inline" true)}}
+{{$eFields = $eFields.Append (sdict "name" "⋄  Nombre de Kicks" "value" (print "> " (or (toInt (dbGet $UID "KickCount").Value) 0)) "inline" true)}}
+{{$eFields = $eFields.Append (sdict "name" "⋄  Nombre d'exclusions" "value" (print "> " (or (toInt (dbGet $UID "MuteCount").Value) 0)) "inline" true)}}
+{{$eFields = $eFields.Append $EEmbV}}
 
-{{/* Last Sanctions */}}
-{{$sanc1 := ""}} {{$sanc1Title := "⋄  VIDE"}} {{$sanc1Content := " "}}
-{{$sanc2 := ""}} {{$sanc2Title := "⋄  VIDE"}} {{$sanc2Content := " "}}
-{{$sanc3 := ""}} {{$sanc3Title := "⋄  VIDE"}} {{$sanc3Content := " "}}
+{{$eFields = $eFields.Append (sdict "name" "⛔  •  Dernières sanctions" "value" " ")}}
 
-{{$dbLastSanc := dbGet $UID "LastSanc"}}
-{{if $dbLastSanc}}
-  {{try}}
-    {{$sanc1 = split (toString (index $dbLastSanc.Value 0)) "❖"}}
-    {{$sanc1Title = print "⋄  Le <t:" (index $sanc1 0) ":f>"}}
-    {{$sanc1Content = (index $sanc1 1)}}
-  {{catch}}
-    {{try}}
-      {{range $k, $v := cslice "raison"}}
-        {{if (reFind (joinStr "" `(?i)(\b` $v `\b)`) (index $sanc1 0))}}
-          {{$sanc1Title = print "⋄  Sanction héritée"}}
-          {{$sanc1Content = print "> " (index $sanc1 0)}}
-        {{else}} {{$sanc1Title = print "⋄  VIDE"}} {{$sanc1Content = " "}} {{end}}
+{{if $LastSanc := dbGet $UID "SancHist"}}
+  {{$sLen := len $LastSanc.Value}}
+  {{range (cslice 1 2 3)}}
+    {{if le . $sLen}}
+      {{$SancTtl := ($SancTxt := "")}}
+
+      {{try}}
+        {{$SProc = index $LastSanc.Value (sub $sLen .)}}
+
+        {{template "TStD" ($TC := sdict "TS" (index $SProc 0) "Style" ($s2 := "02/01/2006, 15:04"))}}
+        {{$SancTtl = print ($SGLst.Get (index $SProc 2)) " du " $TC.FTime " par " (index $SProc 1)}}
+
+        {{$DurText := ""}} {{if not (in (cslice "0U" "1U" "2U" "3" "3S" "4U") (index $SProc 2))}} {{$DurText = print "Durée :** " (index $SProc 3) "\n> **"}} {{end}}
+        {{$SancTxt = print "> **" $DurText "Raison :** " (index $SProc 4)}}
+
+        {{if ge ($AdSL := len (index $SProc 5)) 1}}
+          {{if gt $AdSL 2}} {{$SancTxt = print $SancTxt "\n\n　*Addendas tronqués, affichage des 2 plus récents…*"}} {{end}}
+
+          {{- range (cslice 2 1)}}
+            {{- if le . $AdSL}}
+              {{- $SSProc := index (index $SProc 5) (sub $AdSL .)}}
+              {{- if not (in (cslice "0U" "1U" "2U" "3" "3S" "4U") (index $SSProc 2))}} {{- $DurText = print "Durée :** " (index $SSProc 3) "\n> **"}} {{- end}}
+              {{- template "TStD" ($TC := sdict "TS" (index $SSProc 0) "Style" $s2)}}
+              {{- $SancTxt = print $SancTxt "\n\n　**" ($SGLst.Get (index $SSProc 2)) " du " $TC.FTime " par " (index $SSProc 1) "**\n> **" $DurText "Raison :** " (index $SSProc 4)}}
+            {{- end}}
+          {{- end}}
+
+        {{end}}
+
+      {{catch}}
+        {{$SancTtl = print .Error "\n\nDonnées brutes :"}}
+        {{$SancTxt = print "`" $SProc "`\n\n" }}
       {{end}}
-    {{catch}} {{$sanc1Title = print "⋄  VIDE"}} {{$sanc1Content = " "}} {{end}}
+      {{$eFields = $eFields.Append (sdict "name" (print "⋄  " $SancTtl) "value" $SancTxt)}}
+
+    {{end}}
   {{end}}
 
-  {{try}}
-    {{$sanc2 = split (toString (index $dbLastSanc.Value 1)) "❖"}}
-    {{$sanc2Title = print "⋄  Le <t:" (index $sanc2 0) ":f>"}}
-    {{$sanc2Content = (index $sanc2 1)}}
-  {{catch}}
-    {{try}}
-      {{range $k, $v := cslice "raison"}}
-        {{if (reFind (joinStr "" `(?i)(\b` $v `\b)`) (index $sanc2 0))}}
-          {{$sanc2Title = print "⋄  Sanction héritée"}}
-          {{$sanc2Content = print "> " (index $sanc2 0)}}
-        {{else}} {{$sanc2Title = print "⋄  VIDE"}} {{$sanc2Content = " "}} {{end}}
-      {{end}}
-    {{catch}} {{$sanc2Title = print "⋄  VIDE"}} {{$sanc2Content = " "}} {{end}}
-  {{end}}
-
-  {{try}}
-    {{$sanc3 = split (toString (index $dbLastSanc.Value 2)) "❖"}}
-    {{$sanc3Title = print "⋄  Le <t:" (index $sanc3 0) ":f>"}}
-    {{$sanc3Content = (index $sanc3 1)}}
-  {{catch}}
-    {{try}}
-      {{range $k, $v := cslice "raison"}}
-        {{if (reFind (joinStr "" `(?i)(\b` $v `\b)`) (index $sanc3 0))}}
-          {{$sanc3Title = print "⋄  Sanction héritée"}}
-          {{$sanc3Content = print "> " (index $sanc3 0)}}
-        {{else}} {{$sanc3Title = print "⋄  VIDE"}} {{$sanc3Content = " "}} {{end}}
-      {{end}}
-    {{catch}} {{$sanc3Title = print "⋄  VIDE"}} {{$sanc3Content = " "}} {{end}}
-  {{end}}
+{{else}}
+  {{$eFields = $eFields.Append (sdict "name" "⋄  Aucune sanction répertoriée." "value" " ")}}
 {{end}}
 
-{{/* Embed */}}
+{{$eFields = $eFields.Append $EEmbV}}
+
 {{$embed := cembed "color" (or $rColor 0xaa0000)
-  "title" (print "🗃️ ▸ Résumé du Casier judiciaire de " $usrStr)
-  "fields" (cslice
-      (sdict "name" " " "value" " " "inline" false)
-
-    (sdict "name" "🪪  •  Membre" "value" (print ">>> <@" $UID ">\nID : `" $UID "`") "inline" true)
-    (sdict "name" "\b" "value" $usrSpec "inline" true)
-      (sdict "name" " " "value" " " "inline" false)
-
-    (sdict "name" (print "⋄  " $isOnSvrTitle) "value" $isOnSvr "inline" true)
-    (sdict "name" $usrRankTitle "value" $usrRank "inline" true)
-      (sdict "name" "\b" "value" " " "inline" false)
-
-    (sdict "name" (print "⋄  " $isMinedTitle) "value" $isMinedText "inline" false)
-    (sdict "name" (print "⋄  " $hasPreBanTitle) "value" $hasPreBanText "inline" false)
-      (sdict "name" "\b" "value" " " "inline" false)
-
-    (sdict "name" "📜  •  Historique" "value" " " "inline" false)
-    (sdict "name" "⋄  Nombre de Goulags" "value" (print "> " $GoulagCount) "inline" true)
-    (sdict "name" "⋄  Nombre de Bans" "value" (print "> " $BanCount) "inline" true)
-    (sdict "name" "⋄  Nombre de Kicks" "value" (print "> " $KickCount) "inline" true)
-    (sdict "name" "⋄  Nombre d'exclusions" "value" (print "> " $MuteCount) "inline" true)
-      (sdict "name" " " "value" " " "inline" false)
-
-    (sdict "name" "⛔  •  Dernières sanctions" "value" " " "inline" false)
-    (sdict "name" $sanc1Title "value" $sanc1Content "inline" false)
-    (sdict "name" $sanc2Title "value" $sanc2Content "inline" false)
-    (sdict "name" $sanc3Title "value" $sanc3Content "inline" false)
-      (sdict "name" " " "value" " " "inline" false)
-
-  ) "footer" (sdict "text" (print "Commande invoquée par " (or .User.Globalname .User.String)) "icon_url" "https://cdn.discordapp.com/emojis/1080310621607829564.webp?quality=lossless")
+  "title" (print "🗃️ ▸ Résumé du Casier judiciaire de " $UsrST)
+  "fields" $eFields
+  "footer" (sdict "text" (print "Commande invoquée par " (or .User.Globalname .User.String)) "icon_url" "https://cdn.discordapp.com/emojis/1080310621607829564.webp?quality=lossless")
   "timestamp" currentTime}}
 {{sendMessage nil $embed}}
