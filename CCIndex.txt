@@ -412,7 +412,7 @@ DISCLAIMER : Elements in ‹quotation marks› are variable arguments (IE: User 
           › Roles     : Limited (04) › "Dictateur Suprême", "Développeur", "Grand Modérateur", "Médiateur"
           › Channels  : Not Limited
 
-          › Revision  : 2.35.5
+          › Revision  : 2.40
 
         • 321 - COMMAND
           › Trigger   : -ungoulag
@@ -618,6 +618,15 @@ DISCLAIMER : Elements in ‹quotation marks› are variable arguments (IE: User 
           › Channels  : Not limited
 
           › Revision  : 2.24.1
+
+          › Arguments : ‹@UserOrID› ‹[expand|page]*› ‹#*›
+
+          › Enabled   : No
+          › Name      : n/a
+          › Roles     : Limited (06) › "Dictateur Suprême", "Développeur", "Grand Modérateur", "Médiateur", "Gestionnaire", "Modération"
+          › Channels  : Not limited
+
+          › Revision  : n/a
 
 
 
