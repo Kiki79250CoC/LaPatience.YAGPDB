@@ -40,7 +40,11 @@
 
       {{end}}
 
-    {{else}} {{dbSet $sancUID "SancHist" (cslice $toSet)}} {{end}}
+    {{else}}
+      {{$toSet = $toSet.Append (cslice )}}
+      {{dbSet $sancUID "SancHist" (cslice $toSet)}}
+
+    {{end}}
 
     {{if not $silentK}}
       {{$embed := cembed "color" 0xFAA61A
@@ -49,7 +53,7 @@
             (sdict "name" " " "value" " " "inline" false)
 
           (sdict "name" "🪪  •  Membre" "value" (print ">>> <@" $sancUID ">\nID : `" $sancUID "`") "inline" true)
-          (sdict "name" "\b" "value" $usrSpec "inline" true)
+          (sdict "name" " " "value" $usrSpec "inline" true)
             (sdict "name" " " "value" " " "inline" false)
 
           (sdict "name" "⋄  Sanction" "value" (print "> " "Expulsion **(" $kickCount ")**") "inline" false)
