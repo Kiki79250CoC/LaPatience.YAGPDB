@@ -65,7 +65,11 @@
 
         {{end}}
 
-      {{else}} {{dbSet $sancUID "SancHist" (cslice $toSet)}} {{end}}
+      {{else}}
+        {{$toSet = $toSet.Append (cslice )}}
+        {{dbSet $sancUID "SancHist" (cslice $toSet)}}
+
+      {{end}}
 
       {{if not $silentB}}
         {{$embed := cembed "color" 0xAC0000
@@ -74,7 +78,7 @@
               (sdict "name" " " "value" " " "inline" false)
 
             (sdict "name" "🪪  •  Membre" "value" (print ">>> <@" $sancUID ">\nID : `" $sancUID "`") "inline" true)
-            (sdict "name" "\b" "value" $usrSpec "inline" true)
+            (sdict "name" " " "value" $usrSpec "inline" true)
               (sdict "name" " " "value" " " "inline" false)
 
             (sdict "name" "⋄  Sanction" "value" (print "> " "Bannissement <:ban:1054840260179279882> **(" $banCount ")** " $durationText) "inline" false)
