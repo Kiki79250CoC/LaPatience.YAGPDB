@@ -60,7 +60,7 @@
           (sdict "name" "⋄  Raison" "value" (print "> " $sancRes) "inline" false)
             (sdict "name" " " "value" " " "inline" false)
 
-        ) "footer" (sdict "text" (print "Sanction prononcée par " (getMember $sancMod).User.String))
+        ) "footer" (sdict "text" (print "Sanction prononcée par " (getMember $sancMod).User.String) "icon_url" "https://cdn.discordapp.com/emojis/1080310814453542952.webp?quality=lossless")
         "timestamp" currentTime}}
       {{sendMessage $chnSanc $embed}}
     {{end}}
