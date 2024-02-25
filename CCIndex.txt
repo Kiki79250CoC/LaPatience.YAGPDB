@@ -617,7 +617,7 @@ DISCLAIMER : Elements in ‹quotation marks› are variable arguments (IE: User 
           › Roles     : Limited (06) › "Dictateur Suprême", "Développeur", "Grand Modérateur", "Médiateur", "Gestionnaire", "Modération"
           › Channels  : Not limited
 
-          › Revision  : 3.00.1
+          › Revision  : 3.01
 
         • 317 - COMMAND
           › Trigger   : -usersancs
