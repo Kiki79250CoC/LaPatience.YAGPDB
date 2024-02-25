@@ -5,45 +5,65 @@
 {{$chnZonz := 550364083195609089}}
 {{$sancUID := or .ExecData.sancUsr ($args.Get 0)}}
 {{$sancRes := or .ExecData.sancRes ($args.Get 1)}}
-{{$sancDur := or .ExecData.sancDur ($args.Get 2)}}
+{{$sancDSc := toInt (fdiv ($sancDur := or .ExecData.sancDur ($args.Get 2) 0) 1000000000)}}
 {{$sancMod := or .ExecData.sancMod .User.ID}}
 {{$optArgs := or .ExecData.OptArgs ($args.Get 3) ""}}
-{{$rMbr := ""}}
+{{$rMbr := cslice}}
 
 {{$isTroll := and .ExecData (in (cslice "AutoSanc.Banword" "AutoSanc.Bomb" "AutoSanc.Buy" "AutoSanc.BuyVIP") $sancRes)}}
-{{$isMined := or (eq $sancMod 204255221017214977) (reFind `(?i)(\bB(uy)?\s*(19|25)\b)` $sancRes) (reFind `(?i)--force-as-mine` (or $.Message.Content $optArgs)) (and (le (toInt (fdiv $sancDur 1000000000)) 900) (gt (toInt (fdiv $sancDur 1000000000)) 0))}}
+{{$isMined := or (eq $sancMod 204255221017214977) (reFind `(?i)(\bB(uy)?\s*(19|25)\b)` $sancRes) (reFind `(?i)--force-as-mine` (or $.Message.Content $optArgs)) (and (le $sancDSc 900) (gt $sancDSc 0))}}
 
 {{$readableSancDur := humanizeDurationSeconds $sancDur}}
 {{range $k, $v := (sdict "second" "seconde"  "hour" "heure"  "day" "jour"  "week" "semaine"  "year" "an"  "and" "et")}} {{$readableSancDur = split $readableSancDur $k | joinStr $v}} {{end}}
 
-{{if and (targetHasRoleID $sancUID 1079418386511040572) (lt (toInt (fdiv $sancDur 1000000000)) 900) (not $isTroll)}} {{sendMessage nil (print ">>> **Erreur :**\nImpossible de miner <@" $sancUID "> : Cette personne est <:VIP2_v2:1080311144285229106> **Membre VIP 2**.")}}
-{{else if (getMember $sancUID).User.Bot}} {{sendMessage nil ">>> **Erreur :**\nL'utilisateur spécifié est un bot."}}
-{{else}}                        
-  {{if or (lt ($DailySC := or (toInt (dbGet $sancMod "DailyGoulag").Value) 0) $sancLmt) .ExecData}}
-    {{if not (targetHasRoleID $sancUID 506417754878902272)}}
+{{if $Mbr := getMember $sancUID}}
+  {{$VIP2IsMined := and (targetHasRoleID $sancUID 1079418386511040572) (lt $sancDSc 900) (not $isTroll)}}
+  {{$DailySCVal := lt ($DailySC := or (toInt (dbGet $sancMod "DailyGoulag").Value) 0) $sancLmt}}
+  {{$IsGoulag := targetHasRoleID $sancUID 506417754878902272}}
+
+  {{if and (and (not $VIP2IsMined) (not $Mbr.User.Bot)) (or $DailySCVal .ExecData)}}
+    {{if not $IsGoulag}}
       {{giveRoleID $sancUID 506417754878902272}}
 
       {{$roleList := cslice 496010501990645799 931351059455164477 496010603601854464 507301458853625879 1078386211472805998 1106395328447533077 1054107222856192172 925769441747296316 925767790034583552 925766056650362991 925745256207618139 925761123695886376 925758251662987264 925756577510748210 925745253087076392 925745243180118034 925745259290460210}}
-      {{range $roleList}} {{if targetHasRoleID $sancUID .}} {{$rMbr = print $rMbr "-" .}} {{takeRoleID $sancUID .}} {{end}} {{end}}
+      {{range $roleList}} {{if targetHasRoleID $sancUID .}} {{$rMbr = $rMbr.Append .}} {{takeRoleID $sancUID .}} {{end}} {{end}}
 
-      {{if not $isTroll}}
-        {{if not $isMined}}
-          {{giveRoleID $sancUID 657981836412321842}}
+      {{dbSet $sancUID "SancRoles" $rMbr}}
+    {{end}}
 
-          {{$usrSpec := " "}} {{$usrStr := print "`" $sancUID "`"}}
-          {{if $Mbr := getMember $sancUID}}
-            {{$usrStr = or $Mbr.Nick $Mbr.User.Globalname $Mbr.User.Username}}
-            {{$usrSpec = print "**" $Mbr.User.String "**\n" (or $Mbr.User.Globalname "　--") "\n" $Mbr.Nick}}
-          {{end}}
+    {{if not $isTroll}}
+      {{if not $isMined}}
+        {{if not $IsGoulag}} {{giveRoleID $sancUID 657981836412321842}} {{end}}
 
-          {{$goulagCount := add (or (dbGet $sancUID "GoulagCount").Value 0) 1}}
+        {{$usrSpec := " "}} {{$usrStr := print "`" $sancUID "`"}}
+        {{if $Mbr := getMember $sancUID}}
+          {{$usrStr = or $Mbr.Nick $Mbr.User.Globalname $Mbr.User.Username}}
+          {{$usrSpec = print "**" $Mbr.User.String "**\n" (or $Mbr.User.Globalname "　--") "\n" $Mbr.Nick}}
+        {{end}}
 
-          {{$toSet := cslice currentTime.Unix (getMember $sancMod).User.String "2" $readableSancDur $sancRes (cslice )}}
+        {{$goulagCount := add (or (dbGet $sancUID "GoulagCount").Value 0) 1}}
 
-          {{if $dbLastSanc := dbGet $sancUID "SancHist"}} {{dbSet $sancUID "SancHist" (($dbLastSanc.Value).Append $toSet)}}
-          {{else}} {{dbSet $sancUID "SancHist" (cslice $toSet)}} {{end}}
+        {{$SGL := ""}}
+        {{if $IsGoulag}} {{$SGL = "2E"}} {{end}}
 
-          {{$embed := cembed "color" 0xFFFFFF
+        {{$toSet := cslice currentTime.Unix (getMember $sancMod).User.String (or $SGL "2") $readableSancDur $sancRes}}
+
+        {{if $dbLastSanc := dbGet $sancUID "SancHist"}}
+          {{if $IsGoulag}}
+            {{$LastSancList := $dbLastSanc.Value}}
+            {{$SProc := index $LastSancList (sub (len $LastSancList) 1)}}
+            {{$SubSanc := index $SProc 5}}
+            {{$SubSanc = $SubSanc.Append $toSet}}
+            {{$SProc.Set 5 $SubSanc}}
+            {{$LastSancList.Set (sub (len $LastSancList) 1) $SProc}}
+            {{dbSet $sancUID "SancHist" $LastSancList}}
+
+          {{else}} {{dbSet $sancUID "SancHist" (($dbLastSanc.Value).Append ($toSet = $toSet.Append (cslice )))}} {{end}}
+
+        {{else}} {{dbSet $sancUID "SancHist" (cslice ($toSet = $toSet.Append (cslice )))}} {{end}}
+
+        {{if not $IsGoulag}}
+          {{sendMessage $chnSanc (cembed "color" 0xFFFFFF
             "title" (print "🧾 ▸ Compte rendu · Goulag de " $usrStr)
             "fields" (cslice
                 (sdict "name" " " "value" " " "inline" false)
@@ -56,34 +76,51 @@
               (sdict "name" "⋄  Raison" "value" (print ">>> " $sancRes) "inline" false)
                 (sdict "name" " " "value" " " "inline" false)
  
-            ) "footer" (sdict "text" (print "Sanction prononcée par " (getMember $sancMod).User.String))
-            "timestamp" currentTime}}
-          {{sendMessage $chnSanc $embed}}
+            ) "footer" (sdict "text" (print "Sanction prononcée par " (getMember $sancMod).User.String) "icon_url" "https://cdn.discordapp.com/emojis/1080310814453542952.webp?quality=lossless")
+            "timestamp" currentTime)}}
 
-          {{sendMessage $chnZonz (print "## <@" $sancUID ">, vous avez été sanctionné !\n\n> **Sanction :** Goulag\n> **Durée :** " $readableSancDur "\n> **Raison :** " $sancRes "\n### **Sanctionné par** <@" $sancMod ">")}}
+          {{$GoulagMsg := print "## <@" $sancUID ">, vous avez été sanctionné !\n\n> **Sanction :** Goulag\n> **Durée :** " $readableSancDur "\n> **Raison :** " $sancRes "\n### **Sanctionné par** <@" $sancMod ">"}}
 
           {{if (dbGet $sancUID "AvPreBan")}}
             {{$embed := cembed "color" 0xffbf00 "footer" (sdict "text" (print "Cette personne requiert des précautions particulières.\nRéférez-vous au -sanchistory pour obtenir les détails.") "icon_url" "https://cdn.discordapp.com/emojis/1156596295352467507.webp?quality=lossless")}}
-            {{sendMessage $chnZonz $embed}}
-          {{end}}
+            {{sendMessage $chnZonz (complexMessage "content" $GoulagMsg "embed" $embed)}}
+          {{else}} {{sendMessage $chnZonz $GoulagMsg}} {{end}}
 
           {{dbSet $sancUID "GoulagCount" $goulagCount}}
-          {{dbSet $sancMod "DailyGoulag" (add $DailySC 1)}}
 
-        {{else}}
-          {{$sancText := print "**Mine posée par** <@"}}
-          {{if gt (toInt (fdiv $sancDur 1000000000)) 900}} {{$sancText = print "**Goulagued by** <@"}} {{end}}
+        {{end}}
+
+        {{dbSet $sancMod "DailyGoulag" (add $DailySC 1)}}
+
+      {{else}}
+        {{if not $IsGoulag}}
+          {{$sancText := "**Mine posée par** <@"}}
+          {{if gt $sancDSc 900}} {{$sancText = "**Goulagued by** <@"}} {{end}}
           {{sendMessage $chnMine (print ">>> **Pseudo :** <@" $sancUID ">\n**Sanction :** Goulag\n**Raison :** " $sancRes "\n**Durée :** " $readableSancDur "\n\n" $sancText $sancMod ">")}}
         {{end}}
       {{end}}
+    {{end}}
 
-      {{dbSet $sancUID "SancRoles" $rMbr}}
-
-      {{if not (le (toInt (fdiv $sancDur 1000000000)) 0)}} {{scheduleUniqueCC 321 nil (toInt (fdiv $sancDur 1000000000)) $sancUID (dict "sancUsr" $sancUID)}}
+    {{if not (and (or $isTroll $isMined) $IsGoulag)}}
+      {{if not (le $sancDSc 0)}} {{scheduleUniqueCC 321 nil $sancDSc $sancUID (dict "sancUsr" $sancUID)}}
       {{else}}
-        {{sendDM "Une erreur s'est produite durant le traitement de la durée de la sanction.\nCelle-ci a donc été définie automatiquement sur 2h."}}
-        {{scheduleUniqueCC 321 nil 7200 $sancUID (dict "sancUsr" $sancUID)}}
+        {{$FbkDur := toDuration "2h"}}
+        {{if or $isMined $isTroll}} {{$FbkDur = toDuration "5m"}} {{end}}
+
+        {{$FbkDurTxt := humanizeDurationSeconds $FbkDur}}
+        {{range $k, $v := (sdict "hour" "heure")}} {{$FbkDurTxt = split $FbkDurTxt $k | joinStr $v}} {{end}}
+
+        {{sendDM (print "Une erreur s'est produite durant le traitement de la durée de la sanction.\nCelle-ci a donc été définie automatiquement sur **" $FbkDurTxt "**.")}}
+        {{scheduleUniqueCC 321 nil (toInt (fdiv $FbkDur 1000000000)) $sancUID (dict "sancUsr" $sancUID)}}
       {{end}}
     {{else}} {{sendMessage nil ">>> **Erreur :**\nLa personne mentionnée se trouve déjà au Goulag !"}} {{end}}
-  {{else}} {{sendMessage nil (print ">>> **Erreur :**\nVous avez atteint votre plafond de " $sancLmt " goulags aujourd'hui.")}} {{end}}
-{{end}}
+
+  {{else}}
+    {{$EM := ""}}
+    {{if $VIP2IsMined}} {{$EM = print "Impossible de miner <@" $sancUID "> : Cette personne est <:VIP2_v2:1080311144285229106> **Membre VIP 2**."}}
+    {{else if $Mbr.User.Bot}} {{$EM = "L'utilisateur spécifié est un bot."}}
+    {{else if not $DailySCVal}} {{$EM = print "Vous avez atteint votre plafond de " $sancLmt " goulags aujourd'hui."}}
+    {{else}} {{$EM = "Une erreur inconnue est survenue"}} {{end}}
+    {{sendMessage nil (print ">>> **Erreur :**\n" $EM)}}
+  {{end}}
+{{else}} {{sendMessage nil ">>> **Erreur :**\nIndentifiant fourni invalide."}} {{end}}
