@@ -3,7 +3,7 @@
 
 {{$sancUID := or .ExecData.sancUsr ($args.Get 0)}}
 {{$optArgs := or ($args.Get 2) ($args.Get 1) " "}}
-{{$rMbr := or (toString (dbGet $sancUID "SancRoles").Value) "496010501990645799"}}
+{{$rMbr := or (dbGet $sancUID "SancRoles").Value (cslice 496010501990645799)}}
 
 {{if targetHasRoleID $sancUID 506417754878902272}}
   {{if not .ExecData}}
@@ -32,7 +32,7 @@
     {{cancelScheduledUniqueCC 321 $sancUID}}
   {{end}}
 
-  {{range $k,$v := (split $rMbr "-")}}{{giveRoleID $sancUID (toInt $v)}}{{end}}
+  {{range $rMbr}} {{giveRoleID $sancUID .}} {{end}}
   {{takeRoleID $sancUID 506417754878902272}}
   {{takeRoleID $sancUID 657981836412321842}}
   {{dbDel $sancUID "SancRoles"}}
