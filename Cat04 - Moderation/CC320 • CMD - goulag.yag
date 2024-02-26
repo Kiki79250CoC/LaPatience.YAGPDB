@@ -58,6 +58,8 @@
             {{$LastSancList.Set (sub (len $LastSancList) 1) $SProc}}
             {{dbSet $sancUID "SancHist" $LastSancList}}
 
+            {{sendMessage nil (print "Le goulag de <@" $sancUID "> a été modifié.")}}
+
           {{else}} {{dbSet $sancUID "SancHist" (($dbLastSanc.Value).Append ($toSet = $toSet.Append (cslice )))}} {{end}}
 
         {{else}} {{dbSet $sancUID "SancHist" (cslice ($toSet = $toSet.Append (cslice )))}} {{end}}
