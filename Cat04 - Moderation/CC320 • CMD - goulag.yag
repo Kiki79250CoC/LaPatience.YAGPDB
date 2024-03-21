@@ -43,8 +43,8 @@
 
         {{$goulagCount := add (or (dbGet $sancUID "GoulagCount").Value 0) 1}}
 
-        {{$SGL := ""}}
-        {{if $IsGoulag}} {{$SGL = "2E"}} {{end}}
+        {{$SGL := ""}} {{$EmbSGL := "Goulag"}}
+        {{if $IsGoulag}} {{$SGL = "2E"}} {{$EmbSGL = "Prolongation du goulag"}} {{end}}
 
         {{$toSet := cslice currentTime.Unix (getMember $sancMod).User.String (or $SGL "2") $readableSancDur $sancRes}}
 
@@ -64,23 +64,23 @@
 
         {{else}} {{dbSet $sancUID "SancHist" (cslice ($toSet = $toSet.Append (cslice )))}} {{end}}
 
-        {{if not $IsGoulag}}
-          {{sendMessage $chnSanc (cembed "color" 0xFFFFFF
-            "title" (print "🧾 ▸ Compte rendu · Goulag de " $usrStr)
-            "fields" (cslice
-                (sdict "name" " " "value" " " "inline" false)
+        {{sendMessage $chnSanc (cembed "color" 0xFFFFFF
+          "title" (print "🧾 ▸ Compte rendu · " $EmbSGL " de " $usrStr)
+          "fields" (cslice
+              (sdict "name" " " "value" " " "inline" false)
 
-              (sdict "name" "🪪  •  Membre" "value" (print ">>> <@" $sancUID ">\nID : `" $sancUID "`") "inline" true)
-              (sdict "name" " " "value" $usrSpec "inline" true)
-                (sdict "name" " " "value" " " "inline" false)
+            (sdict "name" "🪪  •  Membre" "value" (print ">>> <@" $sancUID ">\nID : `" $sancUID "`") "inline" true)
+            (sdict "name" " " "value" $usrSpec "inline" true)
+              (sdict "name" " " "value" " " "inline" false)
 
-              (sdict "name" "⋄  Sanction" "value" (print "> " "Goulag **(" $goulagCount ")** de **" $readableSancDur "**") "inline" false)
-              (sdict "name" "⋄  Raison" "value" (print ">>> " $sancRes) "inline" false)
-                (sdict "name" " " "value" " " "inline" false)
+            (sdict "name" "⋄  Sanction" "value" (print "> " "Goulag **(" $goulagCount ")** de **" $readableSancDur "**") "inline" false)
+            (sdict "name" "⋄  Raison" "value" (print ">>> " $sancRes) "inline" false)
+              (sdict "name" " " "value" " " "inline" false)
  
-            ) "footer" (sdict "text" (print "Sanction prononcée par " (getMember $sancMod).User.String) "icon_url" "https://cdn.discordapp.com/emojis/1080310814453542952.webp?quality=lossless")
-            "timestamp" currentTime)}}
+          ) "footer" (sdict "text" (print "Sanction prononcée par " (getMember $sancMod).User.String) "icon_url" "https://cdn.discordapp.com/emojis/1080310814453542952.webp?quality=lossless")
+          "timestamp" currentTime)}}
 
+        {{if not $IsGoulag}}
           {{$GoulagMsg := print "## <@" $sancUID ">, vous avez été sanctionné !\n\n> **Sanction :** Goulag\n> **Durée :** " $readableSancDur "\n> **Raison :** " $sancRes "\n### **Sanctionné par** <@" $sancMod ">"}}
 
           {{if (dbGet $sancUID "AvPreBan")}}
