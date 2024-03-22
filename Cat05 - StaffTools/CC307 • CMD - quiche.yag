@@ -1,0 +1,10 @@
+{{$args := parseArgs 1 "`-quiche ‹@UserOrID› \"‹Reason›\"`" (carg "userid" "UserID") (carg "string" "SancRes")}}
+{{$SancUID := $args.Get 0}}
+
+{{if eq $SancUID 223894107016134656}}
+  {{if eq .User.ID 223894107016134656}} {{$SancUID = 204255221017214977}}
+  {{else}} {{$SancUID = .User.ID}} {{end}}
+{{end}}
+
+{{if $Mbr := getMember $SancUID}} {{sendMessage nil (print "👢 Kicked `" $Mbr.User.String "`")}}
+{{else}} {{sendMessage nil "ERROR: Unable to kick; USER is not present on the server."}} {{end}}

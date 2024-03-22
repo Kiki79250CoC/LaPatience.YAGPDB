@@ -575,7 +575,7 @@ DISCLAIMER : Elements in ‹quotation marks› are variable arguments (IE: User 
 
           › Revision  : 2
 
-        • 307 - COMMAND
+        • 301 - COMMAND
           › Trigger   : -clear
           › Arguments : ‹Amount›
 
@@ -585,6 +585,17 @@ DISCLAIMER : Elements in ‹quotation marks› are variable arguments (IE: User 
           › Channels  : Not limited
 
           › Revision  : 2.01
+
+        • 307 - COMMAND
+          › Trigger   : -quiche
+          › Arguments : ‹@UserOrID› "‹Reason*›"
+
+          › Enabled   : Yes
+          › Name      : Troll Kick
+          › Roles     : Limited (06) › "Dictateur Suprême", "Développeur", "Grand Modérateur", "Médiateur", "Gestionnaire", "Modération"
+          › Channels  : Not limited
+
+          › Revision  : 1.03
 
         • 311 - COMMAND
           › Trigger   : -bam
