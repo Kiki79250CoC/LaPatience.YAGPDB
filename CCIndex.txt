@@ -822,7 +822,7 @@ DISCLAIMER : Elements in ‹quotation marks› are variable arguments (IE: User 
           › Roles     : Not limited
           › Channels  : Limited (02) › "Boutique", "Gestion Bots"
 
-          › Revision  : 2.81.21
+          › Revision  : 2.81.30
 
         • 252 - COMMAND
           › Trigger   : -buyvip
