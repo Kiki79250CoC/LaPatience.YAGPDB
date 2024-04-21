@@ -1,27 +1,40 @@
 {{deleteTrigger 0}}
 {{$args := parseArgs 1 "`-plainte \"‹ContentInQuotes›\"`" (carg "string" "plainte")}}
-
+{{$MaxLength := 3500}}
 {{$reportNbr := dbGet 0 "PlainteCount"}}
-{{$contentPart1 := " "}}
-{{$contentPart2 := " "}}
 
-{{if lt (len ($args.Get 0)) 1024}}
-  {{$contentPart1 = $args.Get 0}}
+{{if le (len ($args.Get 0)) $MaxLength}}
+  {{$eFields := cslice}}
+
+  {{$FieldText := ""}}
+  {{- range (split ($args.Get 0) " ")}}
+    {{- if le (add (len $FieldText) (len (print . " "))) 1020}}
+      {{- $FieldText = print $FieldText " " .}}
+    {{- else}}
+      {{- $eFields = $eFields.Append (sdict "name" " " "value" $FieldText)}}
+      {{- $FieldText = .}}
+    {{- end}}
+  {{- end}}
+  {{$eFields = $eFields.Append (sdict "name" " " "value" $FieldText)}}
+
+  {{$embed := cembed "color" 0x69ed74 "title" "Contenu de la plainte :" "fields" $eFields "footer" (sdict "text" (print "ID de la plainte : " (add $reportNbr.Value 1)))}}
+
+  {{$msgID := sendMessageNoEscapeRetID 691741487213445231 (complexMessage "content" (print "## " (mentionRoleID 1078386211472805998) " Vous avez reçu une nouvelle plainte.") "embed" $embed)}}
+
+  {{if $msgID}}
+    {{sendMessage 1168339319124131871 (print "#" (add $reportNbr.Value 1) "." currentTime.Unix "." (or $msgID "*INVALID_MSGID*") "." .User.ID)}}
+    {{sendMessageNoEscape 693795482639794276 (complexMessage "content" (print "## Logging de Plainte :\n> **Utilisateur :** " .User.Mention " (" .User.String ")\n> **ID :** `" .User.ID "`") "embed" $embed)}}
+
+    {{dbSet 0 "PlainteCount" (add $reportNbr.Value 1)}}
+
+  {{else}}
+    {{sendDM (complexMessage "content" (print ">>> **Erreur :**\nUne erreur est survenue : Votre plainte n'est pas parvenue à destination en raison d'une erreur dans le traitement des données.")
+                             "file" ($args.Get 0)
+                             "filename" (print "RejectedReport_TS" currentTime.Unix "_dump"))}}
+  {{end}}
+
 {{else}}
-  {{$list := split ($args.Get 0) " "}}
-  {{range $k,$v := $list}}{{$index := (roundFloor (div (len $list) 2))}}{{if le (toInt $k) (toInt $index)}}{{$contentPart1 = joinStr " " $contentPart1 $v}}{{else}}{{$contentPart2 = joinStr " " $contentPart2 $v}}{{end}}{{end}}
+  {{sendDM (complexMessage "content" (print ">>> **Erreur :**\nUne erreur est survenue : Votre plainte est trop longue (Limite maximale : " (reReplace "," (humanizeThousands $MaxLength) " ") " caractères).")
+                           "file" ($args.Get 0)
+                           "filename" (print "RejectedReport_TS" currentTime.Unix "_dump"))}}
 {{end}}
-
-{{$embed := sdict "color" 0x69ed74 "fields" (cslice (sdict "name" "Contenu de la plainte :" "value" $contentPart1 "inline" false)) "footer" (sdict "text" (print "ID de la plainte : " (add $reportNbr.Value 1)))}}
-{{$fields := $embed.fields}}
-
-{{if (ne $contentPart2 " ")}}
-  {{$fields = $fields.Append (sdict "name" " " "value" $contentPart2 "inline" false)}}
-{{end}}
-{{$embed.Set "fields" $fields}}
-
-{{$msgID := sendMessageNoEscapeRetID 691741487213445231 (complexMessage "content" (print (mentionRoleID 1078386211472805998) "\nVous avez reçu une nouvelle plainte.") "embed" (cembed $embed))}}
-{{sendMessageNoEscape 693795482639794276 (complexMessage "content" (print "__Logging de Plainte :__\n\n> **Utilisateur :** " .User.Mention " (" .User.String ")\n> **ID :** `" .User.ID "`") "embed" (cembed $embed))}}
-{{sendMessage 1168339319124131871 (print "#" (add $reportNbr.Value 1) "." currentTime.Unix "." $msgID "." .User.ID)}}
-
-{{dbSet 0 "PlainteCount" (add $reportNbr.Value 1)}}
