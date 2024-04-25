@@ -5,12 +5,12 @@
 {{$chnZonz := 550364083195609089}}
 {{$sancUID := or .ExecData.sancUsr ($args.Get 0)}}
 {{$sancRes := or .ExecData.sancRes ($args.Get 1)}}
-{{$sancDSc := toInt (fdiv ($sancDur := or .ExecData.sancDur ($args.Get 2) 0) 1000000000)}}
+{{$sancDSc := toInt (fdiv ($sancDur := or (toDuration .ExecData.sancDur) ($args.Get 2) 0) 1000000000)}}
 {{$sancMod := or .ExecData.sancMod .User.ID}}
 {{$optArgs := or .ExecData.OptArgs ($args.Get 3) ""}}
 {{$rMbr := cslice}}
 
-{{$isTroll := and .ExecData (in (cslice "AutoSanc.Banword" "AutoSanc.Bomb" "AutoSanc.Buy" "AutoSanc.BuyVIP") $sancRes)}}
+{{$isTroll := and .ExecData (reFind `A(uto)?S(anc)?` $sancRes)}}
 {{$isMined := or (eq $sancMod 204255221017214977) (reFind `(?i)(\bB(uy)?\s*(19|25)\b)` $sancRes) (reFind `(?i)--force-as-mine` (or $.Message.Content $optArgs)) (and (le $sancDSc 900) (gt $sancDSc 0))}}
 
 {{$readableSancDur := humanizeDurationSeconds $sancDur}}
