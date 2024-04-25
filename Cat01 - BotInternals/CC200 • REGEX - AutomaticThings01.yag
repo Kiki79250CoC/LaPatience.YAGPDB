@@ -2,7 +2,7 @@
 {{if $mine := dbGet .User.ID "gulag"}}
   {{sendMessage nil "Oups... On dirait qu'un truand vient de marcher sur quelque chose de relativement explosif... <:gros_jesus:1054705212910211144>"}}
   {{$slice := split ($mine.Value) "™"}}
-  {{execCC 320 nil 0 (sdict "sancUsr" .User.ID "sancRes" (index $slice 1) "sancDur" (toDuration (index $slice 2)) "sancMod" (toInt64 (index $slice 3)) "OptArgs" (index $slice 0))}}
+  {{execCC 320 nil 0 (sdict "sancUsr" .User.ID "sancRes" (index $slice 1) "sancDur" (index $slice 2) "sancMod" (toInt64 (index $slice 3)) "OptArgs" (index $slice 0))}}
   {{dbDel .User.ID "gulag"}}
 {{end}}
 
@@ -10,43 +10,28 @@
 {{if eq .Message.ChannelID 496010398848253965}}
   {{$IsImmun := cslice 223894107016134656 369101917659332611}}
 
-  {{/* ---------- Buy 11 ---------- */}}
-  {{if and ($buy11 := dbGet 11 "Buy") (not (in $IsImmun .User.ID))}}
-    {{$entries := cslice}}
-    {{if $DBentry := dbGet 110 "Buy"}} {{$entries = $DBentry.Value}} {{end}}
-    {{if le (len $entries) 10}} {{dbSet 110 "Buy" ($entries.Append (toString .User.ID))}}
-    {{else}}
-      {{$win := index (shuffle $entries) (randInt (len $entries))}}
-      {{dbDel 11 "Buy"}} {{dbDel 110 "Buy"}}
-      {{sendMessage nil (print "Le Buy 11 à frappé sur <@" $win "> ! On se revoit dans 5 minutes.")}}
-      {{sendMessage 1168339319124131871 (print "Buy 11 : <@" $win ">")}}
-      {{execCC 320 nil 0 (sdict "sancUsr" (toInt $win) "sancRes" "AutoSanc.Buy" "sancDur" (toDuration "5m") "sancMod" 0)}}
-      {{return}}
-    {{end}}
-  {{end}}
-
-  {{/* ---------- Buy 14 ---------- */}}
-  {{if and ($buy14 := dbGet 14 "Buy") (gt (toInt $buy14.Value) 0) (not (in $IsImmun .User.ID))}}
-    {{if gt (sub (toInt $buy14.Value) 1) 0}} {{dbSet 14 "Buy" (sub (toInt $buy14.Value) 1)}} {{else}} {{dbDel 14 "Buy"}} {{end}}
-    {{sendMessage 1168339319124131871 (print "Buy 14 : " .User.Mention)}}
-    {{sendDM "Tu viens de te faire Goulag par le Buy 14 ! On se revoit dans 5 minutes !"}}
-    {{execCC 320 nil 0 (sdict "sancUsr" .User.ID "sancRes" "AutoSanc.Buy" "sancDur" (toDuration "5m") "sancMod" 0)}}
+  {{/* ---------- Buy 44 ---------- */}}
+  {{if and ($buy44 := dbGet 44 "Buy") (gt (toInt $buy44.Value) 0) (not (in $IsImmun .User.ID))}}
+    {{if gt (sub (toInt $buy44.Value) 1) 0}} {{dbSet 44 "Buy" (sub (toInt $buy44.Value) 1)}} {{else}} {{dbDel 44 "Buy"}} {{end}}
+    {{sendMessage 1168339319124131871 (print "Buy 44 : " .User.Mention)}}
+    {{sendDM "Tu viens de te faire Goulag par le Buy 44 ! On se revoit dans 5 minutes !"}}
+    {{execCC 320 nil 0 (sdict "sancUsr" .User.ID "sancRes" "AutoSanc" "sancDur" "5m")}}
     {{return}}
   {{end}}
 
-  {{/* ---------- Buy 17 ---------- */}}
-  {{if and (dbGet 17 "Buy") (not (in $IsImmun .User.ID))}}
-    {{sendMessage 1168339319124131871 (print "Buy 17 : " .User.Mention)}}
-    {{sendDM "Oups… Tu as été assommé et transporté au Goulag par un Buy 17. On se revoit dans 2 minutes !"}}
-    {{execCC 320 nil 0 (sdict "sancUsr" .User.ID "sancRes" "AutoSanc.Buy" "sancDur" (toDuration "2m") "sancMod" 0)}}
+  {{/* ---------- Buy 45 ---------- */}}
+  {{if and (dbGet 45 "Buy") (not (in $IsImmun .User.ID))}}
+    {{sendMessage 1168339319124131871 (print "Buy 45 : " .User.Mention)}}
+    {{sendDM "Oups… Tu as été assommé et transporté au Goulag par un Buy 45. On se revoit dans 2 minutes !"}}
+    {{execCC 320 nil 0 (sdict "sancUsr" .User.ID "sancRes" "AutoSanc" "sancDur" "2m")}}
     {{return}}
   {{end}}
 
-  {{/* ---------- Buy 26 ---------- */}}
-  {{if and (dbGet 26 "Buy") (not (in $IsImmun .User.ID))}}
-    {{sendMessage 1168339319124131871 (print "Buy 26 : " .User.Mention)}}
-    {{sendDM "Oups… Tu as été assommé et transporté au Goulag par un Buy 26. On se revoit dans 1 heure !"}}
-    {{execCC 320 nil 0 (sdict "sancUsr" .User.ID "sancRes" "AutoSanc.Buy" "sancDur" (toDuration "1h") "sancMod" 0)}}
+  {{/* ---------- Buy 50 ---------- */}}
+  {{if and (dbGet 50 "Buy") (not (in $IsImmun .User.ID))}}
+    {{sendMessage 1168339319124131871 (print "Buy 50 : " .User.Mention)}}
+    {{sendDM "Oups… Tu as été assommé et transporté au Goulag par un Buy 50. On se revoit dans 1 heure !"}}
+    {{execCC 320 nil 0 (sdict "sancUsr" .User.ID "sancRes" "AutoSanc" "sancDur" "1h")}}
     {{return}}
   {{end}}
 
