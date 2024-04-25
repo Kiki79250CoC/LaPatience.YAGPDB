@@ -6,7 +6,7 @@
 {{$sancUID := or .ExecData.sancUsr ($args.Get 0)}}
 {{$sancRes := or .ExecData.sancRes ($args.Get 1)}}
 {{$sancDSc := toInt (fdiv ($sancDur := or (toDuration .ExecData.sancDur) ($args.Get 2) 0) 1000000000)}}
-{{$sancMod := or .ExecData.sancMod .User.ID}}
+{{$sancMod := or .ExecData.sancMod .User.ID 0}}
 {{$optArgs := or .ExecData.OptArgs ($args.Get 3) ""}}
 {{$rMbr := cslice}}
 
