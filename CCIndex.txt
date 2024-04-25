@@ -201,11 +201,11 @@ DISCLAIMER : Elements in ‹quotation marks› are variable arguments (IE: User 
           › Arguments : n/a
 
           › Enabled   : No
-          › Name      : Buy 32 · Automatic re-rank
+          › Name      : Buy 42 · Automatic re-rank
           › Roles     : Not limited
           › Channels  : Not limited
 
-          › Revision  : 1.00
+          › Revision  : 1.01
 
         • 268 - NONE
           › Trigger   : n/a
