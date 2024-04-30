@@ -46,7 +46,8 @@
         {{$SGL := ""}} {{$EmbSGL := "Goulag"}}
         {{if $IsGoulag}} {{$SGL = "2E"}} {{$EmbSGL = "Prolongation du goulag"}} {{end}}
 
-        {{$toSet := cslice currentTime.Unix (getMember $sancMod).User.String (or $SGL "2") $readableSancDur $sancRes}}
+        {{$ModName := ""}} {{if getMember $sancMod}} {{$ModName = (getMember $sancMod).User.String}} {{end}}
+        {{$toSet := cslice currentTime.Unix (or $ModName (print "ID : `" $sancMod "`")) (or $SGL "2") $readableSancDur $sancRes}}
 
         {{if $dbLastSanc := dbGet $sancUID "SancHist"}}
           {{if $IsGoulag}}
