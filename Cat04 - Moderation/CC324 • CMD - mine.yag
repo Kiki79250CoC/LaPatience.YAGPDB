@@ -1,25 +1,39 @@
 {{$args := parseArgs 3 "`-mine ‹@UserOrID› \"‹Reason›\" ‹Duration› ‹OptArg›`\n\nOptional Arguments :\n`--force-as-mine` (Médiateur +)" (carg "userid" "minedID") (carg "string" "mineRes") (carg "duration" "mineDur") (carg "string" "OptArg")}}
-{{$countAsMineLimit := 15}}
-{{$useLimit := 10}}
-{{$argRelay := or ($args.Get 3) "default"}}
+{{$ArgRelay := or (str ($args.Get 3)) "NoArg"}}
+{{$MineDur := toInt (fdiv ($args.Get 2) 1000000000)}}
+{{$MineLmt := toInt (mult 15 60)}}
+{{$UseLmt := 10}}
+{{$UID := $args.Get 0}}
 
-{{if not (getMember ($args.Get 0)).User.Bot}}
-  {{if (le (toInt (fdiv ($args.Get 2) 1000000000)) (mult $countAsMineLimit 60))}}
-    {{if not (targetHasRoleID ($args.Get 0) 1079418386511040572)}}
-      {{dbSet ($args.Get 0) "gulag" (joinStr "™" (toString $argRelay) ($args.Get 1) ($args.Get 2) .User.ID)}}
-      {{addReactions "✅"}}
-    {{else}} {{sendMessage nil (print ">>> **Erreur :**\nImpossible de miner <@" ($args.Get 0) "> : Cette personne est <:VIP2_v2:1080311144285229106> **Membre VIP 2**.")}} {{end}}
-
-  {{else}}
-    {{if or (targetHasRoleID .User.ID 496010603601854464) (targetHasRoleID .User.ID 666687114326441989) (targetHasRoleID .User.ID 687019136240451638)}}
-      {{$modDailyGCount := 0}}
-      {{$dailyGL := dbGet .User.ID "DailyGoulag"}}
-      {{if $dailyGL}} {{$modDailyGCount = (toInt $dailyGL.Value)}} {{end}}
-
-      {{if lt $modDailyGCount $useLimit}}
-        {{dbSet ($args.Get 0) "gulag" (joinStr "™" (toString $argRelay) ($args.Get 1) ($args.Get 2) .User.ID)}}
+{{if $Mbr := getMember $UID}}
+  {{if not $Mbr.User.Bot}}
+    {{if (le $MineDur $MineLmt)}}
+      {{if not (targetHasRoleID $UID 1079418386511040572)}}
+        {{dbSet $UID "gulag" (joinStr "™" $ArgRelay ($args.Get 1) ($args.Get 2) .User.ID)}}
         {{addReactions "✅"}}
-      {{else}} {{sendMessage nil (print ">>> **Erreur :**\nVous avez atteint votre plafond de " $useLimit " goulags aujourd'hui.")}}  {{end}}
-    {{else}} {{sendMessage nil (print ">>> **Erreur :**\nEn tant que <:Gestionnaire_v2:1080310490246418432> Gestionnaire, les mines ne peuvent excéder la durée de **" $countAsMineLimit " minutes**.")}} {{end}}
-  {{end}}
-{{else}} {{sendMessage nil (print ">>> **Erreur :**\nImpossible de sanctionner/miner <@" ($args.Get 0) "> : C'est un bot putain, gros con va !")}} {{end}}
+      {{else}} {{sendMessage nil (print ">>> **Erreur :**\nImpossible de miner <@" $UID "> : Cette personne est <:VIP2_v2:1080311144285229106> **Membre VIP 2**.")}} {{end}}
+
+    {{else}}
+      {{if or (hasRoleID 496010603601854464) (hasRoleID 666687114326441989) (hasRoleID  687019136240451638)}}
+        {{$ModDailyGCount := or (toInt (dbGet .User.ID "DailyGoulag").Value) 0}}
+
+        {{if lt $ModDailyGCount $UseLmt}}
+          {{dbSet $UID "gulag" (joinStr "™" $ArgRelay ($args.Get 1) ($args.Get 2) .User.ID)}}
+          {{addReactions "✅"}}
+        {{else}} {{sendMessage nil (print ">>> **Erreur :**\nVous avez atteint votre plafond de " $UseLmt " goulags aujourd'hui.")}}  {{end}}
+      {{else}} {{sendMessage nil (print ">>> **Erreur :**\nEn tant que <:Gestionnaire_v2:1080310490246418432> Gestionnaire, les mines ne peuvent excéder la durée de **" $MineLmt " minutes**.")}} {{end}}
+
+    {{end}}
+  {{else}} {{sendMessage nil (print ">>> **Erreur :**\nAction refusée : L'ID spécifié est un bot.")}} {{end}}
+{{else}}
+  {{if or (hasRoleID 496010603601854464) (hasRoleID 666687114326441989) (hasRoleID  687019136240451638)}}
+    {{$ModDailyGCount := or (toInt (dbGet .User.ID "DailyGoulag").Value) 0}}
+
+    {{if lt $ModDailyGCount $UseLmt}}
+      {{dbSet $UID "gulag" (joinStr "™" $ArgRelay ($args.Get 1) ($args.Get 2) .User.ID)}}
+      {{addReactions "✅"}}
+    {{else}} {{sendMessage nil (print ">>> **Erreur :**\nVous avez atteint votre plafond de " $UseLmt " goulags aujourd'hui.")}}  {{end}}
+
+  {{else}} {{sendMessage nil (print ">>> **Erreur :**\nEn tant que <:Gestionnaire_v2:1080310490246418432> Gestionnaire, vous n'êtes pas autorisé à poser des mines sur des personnes qui ne sont pas présentes sur le serveur.")}} {{end}}
+
+{{end}}
