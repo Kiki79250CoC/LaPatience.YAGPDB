@@ -11,7 +11,7 @@
 {{$rMbr := cslice}}
 
 {{$isTroll := and .ExecData (reFind `A(uto)?S(anc)?` $sancRes)}}
-{{$isMined := or (eq $sancMod 204255221017214977) (reFind `(?i)(\bB(uy)?\s*(19|25)\b)` $sancRes) (reFind `(?i)--force-as-mine` (or $.Message.Content $optArgs)) (and (le $sancDSc 900) (gt $sancDSc 0))}}
+{{$isMined := or (eq $sancMod 204255221017214977) (reFind `(?i)(\bB(uy)?\s*(46|49)\b)` $sancRes) (reFind `(?i)--force-as-mine` (or $.Message.Content $optArgs)) (and (le $sancDSc 900) (gt $sancDSc 0))}}
 
 {{$readableSancDur := humanizeDurationSeconds $sancDur}}
 {{range $k, $v := (sdict "second" "seconde"  "hour" "heure"  "day" "jour"  "week" "semaine"  "year" "an"  "and" "et")}} {{$readableSancDur = split $readableSancDur $k | joinStr $v}} {{end}}
