@@ -23,3 +23,21 @@
     {{dbDel 1 "MsgLuck"}}
   {{end}}
 {{end}}
+
+{{/*Buy 17 - Réactions*/}}
+{{if $b17 := dbGet $UID "MsgLuck"}}
+  {{$MsgIDs := $b17.Value}}
+  {{range (cslice 0 1 2)}}
+    {{if eq $.ReactionMessage.ID (index $MsgIDs .)}}
+      {{if eq . (toInt (index $MsgIDs 3))}}
+        {{sendMessage nil (print "🎉 GG <@" $UID ">, tu repars avec 2 500 Points !")}} {{$a := dbIncr $UID "Points" 3500}}
+        {{sendMessage 1168339319124131871 (print "Buy 17 : <@" $UID "> · Résultat : Victoire · Message N°" (add (index $MsgIDs 3) 1))}}
+      {{else}}
+        {{sendMessage nil (print "💣 Désolé <@" $UID ">, ce n'était pas le bon, donc tu files 10 minutes au Goulag. Allez, salut !")}}
+        {{execCC 320 nil 0 (sdict "sancUsr" $UID "sancRes" "AS" "sancDur" "10m")}}
+        {{sendMessage 1168339319124131871 (print "Buy 17 : <@" $UID "> · Résultat : Perdu · Message Gagnant : N°" (add (index $MsgIDs 3) 1))}}
+      {{end}}
+    {{end}}
+  {{end}}
+  {{dbDel $UID "MsgLuck"}}
+{{end}}

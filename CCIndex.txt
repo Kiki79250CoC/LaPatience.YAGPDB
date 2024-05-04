@@ -168,11 +168,11 @@ DISCLAIMER : Elements in ‹quotation marks› are variable arguments (IE: User 
           › Arguments : n/a
 
           › Enabled   : Yes
-          › Name      : Au bon endroit au Bon moment + Drops de Points
+          › Name      : Reaction Dependencies
           › Roles     : Not limited
           › Channels  : Limited (11) › "Général", "Sports", "Jeux-Vidéo", "Anime-Films", "Débats", "Actualités", "Anecdotes-Libres", "Channel-Jeux", "Humour", "Humour-Noir", "Tchat-Noir"
 
-          › Revision  : 2.01
+          › Revision  : 2.10
 
         • 246 - NONE
           › Trigger   : n/a
