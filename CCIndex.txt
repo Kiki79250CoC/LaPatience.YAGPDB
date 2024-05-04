@@ -617,7 +617,7 @@ DISCLAIMER : Elements in ‹quotation marks› are variable arguments (IE: User 
           › Roles     : Limited (03) › "Dictateur Suprême", "Développeur", "Modération"
           › Channels  : Limited (01) › "Salle d'attente"
 
-          › Revision  : 2.01
+          › Revision  : 2.02
 
         • 314 - COMMAND
           › Trigger   : -sanchistory
