@@ -1,0 +1,66 @@
+{{$RoleList := cslice 496010501990645799 931351059455164477 496010603601854464 507301458853625879 1078386211472805998 1106395328447533077 1054107222856192172 925769441747296316 925767790034583552 925766056650362991 925745256207618139 925761123695886376 925758251662987264 925756577510748210 925745253087076392 925745243180118034 925745259290460210}}
+{{$Mode := toInt .ExecData.Mode}}
+{{$rMbr := cslice }}
+{{$UID := toInt .ExecData.UID}}
+{{$ChG := 496010398848253965}}
+
+{{if eq $Mode 0}}
+  {{giveRoleID $UID 735813110224388118}}
+
+  {{range $RoleList}}
+    {{if targetHasRoleID $UID .}}
+      {{$rMbr = $rMbr.Append .}}
+      {{takeRoleID $UID .}}
+    {{end}}
+  {{end}}
+
+  {{dbSet $UID "Buy42" $rMbr}}
+  {{scheduleUniqueCC 266 618851288825856010 900 $UID (dict "Mode" 1 "UID" $UID)}}
+
+{{else if eq $Mode 1}}
+  {{$rMbr := (dbGet $UID "Buy42").Value}}
+
+  {{range $rMbr}} {{giveRoleID $UID .}} {{end}}
+
+  {{takeRoleID $UID 735813110224388118}}
+  {{dbDel $UID "Buy42"}}
+
+{{else if eq $Mode 2}}
+  {{dbSet $UID "Buy41" 0}}
+  {{$BuyerID := toInt .ExecData.Buyer}}
+
+  {{$MsgID := sendMessageRetID $ChG (print "<@" $BuyerID "> a lancé un **Goulag de la Honte** sur <@" $UID ">\n\nSi ce message obtient plus de réactions ✅ que de réactions ❌ **__sous 30 secondes__**, alors <@" $UID "> sera Goulag 5 minutes.\nEn revanche, si le **Goulag de la Honte** rate, alors <@" $BuyerID "> se prendra les 5 minutes à sa place.")}}
+  {{addMessageReactions $ChG $MsgID (cslice "✅" "❌")}}
+
+  {{scheduleUniqueCC 266 618851288825856010 30 $UID (dict "Mode" 3 "UID" $UID "Buyer" $BuyerID "MsgID" $MsgID)}}
+
+{{else if eq $Mode 3}}
+  {{$BuyerID := toInt .ExecData.Buyer}}
+  {{$MsgID := toInt .ExecData.MsgID}}
+
+  {{$CheckRC := 0}}
+  {{$CrossRC := 0}}
+
+  {{range (getMessage $ChG $MsgID).Reactions}}
+    {{if eq .CountDetails.Burst 0}}
+      {{if eq .Emoji.Name "✅"}} {{$CheckRC = sub .Count 1}}
+      {{else if eq .Emoji.Name "❌"}} {{$CrossRC = sub .Count 1}} {{end}}
+    {{end}}
+  {{end}}
+
+  {{if gt $CheckRC $CrossRC}}
+    {{sendMessage $ChG (print "Le **Goulag de la Honte** a fonctionné ! <@" $UID "> a été envoyé sur le bûcher ! 🔥")}}
+    {{execCC 320 nil 0 (sdict "sancUsr" $UID "sancRes" "AutoSanc" "sancDur" "5m")}}
+
+  {{else if gt $CrossRC $CheckRC}}
+    {{sendMessage $ChG (print "Le **Goulag de la Honte** a échoué ! <@" $BuyerID "> en a payé le prix fort… 🔥")}}
+    {{execCC 320 nil 0 (sdict "sancUsr" $BuyerID "sancRes" "AutoSanc" "sancDur" "5m")}}
+
+  {{else}}
+    {{sendMessage $ChG "Le peuple n'a pas pu se décider, le **Goulag de la Honte** est annulé !\n*(Non remboursé)*"}}
+
+  {{end}}
+
+  {{dbDel $UID "Buy41"}}
+
+{{end}}

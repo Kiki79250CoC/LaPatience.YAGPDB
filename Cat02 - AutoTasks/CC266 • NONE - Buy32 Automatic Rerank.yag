@@ -1,5 +1,0 @@
-{{$UID := toInt .ExecData.UID}}
-
-{{takeRoleID $UID 735813110224388118}}
-{{range $k,$v := (split (dbGet $UID "Buy42").Value "-")}} {{giveRoleID $UID (toInt $v)}} {{end}}
-{{dbDel $UID "Buy42"}}
