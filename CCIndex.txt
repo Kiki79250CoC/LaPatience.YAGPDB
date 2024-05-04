@@ -711,6 +711,17 @@ DISCLAIMER : Elements in ‹quotation marks› are variable arguments (IE: User 
 
           › Revision  : 1
 
+        • 262 - COMMAND
+          › Trigger   : -acces
+          › Arguments : ‹@UserOrID›
+
+          › Enabled   : Yes
+          › Name      : n/a
+          › Roles     : Limited (06) › "Dictateur Suprême", "Développeur", "(100+) Légende éternelle" "(90+) Légende", "(80+) Élite ultime", "(70+) Élite supérieure"
+          › Channels  : Limited (02) › "Commandes Bots", "Gestion Bots"
+
+          › Revision  : 1.01
+
         • 293 - COMMAND
           › Trigger   : -bouquiner
           › Arguments : n/a
