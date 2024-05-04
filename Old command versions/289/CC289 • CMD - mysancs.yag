@@ -1,3 +1,4 @@
+@ -1,118 +0,0 @@
 {{$UID := .User.ID}}
 {{$usrStr := or .Member.Nick .User.Globalname .User.Username}}
 {{$rColor := 0x0}}
