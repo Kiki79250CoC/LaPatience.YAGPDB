@@ -5,6 +5,6 @@
   {{if not (targetHasRoleID $UID 506417754878902272)}}
     {{giveRoleID $UID 1165268999437824111}}
     {{takeRoleID $UID 1165268999437824111 3600}}
-    {{sendDM (print "Un accès d'une heure a été accordée à <@" $UID ">")}}
+    {{sendDM (print "Un accès d'une heure a été accordé à <@" $UID ">")}}
   {{else}} {{sendDM ">>> **Erreur :**\nImpossible d'accorder la permission : La personne mentionnée se trouve au Goulag."}} {{end}}
 {{else}} {{sendDM ">>> **Erreur :**\nID fourni invalide."}} {{end}}
