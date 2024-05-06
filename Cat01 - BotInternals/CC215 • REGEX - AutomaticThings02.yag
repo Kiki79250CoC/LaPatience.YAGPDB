@@ -1,4 +1,4 @@
-{{$UTS := .Message.Timestamp.Parse.Unix}}
+{{$UTS := currentTime.Unix}}
 
 {{if and (reFind `(\[.+\]\(.+\))` ($Msg := $.Message.Content)) (not (or (in (cslice 223894107016134656 369101917659332611) .User.ID) (hasRoleID 1078386211472805998)))}}
   {{deleteTrigger 0}} {{sendDM "Les hyperliens sont prohibés sur le serveur pour des raisons de sécurité."}}
