@@ -1,0 +1,27 @@
+{{$args := parseArgs 2 "`-zeus ‹[points|goulag]› ‹@UserOrID›`" (carg "string" "Option") (carg "userid" "UID")}}
+{{$TargID := $args.Get 1}}
+{{$PtsToAdd := 500}}
+{{$GDur := "10m"}}
+
+{{if eq ($CmdQuery := (lower ($args.Get 0))) "points"}}
+  {{if not ($bvip8 := dbGet 108001 "Buy")}}
+    {{if getMember $TargID}}
+      {{$a := dbIncr $TargID "Points" $PtsToAdd}}
+      {{sendMessage nil (print "Accordé. " (reReplace "," (humanizeThousands $PtsToAdd) " ") " Points ont été donnés à <@" $TargID ">.")}}
+      {{dbSetExpire 108001 "Buy" 0 900}}
+    {{else}} {{sendMessage nil ">>> **Erreur :**\nID fourni invalide."}} {{end}}
+  {{else}}
+    {{$a := humanizeDurationSeconds (mult (sub $bvip8.ExpiresAt.Unix currentTime.Unix) 1000000000)}}
+    {{range $k, $v := sdict "our" "eure" "ond" "onde" "and" "et"}} {{$a = split $a $k | joinStr $v}} {{end}}
+    {{sendMessage nil (print ">>> **Erreur :**\nBah non en fait, y'a cooldown…\n*(" $a ")*")}}
+  {{end}}
+
+{{else if eq $CmdQuery "goulag"}}
+  {{if getMember $TargID}}
+    {{if not (targetHasRoleID $TargID 506417754878902272)}}
+      {{sendMessage nil (print "Accordé. <@" $TargID "> a été envoyé " (humanizeDurationSeconds (toDuration $GDur)) " au Goulag.")}}
+      {{execCC 320 nil 0 (sdict "sancUsr" $TargID "sancRes" "AutoSanc" "sancDur" $GDur)}}
+    {{else}} {{sendMessage nil ">>> **Erreur :**\nLa personne mentionnée est déjà au Goulag."}} {{end}}
+  {{else}} {{sendMessage nil ">>> **Erreur :**\nID fourni invalide."}} {{end}}
+
+{{else}} {{sendMessage nil ">>> **Erreur :**\nArgument invalide. Arguments autorisés : `points`, `goulag`"}} {{end}}

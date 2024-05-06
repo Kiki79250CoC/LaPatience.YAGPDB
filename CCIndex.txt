@@ -722,6 +722,17 @@ DISCLAIMER : Elements in ‹quotation marks› are variable arguments (IE: User 
 
           › Revision  : 1.02
 
+        • 289 - COMMAND
+          › Trigger   : -zeus
+          › Arguments : ‹[points|goulag]› ‹@UserOrID›
+
+          › Enabled   : Yes
+          › Name      : Boutique · BuyVIP 8
+          › Roles     : Not limited
+          › Channels  : Not limited
+
+          › Revision  : 1.00
+
         • 293 - COMMAND
           › Trigger   : -bouquiner
           › Arguments : n/a
