@@ -17,4 +17,4 @@
 )}}
 
 {{$a := dbIncr $UID "ScoreExCt" 1}}
-{{if (eq (toInt $a) 300)}} {{if not (hasRoleID 1159816955969142836)}} {{giveRoleID $UID 1159816955969142836}} {{end}} {{end}}
+{{if and (gt (toInt $a) 150) (not (hasRoleID $r := 1159816955969142836))}} {{giveRoleID $UID $r}} {{end}}
