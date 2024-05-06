@@ -1,8 +1,8 @@
 {{/* ---------- Mine ---------- */}}
 {{if $mine := dbGet .User.ID "gulag"}}
-  {{sendMessage nil "Oups... On dirait qu'un truand vient de marcher sur quelque chose de relativement explosif... <:gros_jesus:1054705212910211144>"}}
+  {{sendMessage nil "Oups… On dirait qu'un truand vient de marcher sur quelque chose de relativement explosif… <:gros_jesus:1054705212910211144>"}}
   {{$slice := split ($mine.Value) "™"}}
-  {{execCC 320 nil 0 (sdict "sancUsr" .User.ID "sancRes" (index $slice 1) "sancDur" (index $slice 2) "sancMod" (toInt64 (index $slice 3)) "OptArgs" (index $slice 0))}}
+  {{execCC 320 nil 0 (sdict "sancUsr" .User.ID "sancRes" (index $slice 1) "sancDur" (index $slice 2) "sancMod" (toInt (index $slice 3)) "OptArgs" (index $slice 0))}}
   {{dbDel .User.ID "gulag"}}
 {{end}}
 
