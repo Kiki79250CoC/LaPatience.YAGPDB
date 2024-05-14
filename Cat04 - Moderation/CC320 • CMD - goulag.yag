@@ -41,10 +41,11 @@
           {{$usrSpec = print "**" $Mbr.User.String "**\n" (or $Mbr.User.Globalname "　--") "\n" $Mbr.Nick}}
         {{end}}
 
-        {{$goulagCount := add (or (dbGet $sancUID "GoulagCount").Value 0) 1}}
+        {{$goulagCount := or (dbGet $sancUID "GoulagCount").Value 0}}
 
         {{$SGL := ""}} {{$EmbSGL := "Goulag"}}
-        {{if $IsGoulag}} {{$SGL = "2E"}} {{$EmbSGL = "Prolongation du goulag"}} {{end}}
+        {{if $IsGoulag}} {{$SGL = "2E"}} {{$EmbSGL = "Prolongation du goulag"}}
+        {{else}} {{$goulagCount = add $goulagCount 1}} {{end}}
 
         {{$ModName := ""}} {{if getMember $sancMod}} {{$ModName = (getMember $sancMod).User.String}} {{end}}
         {{$toSet := cslice currentTime.Unix (or $ModName (print "ID : `" $sancMod "`")) (or $SGL "2") $readableSancDur $sancRes}}
