@@ -603,21 +603,21 @@ DISCLAIMER : Elements in ‹quotation marks› are variable arguments (IE: User 
 
           › Enabled   : Yes
           › Name      : Troll ban
-          › Roles     : Limited (06) › "Dictateur Suprême", "Développeur", "Grand Modérateur", "Médiateur", "Gestionnaire", "Modération"
+          › Roles     : Limited (06) › "Dictateur Suprême", "Développeur", "Grand Modérateur", "Modérateur"
           › Channels  : Not limited
 
           › Revision  : 1.03
 
         • 312 - COMMAND
-          › Trigger   : -rank
+          › Trigger   : -getout
           › Arguments : ‹@UserOrID›
 
           › Enabled   : Yes
           › Name      : n/a
-          › Roles     : Limited (03) › "Dictateur Suprême", "Développeur", "Modération"
-          › Channels  : Limited (01) › "Salle d'attente"
+          › Roles     : Limited (04) › "Dictateur Suprême", "Développeur", "Grand Modérateur", "Modérateur"
+          › Channels  : Not limited
 
-          › Revision  : 2.02
+          › Revision  : 2.01
 
         • 314 - COMMAND
           › Trigger   : -sanchistory
