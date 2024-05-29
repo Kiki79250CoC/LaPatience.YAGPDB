@@ -1,6 +1,6 @@
 {{$UTS := currentTime.Unix}}
 
-{{if and (reFind `(\[.+\]\(.+\))` ($Msg := $.Message.Content)) (not (or (in (cslice 223894107016134656 369101917659332611) .User.ID) (hasRoleID 1078386211472805998)))}}
+{{if and (reFind `(\[.+\]\(.+\))` ($Msg := $.Message.Content)) (not (or (in (cslice 223894107016134656 369101917659332611) .User.ID) (hasRoleID 496010603601854464)))}}
   {{deleteTrigger 0}} {{sendDM "Les hyperliens sont prohibés sur le serveur pour des raisons de sécurité."}}
   {{sendMessage 1168339319124131871 (print "Message de <@" .User.ID "> sur le <#" .Message.ChannelID "> contenant un hyperlien intercepté. Contenu du message :\n\n" $Msg)}}
 {{end}}
