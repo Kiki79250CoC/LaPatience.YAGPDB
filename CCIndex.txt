@@ -386,7 +386,7 @@ DISCLAIMER : Elements in ‹quotation marks› are variable arguments (IE: User 
 
           › Enabled   : No
           › Name      : FUTURE : Exclude user
-          › Roles     : Limited (03) › "Dictateur Suprême", "Développeur", "Modération"
+          › Roles     : Limited (03) › "Dictateur Suprême", "Développeur", "Modérateur"
           › Channels  : Not limited
 
           › Revision  : Not available
@@ -397,7 +397,7 @@ DISCLAIMER : Elements in ‹quotation marks› are variable arguments (IE: User 
 
           › Enabled   : No
           › Name      : FUTURE : Revoke user exclusion
-          › Roles     : Limited (03) › "Dictateur Suprême", "Développeur", "Modération"
+          › Roles     : Limited (03) › "Dictateur Suprême", "Développeur", "Modérateur"
           › Channels  : Not limited
 
           › Revision  : Not Available
@@ -409,7 +409,7 @@ DISCLAIMER : Elements in ‹quotation marks› are variable arguments (IE: User 
 
           › Enabled   : Yes
           › Name      : n/a
-          › Roles     : Limited (04) › "Dictateur Suprême", "Développeur", "Grand Modérateur", "Médiateur"
+          › Roles     : Limited (04) › "Dictateur Suprême", "Développeur", "Grand Modérateur", "Modérateur"
           › Channels  : Not Limited
 
           › Revision  : 2.41.7
@@ -421,7 +421,7 @@ DISCLAIMER : Elements in ‹quotation marks› are variable arguments (IE: User 
 
           › Enabled   : Yes
           › Name      : n/a
-          › Roles     : Limited (04) › "Dictateur Suprême", "Développeur", "Grand Modérateur", "Médiateur"
+          › Roles     : Limited (04) › "Dictateur Suprême", "Développeur", "Grand Modérateur", "Modérateur"
           › Channels  : Not Limited
 
           › Revision  : 2.20.1
@@ -438,15 +438,15 @@ DISCLAIMER : Elements in ‹quotation marks› are variable arguments (IE: User 
           › Revision  : Not available
 
         • 323 - COMMAND
-          › Trigger   : -getout
-          › Arguments : ‹@UserOrID›
+          › Trigger   : n/a
+          › Arguments : n/a
 
-          › Enabled   : Yes
+          › Enabled   : n/a
           › Name      : n/a
-          › Roles     : Limited (06) › "Dictateur Suprême", "Développeur", "Grand Modérateur", "Médiateur", "Gestionnaire", "Modération"
-          › Channels  : Not limited
+          › Roles     : n/a
+          › Channels  : n/a
 
-          › Revision  : 2.01
+          › Revision  : n/a
 
         • 324 - COMMAND
           › Trigger   : -mine
@@ -455,7 +455,7 @@ DISCLAIMER : Elements in ‹quotation marks› are variable arguments (IE: User 
 
           › Enabled   : Yes
           › Name      : n/a
-          › Roles     : Limited (06) › "Dictateur Suprême", "Développeur", "Grand Modérateur", "Médiateur", "Gestionnaire" (Boutique), "Modération"
+          › Roles     : Limited (04) › "Dictateur Suprême", "Développeur", "Grand Modérateur", "Modérateur"
           › Channels  : Not limited
 
           › Revision  : 2.40
@@ -466,7 +466,7 @@ DISCLAIMER : Elements in ‹quotation marks› are variable arguments (IE: User 
 
           › Enabled   : Yes
           › Name      : n/a
-          › Roles     : Limited (06) › "Dictateur Suprême", "Développeur", "Grand Modérateur", "Médiateur", "Gestionnaire" (Boutique), "Modération"
+          › Roles     : Limited (04) › "Dictateur Suprême", "Développeur", "Grand Modérateur", "Modérateur"
           › Channels  : Not limited
 
           › Revision  : 1.03
@@ -477,7 +477,7 @@ DISCLAIMER : Elements in ‹quotation marks› are variable arguments (IE: User 
 
           › Enabled   : Yes
           › Name      : n/a
-          › Roles     : Limited (03) › "Dictateur Suprême", "Développeur", "Grand Modérateur", "Médiateur", "Gestionnaire"
+          › Roles     : Limited (04) › "Dictateur Suprême", "Développeur", "Grand Modérateur", "Modérateur"
           › Channels  : Not limited
 
           › Revision  : 2.40.2
@@ -488,7 +488,7 @@ DISCLAIMER : Elements in ‹quotation marks› are variable arguments (IE: User 
 
           › Enabled   : Yes
           › Name      : n/a
-          › Roles     : Limited (03) › "Dictateur Suprême", "Développeur", "Grand Modérateur", "Médiateur"
+          › Roles     : Limited (04) › "Dictateur Suprême", "Développeur", "Grand Modérateur", "Modérateur"
           › Channels  : Not limited
 
           › Revision  : 1.01
@@ -499,7 +499,7 @@ DISCLAIMER : Elements in ‹quotation marks› are variable arguments (IE: User 
 
           › Enabled   : Yes
           › Name      : n/a
-          › Roles     : Limited (03) › "Dictateur Suprême", "Développeur", "Grand Modérateur", "Médiateur"
+          › Roles     : Limited (04) › "Dictateur Suprême", "Développeur", "Grand Modérateur", "Modérateur"
           › Channels  : Not limited
 
           › Revision  : 1.01
@@ -511,7 +511,7 @@ DISCLAIMER : Elements in ‹quotation marks› are variable arguments (IE: User 
 
           › Enabled   : Yes
           › Name      : n/a
-          › Roles     : Limited (04) › "Dictateur Suprême", "Développeur", "Grand Modérateur", "Médiateur"
+          › Roles     : Limited (04) › "Dictateur Suprême", "Développeur", "Grand Modérateur", "Modérateur"
           › Channels  : Not limited
 
           › Revision  : 2.40.2
@@ -522,7 +522,7 @@ DISCLAIMER : Elements in ‹quotation marks› are variable arguments (IE: User 
 
           › Enabled   : No
           › Name      : FUTURE : Prolongate User Ban
-          › Roles     : Limited (04) › "Dictateur Suprême", "Développeur", "Grand Modérateur", "Médiateur"
+          › Roles     : Limited (04) › "Dictateur Suprême", "Développeur", "Grand Modérateur", "Modérateur"
           › Channels  : Not limited
 
           › Revision  : Not available
@@ -533,7 +533,7 @@ DISCLAIMER : Elements in ‹quotation marks› are variable arguments (IE: User 
 
           › Enabled   : No
           › Name      : FUTURE : Unban User
-          › Roles     : Limited (04) › "Dictateur Suprême", "Développeur", "Grand Modérateur", "Médiateur"
+          › Roles     : Limited (04) › "Dictateur Suprême", "Développeur", "Grand Modérateur", "Modérateur"
           › Channels  : Not limited
 
           › Revision  : Not available
@@ -544,7 +544,7 @@ DISCLAIMER : Elements in ‹quotation marks› are variable arguments (IE: User 
 
           › Enabled   : Yes
           › Name      : n/a
-          › Roles     : Limited (04) › "Dictateur Suprême", "Développeur", "Grand Modérateur", "Médiateur", "Gestionnaire"
+          › Roles     : Limited (04) › "Dictateur Suprême", "Développeur", "Grand Modérateur", "Modérateur"
           › Channels  : Not limited
 
           › Revision  : 1.20
@@ -570,7 +570,7 @@ DISCLAIMER : Elements in ‹quotation marks› are variable arguments (IE: User 
 
           › Enabled   : No
           › Name      : n/a
-          › Roles     : Limited (04) › "Dictateur Suprême", "Développeur", "Grand Modérateur", "Médiateur"
+          › Roles     : Limited (04) › "Dictateur Suprême", "Développeur", "Grand Modérateur", "Modérateur"
           › Channels  : Not limited
 
           › Revision  : 2
@@ -581,7 +581,7 @@ DISCLAIMER : Elements in ‹quotation marks› are variable arguments (IE: User 
 
           › Enabled   : Yes
           › Name      : n/a
-          › Roles     : Limited (06) › "Dictateur Suprême", "Développeur", "Grand Modérateur", "Médiateur", "Gestionnaire", "Modération"
+          › Roles     : Limited (06) › "Dictateur Suprême", "Développeur", "Grand Modérateur", "Modérateur"
           › Channels  : Not limited
 
           › Revision  : 2.01
@@ -592,7 +592,7 @@ DISCLAIMER : Elements in ‹quotation marks› are variable arguments (IE: User 
 
           › Enabled   : Yes
           › Name      : Troll Kick
-          › Roles     : Limited (06) › "Dictateur Suprême", "Développeur", "Grand Modérateur", "Médiateur", "Gestionnaire", "Modération"
+          › Roles     : Limited (06) › "Dictateur Suprême", "Développeur", "Grand Modérateur", "Modérateur"
           › Channels  : Not limited
 
           › Revision  : 1.03
@@ -625,7 +625,7 @@ DISCLAIMER : Elements in ‹quotation marks› are variable arguments (IE: User 
 
           › Enabled   : Yes
           › Name      : n/a
-          › Roles     : Limited (06) › "Dictateur Suprême", "Développeur", "Grand Modérateur", "Médiateur", "Gestionnaire", "Modération"
+          › Roles     : Limited (04) › "Dictateur Suprême", "Développeur", "Grand Modérateur", "Modérateur"
           › Channels  : Not limited
 
           › Revision  : 3.01
@@ -636,7 +636,7 @@ DISCLAIMER : Elements in ‹quotation marks› are variable arguments (IE: User 
 
           › Enabled   : No
           › Name      : n/a
-          › Roles     : Limited (06) › "Dictateur Suprême", "Développeur", "Grand Modérateur", "Médiateur", "Gestionnaire", "Modération"
+          › Roles     : Limited (04) › "Dictateur Suprême", "Développeur", "Grand Modérateur", "Modérateur"
           › Channels  : Not limited
 
           › Revision  : n/a
