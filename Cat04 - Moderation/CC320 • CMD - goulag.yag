@@ -1,4 +1,4 @@
-{{$args := parseArgs 3 "`-goulag ‹@UserOrID› \"‹Reason›\" ‹Duration› ‹OptArg›`\n\nOptional Arguments :\n`--force-as-mine` (Médiateur +)" (carg "userid" "sancUsr") (carg "string" "sancRes") (carg "duration" "sancDur") (carg "string" "OptArg")}}
+{{$args := parseArgs 3 "`-goulag ‹@UserOrID› \"‹Reason›\" ‹Duration› ‹OptArg›`\n\nOptional Arguments :\n`--force-as-mine` (Modérateur+)" (carg "userid" "sancUsr") (carg "string" "sancRes") (carg "duration" "sancDur") (carg "string" "OptArg")}}
 {{$sancLmt := 10}}
 {{$chnSanc := 515972308645707777}}
 {{$chnMine := 925172096252936223}}
