@@ -914,7 +914,7 @@ DISCLAIMER : Elements in ‹quotation marks› are variable arguments (IE: User 
           › Roles     : Not limited
           › Channels  : Limited (02) › "Commandes Bots", "Gestion Bots"
 
-          › Revision  : 2.00
+          › Revision  : 2.01
 
 
 

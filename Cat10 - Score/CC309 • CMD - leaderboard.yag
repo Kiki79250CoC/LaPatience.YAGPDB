@@ -4,7 +4,7 @@
 {{$MEntry := add $index 1}}
 {{$PgLmt := dbCount "score"}}
 
-{{if le (add $index 10) $PgLmt}}
+{{if le (add $index 1) $PgLmt}}
   {{$TopList := ""}}
   {{- range (dbTopEntries "score" $LNbr $PageSk)}}
     {{- $inTxt := ($index = add $index 1)}}
