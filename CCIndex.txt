@@ -277,17 +277,6 @@ DISCLAIMER : Elements in ‹quotation marks› are variable arguments (IE: User 
 
     • CATEGORY 03 - ADMIN
 
-        • 158 - COMMAND
-          › Trigger   : -levier
-          › Arguments : n/a
-
-          › Enabled   : Yes
-          › Name      : n/a
-          › Roles     : Not limited
-          › Channels  : Limited (01) › "Gestion Bots"
-
-          › Revision  : 1.10
-
         • 190 - COMMAND
           › Trigger   : -retrieve
           › Arguments : n/a
