@@ -19,7 +19,7 @@
 
   {{$embed := cembed "color" 0x69ed74 "title" "Contenu de la plainte :" "fields" $eFields "footer" (sdict "text" (print "ID de la plainte : " (add $reportNbr.Value 1)))}}
 
-  {{$msgID := sendMessageNoEscapeRetID 691741487213445231 (complexMessage "content" (print "## " (mentionRoleID 1078386211472805998) " Vous avez reçu une nouvelle plainte.") "embed" $embed)}}
+  {{$msgID := sendMessageNoEscapeRetID 691741487213445231 (complexMessage "content" (print "## " (mentionRoleID 496010603601854464) " Vous avez reçu une nouvelle plainte.") "embed" $embed)}}
 
   {{if $msgID}}
     {{sendMessage 1168339319124131871 (print "#" (add $reportNbr.Value 1) "." currentTime.Unix "." (or $msgID "*INVALID_MSGID*") "." .User.ID)}}
