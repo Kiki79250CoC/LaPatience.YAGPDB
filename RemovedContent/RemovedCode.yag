@@ -59,3 +59,23 @@
     {{dbSet 0 "list-abo" $list}}
   {{end}}
 {{end}}
+
+// -----------------------------------------------------------------------------
+
+{{/* -----| April Fools 2024 |----- */}}
+{{$IsImmun := cslice 223894107016134656 369101917659332611 }}
+{{$AFGoulag := (dbGet 0 "AprilFoolGoulagIDs").Value}}
+{{if and (ge $UTS 1711922400) (lt $UTS 1712008800) (not (in $IsImmun .User.ID)) (not (in $AFGoulag .User.ID)) (eq (randInt 25) 14)}}
+
+  {{$AFGoulag = $AFGoulag.Append .User.ID}}
+  {{dbSet 0 "AprilFoolGoulagIDs" $AFGoulag}}
+
+  {{execCC 320 nil 0 (sdict "sancUsr" .User.ID "sancRes" "AutoSanc.Buy" "sancDur" (toDuration "14m") "sancMod" 0)}}
+  {{sendDM "**Désolé, tu es tombé sur la surprise du Premier Avril !**\nRassure toi, ce Goulag est évidemment troll, tu seras sorti d'ici 14 minutes et n'est déclenchable qu'une seule fois par personne.\n\nPasse un bon Premier Avril ! "}}
+  {{sendMessage 1168339319124131871 (print .User.Mention " (`" .User.String "`) s'est mangé le Goulag du Premier Avril !")}}
+
+  {{return}}
+{{end}}
+
+// -----------------------------------------------------------------------------
+
