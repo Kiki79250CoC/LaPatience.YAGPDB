@@ -5,35 +5,18 @@
 {{$UseLmt := 10}}
 {{$UID := $args.Get 0}}
 
-{{if $Mbr := getMember $UID}}
-  {{if not $Mbr.User.Bot}}
-    {{if (le $MineDur $MineLmt)}}
-      {{if not (targetHasRoleID $UID 1079418386511040572)}}
-        {{dbSet $UID "gulag" (joinStr "™" $ArgRelay ($args.Get 1) ($args.Get 2) .User.ID)}}
-        {{addReactions "✅"}}
-      {{else}} {{sendMessage nil (print ">>> **Erreur :**\nImpossible de miner <@" $UID "> : Cette personne est <:VIP2_v2:1080311144285229106> **Membre VIP 2**.")}} {{end}}
+{{$IsBot := ($IsTroll := false)}}
+{{if $Mbr := getMember $UID}} {{$IsBot = $Mbr.User.Bot}} {{end}}
+{{if (reFind `(?i)(--force-as-mine)` $.Message.Content)}} {{$IsTroll = true}} {{end}}
 
-    {{else}}
-      {{if or (hasRoleID 496010603601854464) (hasRoleID 666687114326441989) (hasRoleID  687019136240451638)}}
-        {{$ModDailyGCount := or (toInt (dbGet .User.ID "DailyGoulag").Value) 0}}
+{{if and (not $IsBot) (not ($TMineVIP := and (le $MineDur $MineLmt) (targetHasRoleID $UID 1079418386511040572))) (not ($MinePlaf := and (gt $MineDur $MineLmt) (gt (or (toInt (dbGet .User.ID "DailyGoulag").Value) 0) $UseLmt)))}}
+  {{dbSet $UID "gulag" (cslice (sdict "IsTroll" $IsTroll "ArgRelay" $ArgRelay "Reason" ($args.Get 1) "Duration" ($args.Get 2) "ModID" .User.ID))}}
+  {{addReactions "✅"}}
 
-        {{if lt $ModDailyGCount $UseLmt}}
-          {{dbSet $UID "gulag" (joinStr "™" $ArgRelay ($args.Get 1) ($args.Get 2) .User.ID)}}
-          {{addReactions "✅"}}
-        {{else}} {{sendMessage nil (print ">>> **Erreur :**\nVous avez atteint votre plafond de " $UseLmt " goulags aujourd'hui.")}}  {{end}}
-      {{else}} {{sendMessage nil (print ">>> **Erreur :**\nEn tant que <:Gestionnaire_v2:1080310490246418432> Gestionnaire, les mines ne peuvent excéder la durée de **" $MineLmt " minutes**.")}} {{end}}
-
-    {{end}}
-  {{else}} {{sendMessage nil (print ">>> **Erreur :**\nAction refusée : L'ID spécifié est un bot.")}} {{end}}
 {{else}}
-  {{if or (hasRoleID 496010603601854464) (hasRoleID 666687114326441989) (hasRoleID  687019136240451638)}}
-    {{$ModDailyGCount := or (toInt (dbGet .User.ID "DailyGoulag").Value) 0}}
-
-    {{if lt $ModDailyGCount $UseLmt}}
-      {{dbSet $UID "gulag" (joinStr "™" $ArgRelay ($args.Get 1) ($args.Get 2) .User.ID)}}
-      {{addReactions "✅"}}
-    {{else}} {{sendMessage nil (print ">>> **Erreur :**\nVous avez atteint votre plafond de " $UseLmt " goulags aujourd'hui.")}}  {{end}}
-
-  {{else}} {{sendMessage nil (print ">>> **Erreur :**\nEn tant que <:Gestionnaire_v2:1080310490246418432> Gestionnaire, vous n'êtes pas autorisé à poser des mines sur des personnes qui ne sont pas présentes sur le serveur.")}} {{end}}
-
+  {{$ErrTxt := "Erreur non spécifiée"}}
+  {{if $IsBot}} {{$ErrTxt = "Action refusée : L'ID spécifié est un bot"}}
+  {{else if $TMineVIP}} {{$ErrTxt = print "Impossible de miner <@" $UID "> : Cette personne est <:VIP2_v2:1080311144285229106> **Membre VIP 2**"}}
+  {{else if $MinePlaf}} {{$ErrTxt = print "Vous avez atteint votre plafond de " $UseLmt " goulags aujourd'hui"}} {{end}}
+  {{sendMessage nil (print ">>> **Erreur :**\n" $ErrTxt ".")}}
 {{end}}
