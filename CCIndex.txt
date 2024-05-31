@@ -665,7 +665,7 @@ DISCLAIMER : Elements in ‹quotation marks› are variable arguments (IE: User 
           › Roles     : Not limited
           › Channels  : Limited (02) › "Modération", "Gestion Bots"
 
-          › Revision  : 2.00
+          › Revision  : 3.00
 
         • 182 - COMMAND
           › Trigger   : -avatar
