@@ -678,17 +678,6 @@ DISCLAIMER : Elements in ‹quotation marks› are variable arguments (IE: User 
 
           › Revision  : 1
 
-        • 213 - COMMAND
-          › Trigger   : -necromancien
-          › Arguments : "‹Text›"
-
-          › Enabled   : No
-          › Name      : n/a
-          › Roles     : Limited (01) › "Gérant de Salon"
-          › Channels  : Not limited
-
-          › Revision  : 1.00
-
         • 242 - COMMAND
           › Trigger   : -infoblk
           › Arguments : "‹Text›"
