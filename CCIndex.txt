@@ -299,6 +299,17 @@ DISCLAIMER : Elements in ‹quotation marks› are variable arguments (IE: User 
 
           › Revision  : 1.10
 
+        • 213 - COMMAND
+          › Trigger   : -immundb
+          › Arguments : ‹[Add|Remove|CreateList|DeleteList|Query]› "‹SubKey*›" ‹@UserOrID*›
+
+          › Enabled   : Yes
+          › Name      : n/a
+          › Roles     : Not limited
+          › Channels  : Limited (01) › "Gestion Bots"
+
+          › Revision  : 1.00
+
         • 259 - COMMAND
           › Trigger   : -sendmessage
           › Arguments : "‹Message›"

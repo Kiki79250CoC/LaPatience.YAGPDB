@@ -1,0 +1,141 @@
+{{$args := parseArgs 1 "`-ImmunDB ‹[Add|Remove|CreateList|DeleteList|Query]› \"‹SubKey›\"`" (carg "string" "Option") (carg "string" "SubKey") (carg "string" "OptArgs")}}
+{{$IsEID := ge ($TargID := toInt (or (reFind `(\d{1,20})` (or ($args.Get 2) "")) 0)) 10000000000000000}}
+{{$DBVal := or (dbGet 0 "ImmunDB").Value (sdict )}}
+{{$SKSlc := or ($DBVal.Get ($LSKey := or ($args.Get 1) "")) (cslice )}}
+
+{{$EC := ($ST := ($SM := ""))}}
+
+{{if eq ($CmdQuery := (lower ($args.Get 0))) "createlist"}}
+  {{$args := parseArgs 2 "`-ImmunDB CreateList \"‹SubKey›\"`" (carg "string" "Option") (carg "string" "SubKey") (carg "string" "OptArgs")}}
+
+  {{if not ($DBVal.HasKey $LSKey)}}
+    {{$DBVal.Set $LSKey (cslice )}}
+    {{dbSet 0 "ImmunDB" $DBVal}}
+
+    {{$ST = ($SM = 0)}}
+
+  {{else}} {{$EC = 1}} {{end}}
+
+
+{{else if eq $CmdQuery "deletelist"}}
+  {{$args := parseArgs 2 "`-ImmunDB DeleteList \"‹SubKey›\"`" (carg "string" "Option") (carg "string" "SubKey") (carg "string" "OptArgs")}}
+
+  {{if $DBVal.HasKey $LSKey}}
+    {{$DBVal.Del $LSKey}}
+    {{dbSet 0 "ImmunDB" $DBVal}}
+
+    {{$ST = ($SM = 1)}}
+
+  {{else}} {{$EC = 2}} {{end}}
+
+
+{{else if eq $CmdQuery "add"}}
+  {{$args := parseArgs 3 "`-ImmunDB Add \"‹SubKey›\" ‹@UserOrID›`" (carg "string" "Option") (carg "string" "SubKey") (carg "userid" "UID")}}
+
+  {{if $DBVal.HasKey $LSKey}}
+    {{if not (in (cslice 0 456226577798135808) $TargID)}}
+      {{if not (in $SKSlc $TargID)}}
+        {{$DBVal.Set $LSKey ($SKSlc.Append $TargID)}}
+        {{dbSet 0 "ImmunDB" $DBVal}}
+
+        {{if $IsEID}} {{$ST = ($SM = 2)}}
+        {{else}} {{$ST = ($SM = 3)}} {{end}}
+
+      {{else}} {{if $IsEID}} {{$EC = 5}} {{else}} {{$EC = 6}} {{end}} {{end}}
+
+    {{else}} {{$EC = 7}} {{end}}
+  {{else}} {{$EC = 2}} {{end}}
+
+
+{{else if eq $CmdQuery "remove"}}
+  {{$args := parseArgs 3 "`-ImmunDB Remove \"‹SubKey›\" ‹@UserOrID›`" (carg "string" "Option") (carg "string" "SubKey") (carg "userid" "UID")}}
+
+  {{if $DBVal.HasKey $LSKey}}
+    {{if in $SKSlc $TargID}}
+
+      {{$entries := cslice}}
+      {{range $SKSlc}}
+        {{if not (eq (toInt .) $TargID)}} {{$entries = $entries.Append .}} {{end}}
+      {{end}}
+      {{$DBVal.Set $LSKey $entries}}
+      {{dbSet 0 "ImmunDB" $DBVal}}
+
+      {{if $IsEID}} {{$ST = ($SM = 4)}}
+      {{else}} {{$ST = ($SM = 5)}} {{end}}
+
+    {{else}} {{if $IsEID}} {{$EC = 8}} {{else}} {{$EC = 9}} {{end}} {{end}}
+  {{else}} {{$EC = 2}} {{end}}
+
+
+{{else if eq $CmdQuery "query"}}
+  {{$args := parseArgs 1 "" (carg "string" "Option") (carg "string" "SubKey") (carg "string" "OptArgs")}}
+
+  {{if $LSKey}}
+    {{$ImmunList := ""}}
+    {{$Count := 0}}
+    {{range $SKSlc}}
+      {{$Count = add $Count 1}}
+      {{if ge (toInt .) 10000000000000000}} {{$ImmunList = print $ImmunList "　· <@" . ">\n"}}
+      {{else}} {{$ImmunList = print $ImmunList "　· " . "\n"}} {{end}}
+    {{end}}
+
+    {{if $ImmunList}}
+      {{sendMessage nil (cembed "color" 0xc51012
+        "title" (print "Index de la base de données · Liste \"" $LSKey "\"")
+        "description" (print "**⋄  Nombre d'entrées dans la liste : **" $Count "\n" $ImmunList)
+      )}}
+
+    {{else}} {{$EC = 10}} {{end}}
+
+  {{else}}
+    {{$KeyList := ""}}
+    {{$Count := 0}}
+    {{range $key, $value := $DBVal}}
+      {{$Count = add $Count 1}}
+      {{$KeyList = print $KeyList "　· " $key "\n"}}
+    {{end}}
+
+    {{if $KeyList}}
+      {{sendMessage nil (cembed "color" 0xc51012
+        "title" (print "Index des listes de la base de données")
+        "description" (print "**⋄  Nombre de listes : **" $Count "\n" $KeyList)
+      )}}
+
+    {{else}} {{$EC = 4}} {{end}}
+
+  {{end}}
+
+{{else}} {{sendMessage nil ">>> **Erreur :**\nArgument invalide. Arguments autorisés : `Add`, `Remove`, `CreateList`, `RemoveList`, `Query`"}} {{end}}
+
+{{$SMTTtl := cslice
+  "Liste ajoutée"
+  "Liste supprimée"
+  "Utilisateur ajouté"
+  "Item ajouté"
+  "Utilisateur retiré"
+  "Item retiré"
+}}
+{{$SMTTxt := cslice
+  (print "La liste **" $LSKey "** a été créée dans la base de données")
+  (print "La liste **" $LSKey "** a été supprimée de la base de données")
+  (print "L'utilisateur <@" $TargID "> (**" $TargID "**) a été ajouté à la liste **" $LSKey "**")
+  (print "L'item **" $TargID "** a été ajouté à la liste **" $LSKey "**")
+  (print "L'utilisateur <@" $TargID "> (**" $TargID "**) a été retiré de la liste **" $LSKey "**")
+  (print "L'item **" $TargID "** a été retiré la liste **" $LSKey "**")
+}}
+{{$EMText := cslice
+  "Erreur non spécifiée"
+  (print "La liste **" $LSKey "** existe déjà")
+  (print "La liste **" $LSKey "** n'existe pas")
+  (print "La liste **" $LSKey "** est vide")
+  "La base de données ne contient aucune liste"
+  "L'utilisateur existe déjà dans la liste"
+  "L'item existe déjà dans la liste"
+  "Identifiant invalide"
+  "L'utilisateur n'existe pas dans la liste"
+  "L'item n'existe pad dans la liste"
+  "Cette liste est vide"
+}}
+
+{{if and (not (eq (str $SM) "")) (not (eq (str $ST) ""))}} {{sendMessage nil (cembed "color" 0x00b04f "title" (index $SMTTtl (or $ST 0)) "description" (print (index $SMTTxt (or $SM 0)) "."))}} {{end}}
+{{if (not (eq (str $EC) ""))}} {{sendMessage nil (cembed "color" 0xda373c "title" "Erreur" "description" (print (index $EMText (or $EC 0)) ".") "footer" (sdict "text" (print "Erreur " $EC)))}} {{end}}
