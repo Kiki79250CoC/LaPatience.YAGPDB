@@ -308,7 +308,7 @@ DISCLAIMER : Elements in ‹quotation marks› are variable arguments (IE: User 
           › Roles     : Not limited
           › Channels  : Limited (01) › "Gestion Bots"
 
-          › Revision  : 1.00
+          › Revision  : 1.10
 
         • 259 - COMMAND
           › Trigger   : -sendmessage

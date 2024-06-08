@@ -1,4 +1,4 @@
-{{$args := parseArgs 1 "`-ImmunDB ‹[Add|Remove|CreateList|DeleteList|Query]› \"‹SubKey›\"`" (carg "string" "Option") (carg "string" "SubKey") (carg "string" "OptArgs")}}
+{{$args := parseArgs 1 "`-ImmunDB ‹[Add|Remove|CreateList|DeleteList|RenameList|DuplicateList|Query]› \"‹SubKey›\"`" (carg "string" "Option") (carg "string" "SubKey") (carg "string" "OptArgs")}}
 {{$IsEID := ge ($TargID := toInt (or (reFind `(\d{1,20})` (or ($args.Get 2) "")) 0)) 10000000000000000}}
 {{$DBVal := or (dbGet 0 "ImmunDB").Value (sdict )}}
 {{$SKSlc := or ($DBVal.Get ($LSKey := or ($args.Get 1) "")) (cslice )}}
@@ -28,6 +28,32 @@
 
   {{else}} {{$EC = 2}} {{end}}
 
+{{else if eq $CmdQuery "renamelist"}}
+  {{$args := parseArgs 3 "`-ImmunDB RenameList \"‹SubKey›\" \"‹NewName›\"`" (carg "string" "Option") (carg "string" "SubKey") (carg "string" "NewName")}}
+
+  {{if $DBVal.HasKey $LSKey}}
+    {{$TVal := $DBVal.Get $LSKey}}
+
+    {{$DBVal.Set ($args.Get 2) $TVal}}
+    {{$DBVal.Del $LSKey}}
+    {{dbSet 0 "ImmunDB" $DBVal}}
+
+    {{$ST = ($SM = 6)}}
+
+  {{else}} {{$EC = 2}} {{end}}
+
+{{else if eq $CmdQuery "duplicatelist"}}
+  {{$args := parseArgs 3 "`-ImmunDB DuplicateList \"‹SubKey›\" \"‹NewListName›\"`" (carg "string" "Option") (carg "string" "SubKey") (carg "string" "NewListName")}}
+
+  {{if $DBVal.HasKey $LSKey}}
+    {{$TVal := $DBVal.Get $LSKey}}
+
+    {{$DBVal.Set ($args.Get 2) $TVal}}
+    {{dbSet 0 "ImmunDB" $DBVal}}
+
+    {{$ST = ($SM = 7)}}
+
+  {{else}} {{$EC = 2}} {{end}}
 
 {{else if eq $CmdQuery "add"}}
   {{$args := parseArgs 3 "`-ImmunDB Add \"‹SubKey›\" ‹@UserOrID›`" (carg "string" "Option") (carg "string" "SubKey") (carg "userid" "UID")}}
@@ -105,7 +131,7 @@
 
   {{end}}
 
-{{else}} {{sendMessage nil ">>> **Erreur :**\nArgument invalide. Arguments autorisés : `Add`, `Remove`, `CreateList`, `RemoveList`, `Query`"}} {{end}}
+{{else}} {{sendMessage nil ">>> **Erreur :**\nArgument invalide. Arguments autorisés : `Add`, `Remove`, `CreateList`, `DeleteList`, `RenameList`, `DuplicateList`, `Query`"}} {{end}}
 
 {{$SMTTtl := cslice
   "Liste ajoutée"
@@ -114,6 +140,8 @@
   "Item ajouté"
   "Utilisateur retiré"
   "Item retiré"
+  "Liste renommée"
+  "Liste dupliquée"
 }}
 {{$SMTTxt := cslice
   (print "La liste **" $LSKey "** a été créée dans la base de données")
@@ -122,6 +150,8 @@
   (print "L'item **" $TargID "** a été ajouté à la liste **" $LSKey "**")
   (print "L'utilisateur <@" $TargID "> (**" $TargID "**) a été retiré de la liste **" $LSKey "**")
   (print "L'item **" $TargID "** a été retiré la liste **" $LSKey "**")
+  (print "La liste **" $LSKey "** a été renommée en **" ($args.Get 2) "** avec succès")
+  (print "La liste **" $LSKey "** a été dupliquée vers **" ($args.Get 2) "** avec succès")
 }}
 {{$EMText := cslice
   "Erreur non spécifiée"
