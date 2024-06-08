@@ -13,6 +13,35 @@
   {{return}}
 {{end}}
 
+{{/* ---------- Bad Links Filter ---------- */}}
+{{if reFind `(\[(.+)?(steamcommunity).com.+\]\(.+\)|((https?:\/\/)?(discord.com\/invite\/|discord.gg\/)(teenhubs|xxxhubs|nsfwhubs|xxxpics|fphVRNxuuc|s2ejq4gj)))` ($Msg := $.Message.Content)}}
+  {{deleteTrigger 0}}
+  {{if not (dbGet .User.ID "FlaggedBadLink")}}
+    {{execAdmin "timeout" .User.ID "MATCH REGEX · Lien vérolé" "12h"}}
+    {{dbSetExpire .User.ID "FlaggedBadLink" 0 43200}}
+
+    {{$ModChn := "【🔴】tchat-modération"}}
+
+    {{$DStr := ((timestampToTime (add currentTime.Unix 43190)).In (loadLocation "Europe/Paris")).Format (or .Style "02 January 2006 15:04:05")}}
+    {{range $k, $v := sdict "uary" "vier" "ebruary" "évrier" "ch" "s" "pr" "vr" "ay" "ai" "une" "uin" "uly" "uillet" "ugus" "oû" "ber" "bre" "Dec" "Déc"}} {{$DStr = split $DStr $k | joinStr $v}} {{end}}
+
+    {{$MsgID := sendMessageRetID $ModChn (cembed
+      "color" 0xda373c
+      "title" (print "⚠️ Message suspect détecté")
+      "description" (print "Message suspect posté par l'utilisateur <@" .User.ID ">\nL'utilisateur a été mute le temps qu'un modérateur prenne une décision.\n\n**Contenu du message :**\n" $Msg)
+      "fields" (cslice ($eLine := (sdict "name" " " "value" " ")) (sdict "name" "Options disponibles" "value" "🔨 · Bannir la personne\n❌ · Relâcher (faux positif, etc.)"))
+      "footer" (sdict "text" (print "Si aucune action n'est prise avant le " $DStr ", la personne actuellement exclue sera automatiquement bannie 14 jours du serveur.")
+                      "icon_url" "https://cdn.discordapp.com/emojis/1142991749984292914.gif?quality=lossless")
+    )}}
+    {{addMessageReactions $ModChn $MsgID (cslice "🔨" "❌")}}
+
+    {{dbSetExpire $MsgID "SusMbr" (sdict "UserID" .User.ID "WarnMsgID" $MsgID) 43195}}
+    {{scheduleUniqueCC 329 $ModChn 43200 (print "SusCase_" .User.ID) (dict "SancUID" .User.ID "SancDur" "14d" "SancRes" "BAN AUTO · Correspondance lien vérolé" "SancMod" 204255221017214977)}}
+
+  {{end}}
+  {{return}}
+{{end}}
+
 {{/* ---------- Général ---------- */}}
 {{if eq .Message.ChannelID 496010398848253965}}
   {{$IsImmun := cslice 223894107016134656 369101917659332611}}
