@@ -2,6 +2,18 @@
 {{$PtsBL := cslice}}
 {{$PtsToAdd := 150}}
 
+{{/* MOD · Action Liens inappropriés */}}
+{{if $SusMbr := (dbGet .ReactionMessage.ID "SusMbr").Value}}
+  {{if or (eq .Reaction.Emoji.Name "🔨") (eq .Reaction.Emoji.Name "❌")}}
+    {{deleteAllMessageReactions nil $SusMbr.WarnMsgID}}
+    {{dbDel .ReactionMessage.ID "FlaggedBadLink"}}
+    {{dbDel $SusMbr.UserID ""}}
+  {{end}}
+  {{if eq .Reaction.Emoji.Name "🔨"}} {{execCC 329 nil 0 (dict "SancUID" $SusMbr.UserID "SancDur" "14d" "SancRes" "Lien NSFW" "SancMod" .User.ID "CancelScheduledCC" true "ScheduledCCName" (print "SusCase_" $SusMbr.UserID))}}
+  {{else if eq .Reaction.Emoji.Name "❌"}} {{cancelScheduledUniqueCC 329 (print "SusCase_" $SusMbr.UserID)}} {{execAdmin "untimeout" $SusMbr.UserID}} {{end}}
+  {{return}}
+{{end}}
+
 {{/* Badge "Au bon endroit au bon moment" */}}
 {{if $aboabm := dbGet 0 "MsgLuck"}}
   {{if eq .ReactionMessage.ID (toInt64 $aboabm.Value)}}
