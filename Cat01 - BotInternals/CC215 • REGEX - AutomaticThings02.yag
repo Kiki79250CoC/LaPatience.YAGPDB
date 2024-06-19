@@ -84,16 +84,13 @@
 {{end}}
 
 {{/* ---------- Banword Boutique ---------- */}}
-{{if $banwordToggle := false}}
-  {{$bBWList := cslice "mais" "banword" "bw"}}
-  {{$bBWTrigger := false}}
-  {{range $k, $v := $bBWList}} {{if (reFind (print `(?i)(\b` $v `\b)`) $.Message.Content)}} {{$bBWTrigger = true}} {{end}} {{end}}
-  {{if and $bBWTrigger (not (in (cslice 223894107016134656 369101917659332611) .User.ID))}}
-    {{execCC 320 nil 0 (sdict "sancUsr" .User.ID "sancRes" "AutoSanc.Banword" "sancDur" (toDuration "5m") "sancMod" 0)}}
-    {{sendDM "Tu viens de te faire avoir par un Banword (Buy 23*). On se revoit dans 5 minutes <:esso:1054716569449668609>\n\n\\* Le Buy 23 permet à quiconque de \"bannir\" un mot pendant 15 heures, et toute personne qui prononce ce mot est transporté au Goulag pendant 5 minutes."}}
-    {{sendMessage 1168339319124131871 (print .User.Mention " s'est mangé un Banword Boutique.")}}
+{{if $banwordToggle := true}}
+  {{if and ($r := reFind `(?i)(\b(mais)\b|b(an)?(-)?\s*w(ord)?(s|ed)?)` $.Message.Content) (not (in (cslice 223894107016134656 369101917659332611) .User.ID))}}
+    {{execCC 320 nil 0 (sdict "sancUsr" .User.ID "sancRes" "AutoSanc" "sancDur" "5m")}}
+    {{sendDM "Tu viens de te faire avoir par un Banword (Buy 48*). On se revoit dans 5 minutes <:esso:1054716569449668609>\n\n\\* Le Buy 48 permet à quiconque de \"bannir\" un mot pendant 15 heures, et toute personne qui prononce ce mot est transporté au Goulag pendant 5 minutes."}}
+    {{sendMessage 1168339319124131871 (print .User.Mention " s'est mangé un Banword Boutique (**" $r "**).")}}
     {{return}}
-  {{else}} {{if $bBWTrigger}} {{sendMessage 1168339319124131871 (print "`" .User.Username "` a dit le mot 😱 ! J'vais le dire à ma mère !")}} {{end}} {{end}}
+  {{end}}
 {{end}}
 
 {{/* ---------- BuyVIP 3 ---------- */}}
