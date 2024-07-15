@@ -1,3 +1,6 @@
 {{$args := parseArgs 1 "`-clear ‹HowManyMessageToDelete›`" (carg "int" "int")}}
-{{addReactions "🧹"}}
-{{execAdmin "clear" ($args.Get 0) "-nopin"}}
+{{if and (ge ($args.Get 0) 1) (le ($args.Get 0) 100)}}
+  {{addReactions "🧹"}}
+  {{execAdmin "clear" ($args.Get 0) "-nopin"}}
+{{else}} {{deleteMessage nil (sendMessageRetID nil (print ">>> **Erreur :**\nLe nombre saisi (" ($args.Get 0) ") est en dehors de la plage autorisée (1 -> 100)")) 10}} {{end}}
+{{deleteTrigger 0}}
