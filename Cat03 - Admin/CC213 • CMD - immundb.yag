@@ -1,7 +1,10 @@
-{{$args := parseArgs 1 "`-ImmunDB ‹[Add|Remove|CreateList|DeleteList|RenameList|DuplicateList|Query]› \"‹SubKey›\"`" (carg "string" "Option") (carg "string" "SubKey") (carg "string" "OptArgs")}}
-{{$IsEID := ge ($TargID := toInt (or (reFind `(\d{1,20})` (or ($args.Get 2) "")) 0)) 10000000000000000}}
+{{$args := parseArgs 1 "`-ImmunDB ‹Option› \"‹SubKey›\"`\n\nOptions :\n  · `Add`\n  · `EditIndex`\n  · `Remove`\n  · `CreateList`\n  · `RenameList`\n  · `DuplicateList`\n  · `DeleteList`\n  · `Query`" (carg "string" "Option") (carg "string" "SubKey") (carg "string" "OptArgs") (carg "string" "OptArgs")}}
+{{$IsEID := ge ($TargID := toInt (or (reFind `(\d{1,20})` (or ($TargStr := $args.Get 2) "")) 0)) 10000000000000000}}
 {{$DBVal := or (dbGet 0 "ImmunDB").Value (sdict )}}
 {{$SKSlc := or ($DBVal.Get ($LSKey := or ($args.Get 1) "")) (cslice )}}
+{{$NIVal := or ($args.Get 3) ""}}
+
+{{$Dbg := false}}
 
 {{$EC := ($ST := ($SM := ""))}}
 
@@ -28,6 +31,7 @@
 
   {{else}} {{$EC = 2}} {{end}}
 
+
 {{else if eq $CmdQuery "renamelist"}}
   {{$args := parseArgs 3 "`-ImmunDB RenameList \"‹SubKey›\" \"‹NewName›\"`" (carg "string" "Option") (carg "string" "SubKey") (carg "string" "NewName")}}
 
@@ -38,9 +42,10 @@
     {{$DBVal.Del $LSKey}}
     {{dbSet 0 "ImmunDB" $DBVal}}
 
-    {{$ST = ($SM = 6)}}
+    {{$ST = ($SM = 2)}}
 
   {{else}} {{$EC = 2}} {{end}}
+
 
 {{else if eq $CmdQuery "duplicatelist"}}
   {{$args := parseArgs 3 "`-ImmunDB DuplicateList \"‹SubKey›\" \"‹NewListName›\"`" (carg "string" "Option") (carg "string" "SubKey") (carg "string" "NewListName")}}
@@ -51,46 +56,92 @@
     {{$DBVal.Set ($args.Get 2) $TVal}}
     {{dbSet 0 "ImmunDB" $DBVal}}
 
-    {{$ST = ($SM = 7)}}
+    {{$ST = ($SM = 3)}}
 
   {{else}} {{$EC = 2}} {{end}}
 
+
 {{else if eq $CmdQuery "add"}}
-  {{$args := parseArgs 3 "`-ImmunDB Add \"‹SubKey›\" ‹@UserOrID›`" (carg "string" "Option") (carg "string" "SubKey") (carg "userid" "UID")}}
+  {{$args := parseArgs 3 "`-ImmunDB Add \"‹SubKey›\" ‹[@UserOrID|Content]›`" (carg "string" "Option") (carg "string" "SubKey") (carg "string" "Item")}}
 
   {{if $DBVal.HasKey $LSKey}}
-    {{if not (in (cslice 0 456226577798135808) $TargID)}}
-      {{if not (in $SKSlc $TargID)}}
-        {{$DBVal.Set $LSKey ($SKSlc.Append $TargID)}}
-        {{dbSet 0 "ImmunDB" $DBVal}}
+    {{if eq $TargStr (str (toInt $TargStr))}}
+      {{if not (in (cslice 0 456226577798135808) $TargID)}}
+        {{if not (in $SKSlc $TargID)}} {{$DBVal.Set $LSKey ($SKSlc.Append $TargID)}}
+        {{else}} {{$EC = 5}} {{if $IsEID}} {{$EC = 6}} {{end}} {{end}}
+ 
+      {{else}} {{$EC = 7}} {{end}}
 
-        {{if $IsEID}} {{$ST = ($SM = 2)}}
-        {{else}} {{$ST = ($SM = 3)}} {{end}}
+    {{else}}
+      {{if not (in $SKSlc $TargStr)}}
+        {{$TargID = print "\"" $TargStr "\""}}
+        {{$DBVal.Set $LSKey ($SKSlc.Append $TargStr)}}
+      {{else}} {{$EC = 6}} {{end}}
 
-      {{else}} {{if $IsEID}} {{$EC = 5}} {{else}} {{$EC = 6}} {{end}} {{end}}
+    {{end}}
 
-    {{else}} {{$EC = 7}} {{end}}
+  {{else}} {{$EC = 2}} {{end}}
+
+  {{if not $EC}}
+    {{dbSet 0 "ImmunDB" $DBVal}}
+
+    {{$ST = ($SM = 4)}}
+    {{if $IsEID}} {{$ST = ($SM = 5)}} {{end}}
+
+  {{end}}
+
+
+{{else if eq $CmdQuery "editindex"}}
+  {{$args := parseArgs 3 "`-ImmunDB EditIndex \"‹SubKey›\" ‹Index› ‹[@UserOrID|Content]›`" (carg "string" "Option") (carg "string" "SubKey") (carg "int" "ItIdx") (carg "string" "Item")}}
+
+  {{if $DBVal.HasKey $LSKey}}
+    {{if le $TargID (sub (len $SKSlc) 1)}}
+      {{if eq $NIVal (str (toInt $NIVal))}} {{$SKSlc.Set $TargID (toInt $NIVal)}}
+      {{else}} {{$SKSlc.Set $TargID $NIVal}} {{end}}
+
+      {{$DBVal.Set $LSKey $SKSlc}}
+      {{dbSet 0 "ImmunDB" $DBVal}}
+
+      {{$ST = ($SM = 6)}}
+
+    {{else}} {{$EC = 8}} {{end}}
   {{else}} {{$EC = 2}} {{end}}
 
 
 {{else if eq $CmdQuery "remove"}}
-  {{$args := parseArgs 3 "`-ImmunDB Remove \"‹SubKey›\" ‹@UserOrID›`" (carg "string" "Option") (carg "string" "SubKey") (carg "userid" "UID")}}
+  {{$args := parseArgs 3 "`-ImmunDB Remove \"‹SubKey›\" ‹[@UserOrID|Content]›`" (carg "string" "Option") (carg "string" "SubKey") (carg "string" "Item")}}
 
+  {{$entries := cslice}}
   {{if $DBVal.HasKey $LSKey}}
-    {{if in $SKSlc $TargID}}
+    {{if eq $TargStr (str (toInt $TargStr))}}
+      {{if in $SKSlc $TargID}}
+        {{range $SKSlc}}
+          {{if not (eq (toInt .) $TargID)}} {{$entries = $entries.Append .}} {{end}}
+        {{end}}
+      {{else}} {{$EC = 9}} {{if $IsEID}} {{$EC = 10}} {{end}} {{end}}
 
-      {{$entries := cslice}}
-      {{range $SKSlc}}
-        {{if not (eq (toInt .) $TargID)}} {{$entries = $entries.Append .}} {{end}}
-      {{end}}
-      {{$DBVal.Set $LSKey $entries}}
-      {{dbSet 0 "ImmunDB" $DBVal}}
+    {{else}}
+      {{if in $SKSlc $TargStr}}
+        {{$TargID = print "\"" $TargStr "\""}}
+        {{range $SKSlc}}
+          {{if eq (printf "%T" .) "string"}}
+            {{if not (eq . $TargStr)}} {{$entries = $entries.Append .}} {{end}}
+          {{else}} {{$entries = $entries.Append .}} {{end}}
+        {{end}}
+      {{else}} {{$EC = 8}} {{end}}
 
-      {{if $IsEID}} {{$ST = ($SM = 4)}}
-      {{else}} {{$ST = ($SM = 5)}} {{end}}
+    {{end}}
 
-    {{else}} {{if $IsEID}} {{$EC = 8}} {{else}} {{$EC = 9}} {{end}} {{end}}
   {{else}} {{$EC = 2}} {{end}}
+
+  {{if not $EC}}
+    {{$DBVal.Set $LSKey $entries}}
+    {{dbSet 0 "ImmunDB" $DBVal}}
+
+    {{$ST = ($SM = 7)}}
+    {{if $IsEID}} {{$ST = ($SM = 8)}} {{end}}
+
+  {{end}}
 
 
 {{else if eq $CmdQuery "query"}}
@@ -99,10 +150,11 @@
   {{if $LSKey}}
     {{$ImmunList := ""}}
     {{$Count := 0}}
-    {{range $SKSlc}}
+    {{range $ID, $i := $SKSlc}}
       {{$Count = add $Count 1}}
-      {{if ge (toInt .) 10000000000000000}} {{$ImmunList = print $ImmunList "　· <@" . ">\n"}}
-      {{else}} {{$ImmunList = print $ImmunList "　· " . "\n"}} {{end}}
+      {{$DebugType := ""}} {{if $Dbg}} {{$DebugType = print " - " (printf "%T" $i)}} {{end}}
+      {{if ge (toInt $i) 10000000000000000}} {{$ImmunList = print $ImmunList "　· <@" $i ">\n"}}
+      {{else}} {{$ImmunList = print $ImmunList "　· `#" (printf "%03d" $ID) "` › " $i $DebugType "\n"}} {{end}}
     {{end}}
 
     {{if $ImmunList}}
@@ -111,7 +163,7 @@
         "description" (print "**⋄  Nombre d'entrées dans la liste : **" $Count "\n" $ImmunList)
       )}}
 
-    {{else}} {{$EC = 10}} {{end}}
+    {{else}} {{$EC = 11}} {{end}}
 
   {{else}}
     {{$KeyList := ""}}
@@ -136,22 +188,24 @@
 {{$SMTTtl := cslice
   "Liste ajoutée"
   "Liste supprimée"
-  "Utilisateur ajouté"
-  "Item ajouté"
-  "Utilisateur retiré"
-  "Item retiré"
   "Liste renommée"
   "Liste dupliquée"
+  "Item ajouté"
+  "Utilisateur ajouté"
+  "Index de liste mis à jour"
+  "Item retiré"
+  "Utilisateur retiré"
 }}
 {{$SMTTxt := cslice
   (print "La liste **" $LSKey "** a été créée dans la base de données")
   (print "La liste **" $LSKey "** a été supprimée de la base de données")
-  (print "L'utilisateur <@" $TargID "> (**" $TargID "**) a été ajouté à la liste **" $LSKey "**")
-  (print "L'item **" $TargID "** a été ajouté à la liste **" $LSKey "**")
-  (print "L'utilisateur <@" $TargID "> (**" $TargID "**) a été retiré de la liste **" $LSKey "**")
-  (print "L'item **" $TargID "** a été retiré la liste **" $LSKey "**")
   (print "La liste **" $LSKey "** a été renommée en **" ($args.Get 2) "** avec succès")
   (print "La liste **" $LSKey "** a été dupliquée vers **" ($args.Get 2) "** avec succès")
+  (print "L'item **" $TargID "** a été ajouté à la liste **" $LSKey "**")
+  (print "L'utilisateur <@" $TargID "> (**" $TargID "**) a été ajouté à la liste **" $LSKey "**")
+  (print "L'index **" $TargID "** de la liste **" $LSKey "** a été mis à jour")
+  (print "L'item **" $TargID "** a été retiré la liste **" $LSKey "**")
+  (print "L'utilisateur <@" $TargID "> (**" $TargID "**) a été retiré de la liste **" $LSKey "**")
 }}
 {{$EMText := cslice
   "Erreur non spécifiée"
@@ -159,11 +213,12 @@
   (print "La liste **" $LSKey "** n'existe pas")
   (print "La liste **" $LSKey "** est vide")
   "La base de données ne contient aucune liste"
-  "L'utilisateur existe déjà dans la liste"
   "L'item existe déjà dans la liste"
+  "L'utilisateur existe déjà dans la liste"
   "Identifiant invalide"
+  "Cet index n'existe pas"
+  "L'item n'existe pas dans la liste"
   "L'utilisateur n'existe pas dans la liste"
-  "L'item n'existe pad dans la liste"
   "Cette liste est vide"
 }}
 
