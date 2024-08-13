@@ -1,43 +1,75 @@
-{{$IsImmun := cslice 531170764183830528 369101917659332611}}
-{{$PtToAdd := 1}}
+{{$TaxQSlc := cslice (cslice 7000 0.20) (cslice 13000 0.35) (cslice 20000 0.50)}}
+{{$1stPSld := 150}}
 {{$TimeGap := 120}}
-{{$TaxMinA := 7000}}
-{{$TaxMinB := 13000}}
-{{$TaxMinC := 20000}}
-{{$TaxT3PM := 0.50}}
-{{$TaxT2PM := 0.35}}
-{{$TaxPM := 0.20}}
+{{$PtToAdd := 1}}
+
 {{$PtSld := ($TaxAmnt := ($PremLv := 0))}}
+{{$ImDB := (dbGet 0 "ImmunDB").Value}}
 {{$IDS := toString ($UID := .User.ID)}}
 
-{{if targetHasRoleID $UID 1079418386511040572}} {{$PremLv = 2}}
-{{else if targetHasRoleID $UID 967188575005315132}} {{$PremLv = 1}} {{end}}
+{{if $Mbr := getMember $UID}}
+  {{$SancProfile := (dbGet $UID "SancProfile").Value}}
 
-{{$PtPlaf := toInt (dbGet $PremLv "PremPlaf").Value}}
+  {{range $ID, $r := (cslice 0 967188575005315132 1079418386511040572)}} {{if in $Mbr.Roles $r}} {{$PremLv = $ID}} {{end}} {{end}}
+  {{$PtPlaf := toInt (index $ImDB.PlafLmt $PremLv)}}
 
-{{if $PtSldDB := dbGet $UID "Points"}}
-  {{if ge (sub .Message.Timestamp.Parse.Unix $PtSldDB.UpdatedAt.Unix) $TimeGap}}
-    {{if or (lt (toInt $PtSldDB.Value) $PtPlaf) (in $IsImmun $UID)}} {{$PtSld = toInt (dbIncr $UID "Points" $PtToAdd)}}
-    {{else}} {{$PtSld = toInt (dbIncr 531170764183830528 "Points" $PtToAdd)}} {{end}}
+  {{$IsLv10orHigher := ""}}
+  {{range (cslice 925745243180118034 925745253087076392 925756577510748210 925758251662987264 925761123695886376 925745256207618139 925766056650362991 925767790034583552 925769441747296316 1054107222856192172 1106395328447533077)}}
+    {{if in $Mbr.Roles .}} {{$IsLv10orHigher = .}} {{end}}
   {{end}}
-{{else}}
-  {{if $OldPtsSystemDB := dbGet $UID "points"}}
-    {{$PtSld = toInt (dbIncr $UID "Points" (add (index $OldPtsSystemDB.Value 0) $PtToAdd))}}
-    {{dbDel $UID "points"}}
-    {{sendMessage 1180340984626806884 (print .User.Mention " (`" (or .Member.Nick .User.Globalname .User.String) " - " .User.ID "`) a migré son solde de Points · Solde au moment de la migration : " (reReplace "," (humanizeThousands $PtSld) " ") " Points")}}
-  {{else}} {{dbSet $UID "Points" $PtToAdd}} {{end}}
-{{end}}
 
-{{if eq ($TaxSTgl := (dbGet 0 "TaxToggle").Value) "1"}}
-  {{/* Taxes */}}
-  {{if ge $PtSld $TaxMinA}}
-    {{if ge $PtSld $TaxMinB}} {{$TaxPM = $TaxT2PM}} {{end}}
-    {{/* if ge $PtSld $TaxMinC}} {{$TaxPM = $TaxT3PM}} {{end */}}
-    {{$TaxAmnt := toInt (mult (toFloat $PtSld) $TaxPM)}}
+  {{if $IsLv10orHigher}}
+    {{$IsFrozen := $SancProfile.ActiveWarns.FrzSld}}
 
-    {{if $TaxDB := dbGet 0 "Taxes"}}
-      {{$TaxSlice := $TaxDB.Value}}
-      {{if not ($TaxSlice.Get $IDS)}} {{$TaxSlice.Set $IDS (cslice $TaxAmnt 0)}} {{dbSet 0 "Taxes" $TaxSlice}} {{end}}
-    {{else}} {{if and (not ((getMember $UID).User.Bot)) (not (in $IsImmun $UID))}} {{dbSet 0 "Taxes" (sdict $IDS (cslice $TaxAmnt 0))}} {{end}} {{end}}
+    {{if $PtSldDB := dbGet $UID "Points"}}
+      {{if not $IsFrozen}}
+        {{if ge (sub currentTime.Unix $PtSldDB.UpdatedAt.Unix) $TimeGap}}
+          {{if or (lt (toInt $PtSldDB.Value) $PtPlaf) (in ($ImDB.Get "NoPlaf") $UID)}} {{$PtSld = toInt (dbIncr $UID "Points" $PtToAdd)}}
+          {{else}} {{$PtSld = toInt (dbIncr 531170764183830528 "Points" $PtToAdd)}} {{end}}
+        {{end}}
+      {{end}}
+
+    {{else}}
+      {{if $IsFrozen}} {{$PtToAdd = 0}} {{end}}
+
+      {{if $OldPtsSystemDB := dbGet $UID "points"}}
+        {{$PtSld = toInt (dbIncr $UID "Points" (add (index $OldPtsSystemDB.Value 0) $PtToAdd))}}
+        {{dbDel $UID "points"}}
+        {{sendMessage 1180340984626806884 (print .User.Mention " (`" (or .Member.Nick .User.Globalname .User.String) " - " .User.ID "`) a migré son solde de Points · Solde au moment de la migration : " (reReplace "," (humanizeThousands $PtSld) " ") " Points")}}
+      {{else}} {{dbSet $UID "Points" $1stPSld}} {{end}}
+
+    {{end}}
+
+    {{/* Taxes */}}
+    {{if eq ($TaxSTgl := (dbGet 0 "TaxToggle").Value) "1"}}
+      {{$TaxPM := ""}}
+      {{range $TaxQSlc}} {{if ge $PtSld (index . 0)}} {{$TaxPM = (index . 1)}} {{end}} {{end}}
+
+      {{if $TaxPM}}
+        {{$TaxAmnt := toInt (mult (toFloat $PtSld) $TaxPM)}}
+
+        {{if $TaxDB := dbGet 0 "Taxes"}}
+          {{$TaxSlice := $TaxDB.Value}}
+          {{if not ($TaxSlice.Get $IDS)}} {{$TaxSlice.Set $IDS (cslice $TaxAmnt 0)}} {{dbSet 0 "Taxes" $TaxSlice}} {{end}}
+        {{else}} {{if and (not ((getMember $UID).User.Bot)) (not (in ($ImDB.Get "NoPlaf") $UID))}} {{dbSet 0 "Taxes" (sdict $IDS (cslice $TaxAmnt 0))}} {{end}} {{end}}
+
+      {{end}}
+    {{end}}
+
+  {{else}}
+    {{$WipedPts := 0}}
+    {{if $PtSldDB := dbGet $UID "Points"}}
+      {{$a := toInt (dbIncr 531170764183830528 "Points" ($WipedPts = toInt $PtSldDB.Value))}}
+      {{dbDel $UID "Points"}}
+
+    {{else}}
+      {{if $OldPtsSystemDB := dbGet $UID "points"}}
+        {{$PtSld = toInt (dbIncr 531170764183830528 "Points" ($WipedPts = toInt (index $OldPtsSystemDB.Value 0)))}}
+        {{dbDel $UID "points"}}
+      {{end}}
+
+    {{end}}
+    {{if $WipedPts}} {{sendMessage 1168339319124131871 (print "**[PTS_SYS · Niv. < 10]** Solde de <@" $UID "> transféré au Trésor Public : " (reReplace "," (humanizeThousands $WipedPts) " ") " Points.")}} {{end}}
+
   {{end}}
 {{end}}
