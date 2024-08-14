@@ -312,14 +312,14 @@ DISCLAIMER : Elements in ‹quotation marks› are variable arguments (IE: User 
 
         • 264 - COMMAND
           › Trigger   : -prono
-          › Arguments : ‹[create|close|winner]› ‹[MinBet/WinnerOID]› ‹MaxBet› "‹1:côte1,2:côte2,3:côte3,...›"
+          › Arguments : ‹[create|edit|close|reopen|winner]› ‹[MinBet/WinnerOID]› ‹MaxBet› "‹1:côte1,2:côte2,3:côte3,...›"
 
           › Enabled   : Yes
           › Name      : n/a
           › Roles     : Not limited
           › Channels  : Limited (01) › "Gestion Bots"
 
-          › Revision  : 2.10
+          › Revision  : 2.20
 
         • 273 - COMMAND
           › Trigger   : -removetrigger
