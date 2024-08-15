@@ -25,7 +25,7 @@ DISCLAIMER : Elements in ‹quotation marks› are variable arguments (IE: User 
           › Roles     : Not limited
           › Channels  : Limited (11) › "Général", "Sports", "Jeux-Vidéo", "Anime-Films", "Débats", "Actualités", "Channel Jeux", "Humour", "Humour Noir", "Tchat noir", "Gestion Bots"
 
-          › Revision  : 4.00
+          › Revision  : 4.00.1
 
         • 200 - REGEX
           › Trigger   : .*
