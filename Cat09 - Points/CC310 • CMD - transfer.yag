@@ -3,6 +3,7 @@
 
 {{$FUsr := .User.ID}}
 {{$DUsr := $args.Get 0}}
+{{$FUv2 := ($DUv2 := "")}}
 
 {{$EC := ($PremLv := 0)}}
 
@@ -19,8 +20,6 @@
     {{if in $FMbr.Roles .}} {{$FUsrIsLv10orHigher = .}} {{end}}
     {{if in $DMbr.Roles .}} {{$DUsrIsLv10orHigher = .}} {{end}}
   {{end}}
-
-  {{$FUv2 := ($DUv2 := "")}}
 
   {{$PtsFU := or (toInt (dbGet $FUsr "Points").Value) 0}}
   {{if not $PtsFU}} {{$PtsFU = index (or ($FUv2 = (dbGet $FUsr "points").Value) (cslice 0 0)) 0}} {{end}}
