@@ -1,57 +1,102 @@
-{{$args := parseArgs 0 "`-points ‹@UserOrID›`" (carg "userid" "user")}}
-{{$CanBypass := cslice 369101917659332611 531170764183830528}}
-{{$StatText := ($iURL := ($tx := ($BuysShop := ($PtsSysT := ($Plural := "")))))}}
-{{$PremLvl := 0}}
-{{$PtsSysV := 3}}
-{{$UsrDN := (toString ($UID := or ($args.Get 0) .User.ID))}}
-{{$PlafT := "Votre"}}
+{{$args := parseArgs 0 (print "`" .ServerPrefix .CCTrigger " ‹@UserOrID›`") (carg "userid" "user")}}
+{{$ImDB := (dbGet 0 "ImmunDB").Value}}
+
+{{$UsrS := str ($UID := or ($args.Get 0) .User.ID)}}
+{{$STxt := ($iURL := ($tx := ($BuysShop := ($PtsSysT := ($Plrl := ($IsLv10orHigher := ""))))))}}
+{{$PlfT := "Votre"}}
 {{$PtsT := "Vous possédez"}}
 
-{{if targetHasRoleID $UID 1079418386511040572}} {{$PremLvl = 2}} {{$tx = " (VIP2)"}}
-{{else if targetHasRoleID $UID 967188575005315132}} {{$PremLvl = 1}} {{$tx = " (VIP1)"}} {{end}}
-{{$Plaf := toInt (dbGet $PremLvl "PremPlaf").Value}}
-{{$PlafText := print (reReplace "," (humanizeThousands $Plaf) " ") " Points" $tx}}
+{{$PtSV := 3}}
+{{$EC := ($PremLv := 0)}}
+{{$IsBot := false}}
 
-{{$PtSld := 0}}
-{{if $PtSldDB := dbGet $UID "Points"}} {{$PtSld = toInt $PtSldDB.Value}}
-{{else}} {{if $PtSldDB := dbGet $UID "points"}} {{$PtsSysV = 2}} {{$PtSld = index ($PtSldDB.Value) 0}} {{end}} {{end}}
-{{if or (lt $PtSld -1) (gt $PtSld 1)}} {{$Plural = "s"}} {{end}}
+{{$PtSld := or (toInt (dbGet $UID "Points").Value) 0}}
+{{if not $PtSld}} {{if $PtSldDB := dbGet $UID "points"}} {{$PtSV = 2}} {{$PtSld = or (index ($PtSldDB.Value) 0) 0}} {{end}} {{end}}
 
-{{if (getMember $UID)}}
-  {{$iURL = print "https://cdn.discordapp.com/avatars/" $UID "/" (getMember $UID).User.Avatar ".png"}}
-  {{$UsrDN = or (getMember $UID).Nick (getMember $UID).User.Globalname (getMember $UID).User.Username}}
+{{$Mbr := getMember $UID}}
 
-  {{if or (getMember $UID).User.Bot (in $CanBypass $UID)}} {{$PlafText = "Illimité"}} {{end}}
-  {{if not (getMember $UID).User.Bot}} {{$BuysShop = print " · Achats Boutique : " (reReplace "," (humanizeThousands (or (dbGet $UID "BuyCt").Value 0)) " ")}} {{end}}
+{{if $Mbr}}
+  {{range $ID, $r := (cslice 0 967188575005315132 1079418386511040572)}} {{if in $Mbr.Roles $r}} {{$PremLv = $ID}} {{end}} {{end}}
+  {{if $PremLv}} {{$tx = print " (VIP" $PremLv ")"}} {{end}}
 
-  {{$StatText = print $PlafT " plafond : " $PlafText $BuysShop "\n"}}
-  {{if eq $PtsSysV 2}} {{$PtsSysT = print "\n\nPensez à migrer votre solde de Points en envoyant un message sur le Général.\nLe système V2 n'est plus pris en charge depuis le 01 Janvier 2024."}} {{end}}
-{{end}}
-{{if ne .User.ID $UID}} {{$PlafT = "Son"}} {{$PtsT = print $UsrDN " possède"}} {{end}}
-
-{{$pEmbed := sdict "color" 0xffbf00
-  "author" (sdict "name" $UsrDN "icon_url" $iURL)
-  "title" (print $PtsT " **" (reReplace "," (humanizeThousands $PtSld) " ") "** Point" $Plural)
-  "footer" (sdict "text" (print $StatText "Lorsque vous discutez, vous gagnez 1 Point par tranche de 2 minutes." $PtsSysT))
-}}
-{{$fields := $pEmbed.fields}}
-
-{{if eq ($TaxSTgl := (dbGet 0 "TaxToggle").Value) "1"}}
-  {{$Taxes := (dbGet 0 "Taxes").Value}}
-  {{if $TaxAcct := $Taxes.Get (toString $UID)}}
-    {{$fields = (cslice (sdict "name" " " "value" (print "**⋄  Taxes :**\nSomme à dépenser pour l'exemption : **" (reReplace "," (print (humanizeThousands (toInt (or (index $TaxAcct 1) 0))) "/" (humanizeThousands (toInt (index $TaxAcct 0)))) " ") " Points**")) (sdict "name" " " "value" " "))}}
-    {{$pEmbed.Set "fields" $fields}}
+  {{range (cslice 925745243180118034 925745253087076392 925756577510748210 925758251662987264 925761123695886376 925745256207618139 925766056650362991 925767790034583552 925769441747296316 1054107222856192172 1106395328447533077)}}
+    {{if in $Mbr.Roles .}} {{$IsLv10orHigher = .}} {{end}}
   {{end}}
+
+  {{$iURL = print "https://cdn.discordapp.com/avatars/" $UID "/" $Mbr.User.Avatar ".png"}}
+  {{$UsrS = or $Mbr.Nick $Mbr.User.Globalname $Mbr.User.Username}}
+  {{$IsBot = $Mbr.User.Bot}}
+
+  {{if not (in $ImDB.PatrolActs $UID)}} {{$BuysShop = print " · Achats Boutique : " (reReplace "," (humanizeThousands (or (dbGet $UID "BuyCt").Value 0)) " ")}} {{end}}
+
+  {{if eq $PtSV 2}} {{$PtsSysT = "\n\nLe système V2 n'est plus pris en charge depuis le 01 Janvier 2024.\nVeuillez migrer vos points dès que possible."}} {{end}}
+  {{if not $IsLv10orHigher}} {{$PtSld = 0}} {{$PtsSysT = "\nAtteignez le Niveau 10 pour commencer à obtenir des Points."}} {{end}}
+
 {{end}}
 
-{{$embed := cembed $pEmbed}}
+{{if or (lt $PtSld -1) (gt $PtSld 1)}} {{$Plrl = "s"}} {{end}}
 
-{{$embed2 := cembed "color" 0xda373c
-  "title" "Attention !"
-  "footer" (sdict "text" (print "Vous avez atteint votre plafond de " $PlafText ".\nVous ne pouvez donc plus en gagner à moins de dépenser ceux que vous avez déjà."))
+{{$PtPlaf := index $ImDB.PlafLmt $PremLv}}
+{{$PlfTxt := print (reReplace "," (humanizeThousands $PtPlaf) " ") " Points" $tx}}
+
+{{if in $ImDB.NoPlaf $UID}} {{$PlfTxt = "Illimité"}} {{end}}
+{{if not (eq .User.ID $UID)}} {{$PlfT = "Son"}} {{$PtsT = print $UsrS " possède"}} {{end}}
+
+{{if and $Mbr $IsLv10orHigher}} {{$STxt = print $PlfT " plafond : " $PlfTxt $BuysShop "\n"}} {{end}}
+
+{{if not $IsBot}}
+
+  {{$pEmbed := sdict "color" 0xffbf00
+    "author" (sdict "name" $UsrS "icon_url" $iURL)
+    "title" (print $PtsT " **" (reReplace "," (humanizeThousands $PtSld) " ") "** Point" $Plrl)
+    "footer" (sdict "text" (print $STxt "Lorsque vous discutez, vous gagnez 1 Point par tranche de 2 minutes." $PtsSysT))
+  }}
+  {{$eFld := or $pEmbed.fields (cslice )}}
+
+  {{if $Mbr}}
+    {{if eq ($TaxSTgl := (dbGet 0 "TaxToggle").Value) "1"}}
+      {{$TaxDB := (dbGet 0 "Taxes").Value}}
+      {{if $TaxAcct := $TaxDB.Get (str $UID)}}
+        {{$eFld = $eFld.Append (sdict "name" " " "value" (print "**⋄  Taxes :**\n-# Somme à dépenser pour l'exemption : **" (reReplace "," (print (humanizeThousands (toInt (or (index $TaxAcct 1) 0))) "/" (humanizeThousands (toInt (index $TaxAcct 0)))) " ") " Points**"))}}
+      {{end}}
+    {{end}}
+
+    {{$SancProfile := (dbGet $UID "SancProfile").Value}}
+    {{if $IsFrozen := $SancProfile.ActiveWarns.FrzSld}}
+      {{if lt currentTime.Unix $IsFrozen.ExpiresAt}}
+        {{$DateStr := ((timestampToTime $IsFrozen.UpdatedAt).In (loadLocation "Europe/Paris")).Format "02 January 2006"}}
+        {{range $k, $v := sdict "uary" "vier" "ebruary" "évrier" "ch" "s" "pr" "vr" "ay" "ai" "une" "uin" "uly" "uillet" "ugus" "oû" "ber" "bre"}} {{$DateStr = split $DateStr $k | joinStr $v}} {{end}}
+
+        {{$RdblSD := humanizeDurationSeconds $IsFrozen.Duration}}
+        {{range $Bfr, $Aft := (sdict "nd" "nde"  "hour" "heure"  "day" "jour"  "week" "semaine"  "year" "an"  "and" "et")}} {{$RdblSD = split $RdblSD $Bfr | joinStr $Aft}} {{end}}
+
+        {{$eFld = $eFld.Append (sdict "name" " " "value" (print "**⋄  Avis de sanction**\n-# Une sanction émise à " (lower $PlfT) " encontre le **" $DateStr "** a gelé " (lower $PlfT) " compte.\n-# Aucune action ne peut être effectuée tant que cette sanction est en vigeur.\n\n-# **Durée de la sanction :** " $RdblSD "\n-# **Raison :** " $IsFrozen.Reason))}}
+      {{end}}
+    {{end}}
+
+    {{if ge (len $eFld) 1}}
+      {{$eFld := $eFld.Append (sdict "name" " " "value" " ")}}
+      {{$pEmbed.Set "fields" $eFld}}
+    {{end}}
+
+  {{end}}
+
+  {{$embed := cembed $pEmbed}}
+
+  {{$embed2 := cembed "color" 0xda373c
+    "title" "Attention !"
+    "footer" (sdict "text" (print "Vous avez atteint votre plafond de " $PlfTxt ".\nVous ne pouvez donc plus en gagner à moins de dépenser ceux que vous avez déjà."))
+  }}
+
+  {{$toSend := cslice $embed}}
+  {{if and $Mbr (ge $PtSld $PtPlaf) (not $IsBot) (not (in $ImDB.NoPlaf $UID))}} {{$toSend = $toSend.Append $embed2}} {{end}}
+
+  {{sendMessage nil (complexMessage "embed" $toSend)}}
+
+{{else}} {{$EC = 1}} {{end}}
+
+{{$EMText := cslice
+  "Err0"
+  "L'utilisateur spécifié est un bot"
 }}
-
-{{$toSend := cslice $embed}}
-{{if (getMember $UID)}} {{if and (ge $PtSld $Plaf) (not (getMember $UID).User.Bot) (not (in $CanBypass $UID))}} {{$toSend = $toSend.Append $embed2}} {{end}} {{end}}
-
-{{sendMessage nil (complexMessage "embed" $toSend)}}
+{{if ne $EC 0}} {{sendMessage nil (print ">>> **Erreur :**\nAction refusée : " (index $EMText $EC) ".\n-# *Erreur " $EC "*")}} {{end}}
