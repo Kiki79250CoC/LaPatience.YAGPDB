@@ -13,11 +13,21 @@
   {{return}}
 {{end}}
 
+{{/* ---------- Active Warns Cleanup ---------- */}}
+{{if $FrzSld := $SancProfile.ActiveWarns.FrzSld}} {{if gt currentTime.Unix $FrzSld.ExpiresAt}} {{$SancProfile.ActiveWarns.Del "FrzSld"}} {{end}} {{end}}
+{{if $PreBan := $SancProfile.ActiveWarns.PreBan}} {{if gt currentTime.Unix $PreBan.ExpiresAt}} {{$SancProfile.ActiveWarns.Del "PreBan"}} {{end}} {{end}}
+{{if not (eq $SancProfile $SPBk)}} {{dbSet .User.ID "SancProfile" $SancProfile}} {{end}}
+
 {{/* ---------- Bad Links Filter ---------- */}}
-{{if reFind `(\[(.+)?(steamcommunity).com.+\]\(.+\)|((https?:\/\/)?(discord.com\/invite\/|discord.gg\/)(teenhubs|xxxhubs|nsfwhubs|xxxpics|fphVRNxuuc|s2ejq4gj)))` ($Msg := $.Message.Content)}}
+{{$BadLInvitesList := ($BadLSteamList := "")}}
+
+{{range $ImDB.BadLInvites}} {{$BadLInvitesList = joinStr "|" $BadLInvitesList .}} {{end}}
+{{range $ImDB.BadLSteam}} {{$BadLSteamList = joinStr "|" $BadLSteamList .}} {{end}}
+
+{{if reFind (print `(\[(.+)?(steamcommunity|` $BadLSteamList `).com.+\]\(.+\)|((https?:\/\/)?(discord.com\/invite\/|discord.gg\/)(` $BadLInvitesList `)))`) ($Msg := $.Message.Content)}}
   {{deleteTrigger 0}}
   {{if not (dbGet .User.ID "FlaggedBadLink")}}
-    {{execAdmin "timeout" .User.ID "MATCH REGEX · Lien vérolé" "12h"}}
+    {{$s := execAdmin "timeout" .User.ID "MATCH REGEX · Lien vérolé" "12h"}}
     {{dbSetExpire .User.ID "FlaggedBadLink" 0 43200}}
 
     {{$ModChn := "【🔴】tchat-modération"}}
@@ -36,7 +46,7 @@
     {{addMessageReactions $ModChn $MsgID (cslice "🔨" "❌")}}
 
     {{dbSetExpire $MsgID "SusMbr" (sdict "UserID" .User.ID "WarnMsgID" $MsgID) 43195}}
-    {{scheduleUniqueCC 329 $ModChn 43200 (print "SusCase_" .User.ID) (dict "SancUID" .User.ID "SancDur" "14d" "SancRes" "BAN AUTO · Correspondance lien vérolé" "SancMod" 204255221017214977)}}
+    {{scheduleUniqueCC 329 $ModChn 43200 (print "SusCase_" .User.ID) (dict "SancUID" .User.ID "SancDur" "14d" "SancRes" "BAN AUTO · Correspondance lien vérolé" "SancMod" 204255221017214977 "RemReact" $MsgID "WipePoints" true)}}
 
   {{end}}
   {{return}}
