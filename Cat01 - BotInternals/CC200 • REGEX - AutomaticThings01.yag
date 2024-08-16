@@ -1,16 +1,29 @@
-{{/* ---------- Mine ---------- */}}
-{{if $mine := dbGet .User.ID "gulag"}}
-  {{sendMessage nil "Oups… On dirait qu'un truand vient de marcher sur quelque chose de relativement explosif… <:gros_jesus:1054705212910211144>"}}
+{{$SPBk := ($SancProfile := (dbGet .User.ID "SancProfile").Value)}}
+{{$ImDB := (dbGet 0 "ImmunDB").Value}}
 
-  {{if eq (printf "%T" $mine.Value) "*templates.Slice"}}
-    {{$Val := index $mine.Value 0}}
-    {{execCC 320 nil 0 (sdict "sancUsr" .User.ID "sancRes" $Val.Reason "sancDur" $Val.Duration "sancMod" $Val.ModID "OptArgs" $Val.ArgRelay)}}
-  {{else}}
-    {{$slice := split ($mine.Value) "™"}}
-    {{execCC 320 nil 0 (sdict "sancUsr" .User.ID "sancRes" (index $slice 1) "sancDur" (index $slice 2) "sancMod" (toInt (index $slice 3)) "OptArgs" (index $slice 0))}}
-  {{end}}
-  {{dbDel .User.ID "gulag"}}
+{{/* ---------- Mine ---------- */}}
+{{if $IsMined := $SancProfile.ActiveWarns.IsMined}}
+  {{sendMessage nil "Oups… On dirait qu'un truand vient de marcher sur quelque chose de relativement explosif… <:gros_jesus:1054705212910211144>"}}
+  {{execCC 320 nil 0 (sdict "SancUsr" .User.ID "SancRes" $IsMined.Reason "sancDur" $IsMined.Duration "SancMod" $IsMined.ModID)}}
+  {{$SancProfile.ActiveWarns.Del "IsMined"}}
+  {{dbSet .User.ID "SancProfile" $SancProfile}}
   {{return}}
+
+{{else}}
+  {{if $LegacyMine := dbGet .User.ID "gulag"}}
+    {{sendMessage nil "Oups… On dirait qu'un truand vient de marcher sur quelque chose de relativement explosif… <:gros_jesus:1054705212910211144>"}}
+
+    {{if eq (printf "%T" $LegacyMine.Value) "*templates.Slice"}}
+      {{$Val := index $LegacyMine.Value 0}}
+      {{execCC 320 nil 0 (sdict "sancUsr" .User.ID "sancRes" $Val.Reason "sancDur" $Val.Duration "sancMod" $Val.ModID "OptArgs" $Val.ArgRelay     "SancUsr" .User.ID "SancRes" $Val.Reason "SancDur" $Val.Duration "SancMod" $Val.ModID)}}
+    {{else}}
+      {{$slice := split ($LegacyMine.Value) "™"}}
+      {{execCC 320 nil 0 (sdict "sancUsr" .User.ID "sancRes" (index $slice 1) "sancDur" (index $slice 2) "sancMod" (toInt (index $slice 3)) "OptArgs" (index $slice 0))     "SancUsr" .User.ID "SancRes" (index $slice 1) "SancDur" (index $slice 2) "SancMod" (toInt (index $slice 3))}}
+    {{end}}
+    {{dbDel .User.ID "gulag"}}
+    {{return}}
+  {{end}}
+
 {{end}}
 
 {{/* ---------- Active Warns Cleanup ---------- */}}
