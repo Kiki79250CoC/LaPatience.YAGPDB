@@ -172,7 +172,7 @@ DISCLAIMER : Elements in ‹quotation marks› are variable arguments (IE: User 
           › Roles     : Not limited
           › Channels  : Limited (11) › "Général", "Sports", "Jeux-Vidéo", "Anime-Films", "Débats", "Actualités", "Anecdotes-Libres", "Channel-Jeux", "Humour", "Humour-Noir", "Tchat-Noir"
 
-          › Revision  : 2.11
+          › Revision  : 2.11.1
 
         • 246 - NONE
           › Trigger   : n/a
