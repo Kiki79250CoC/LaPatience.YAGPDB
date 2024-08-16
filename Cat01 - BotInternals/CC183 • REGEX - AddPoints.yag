@@ -14,12 +14,20 @@
   {{$PtPlaf := toInt (index $ImDB.PlafLmt $PremLv)}}
 
   {{$IsLv10orHigher := ""}}
+  {{$GlgRl := cslice}}
+  {{if in $Mbr.Roles 506417754878902272}}
+    {{$Val := (dbGet $UID "SancRoles").Value}}
+    {{if eq (printf "%T" $Val) "*templates.SDict"}} {{$GlgRl = or $Val.Roles (cslice )}}
+    {{else}} {{$GlgRl = $Val}} {{end}}
+  {{end}}
+
   {{range (cslice 925745243180118034 925745253087076392 925756577510748210 925758251662987264 925761123695886376 925745256207618139 925766056650362991 925767790034583552 925769441747296316 1054107222856192172 1106395328447533077)}}
-    {{if in $Mbr.Roles .}} {{$IsLv10orHigher = .}} {{end}}
+    {{if or (in $Mbr.Roles .) (in $GlgRl .)}} {{$IsLv10orHigher = .}} {{end}}
   {{end}}
 
   {{if $IsLv10orHigher}}
-    {{$IsFrozen := $SancProfile.ActiveWarns.FrzSld}}
+    {{$IsFrozen := false}}
+    {{if $FrzSld := $SancProfile.ActiveWarns.FrzSld}} {{$IsFrozen = lt currentTime.Unix $FrzSld.ExpiresAt}} {{end}}
 
     {{if $PtSldDB := dbGet $UID "Points"}}
       {{if not $IsFrozen}}
@@ -36,8 +44,12 @@
         {{$PtSld = toInt (dbIncr $UID "Points" (add (index $OldPtsSystemDB.Value 0) $PtToAdd))}}
         {{dbDel $UID "points"}}
         {{sendMessage 1180340984626806884 (print .User.Mention " (`" (or .Member.Nick .User.Globalname .User.String) " - " .User.ID "`) a migré son solde de Points · Solde au moment de la migration : " (reReplace "," (humanizeThousands $PtSld) " ") " Points")}}
-      {{else}} {{if and (in $Mbr.Roles 925745243180118034) (not $IsFrozen)}} {{dbSet $UID "Points" $1stPSld}} {{end}} {{end}}
-
+      {{else}}
+        {{if not $IsFrozen}}
+          {{if and (eq (or $SancProfile.Stats.Ban 0) 0) (in $Mbr.Roles 925745243180118034)}} {{dbSet $UID "Points" $1stPSld}}
+          {{else}} {{dbSet $UID "Points" $PtToAdd}} {{end}}
+        {{end}}
+      {{end}}
     {{end}}
 
     {{/* Taxes */}}
