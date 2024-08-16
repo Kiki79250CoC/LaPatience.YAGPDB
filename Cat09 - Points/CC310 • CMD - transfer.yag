@@ -27,8 +27,9 @@
   {{$PtsDU := or (toInt (dbGet $DUsr "Points").Value) 0}}
   {{if not $PtsDU}} {{$PtsDU = index (or ($DUv2 = (dbGet $DUsr "points").Value) (cslice 0 0)) 0}} {{end}}
 
-  {{$FrozAcFU := $FSancProfile.ActiveWarns.FrzSld}}
-  {{$FrozAcDU := $DSancProfile.ActiveWarns.FrzSld}}
+  {{$FrozAcFU := ($FrozAcDU := false)}}
+  {{if $FrzSldFU := $FSancProfile.ActiveWarns.FrzSld}} {{$FrozAcFU = lt currentTime.Unix $FrzSldFU.ExpiresAt}} {{end}}
+  {{if $FrzSldDU := $DSancProfile.ActiveWarns.FrzSld}} {{$FrozAcDU = lt currentTime.Unix $FrzSldDU.ExpiresAt}} {{end}}
 
   {{if and (not (eq $DUsr $FUsr)) (gt ($args.Get 1) 0) (ge $PtsFU ($args.Get 1)) $FUsrIsLv10orHigher $DUsrIsLv10orHigher (not $FrozAcFU) (not $FrozAcDU) (not (and $FUv2 $DUv2))  (not ($IsBot := $DMbr.User.Bot))}}
     {{$VirAmt := $args.Get 1}}
