@@ -29,7 +29,7 @@
 {{/* ---------- Active Warns Cleanup ---------- */}}
 {{if $FrzSld := $SancProfile.ActiveWarns.FrzSld}} {{if gt currentTime.Unix $FrzSld.ExpiresAt}} {{$SancProfile.ActiveWarns.Del "FrzSld"}} {{end}} {{end}}
 {{if $PreBan := $SancProfile.ActiveWarns.PreBan}} {{if gt currentTime.Unix $PreBan.ExpiresAt}} {{$SancProfile.ActiveWarns.Del "PreBan"}} {{end}} {{end}}
-{{if not (eq $SancProfile $SPBk)}} {{dbSet .User.ID "SancProfile" $SancProfile}} {{end}}
+{{if not (eq (str $SancProfile) (str $SPBk))}} {{dbSet .User.ID "SancProfile" $SancProfile}} {{end}}
 
 {{/* ---------- Bad Links Filter ---------- */}}
 {{$BadLInvitesList := ($BadLSteamList := "")}}
