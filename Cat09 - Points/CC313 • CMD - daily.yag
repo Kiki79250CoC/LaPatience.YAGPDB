@@ -1,33 +1,43 @@
-{{$dailyVIPlv1 := 75}}
-{{$dailyVIPlv2 := 150}}
-{{$dailyInvLmt := 86400}}
-{{$ptsToDonate := 0}}
-{{$MigrMessage := ""}}
-{{$UsrN := ""}}
-{{$UsrPS := 0}}
+{{$DUseLmt := 86400}}
+{{$PremRwd := cslice 0 75 150}}
+{{$PremLv := ($EC := 0)}}
+{{$UsrN := or .Member.Nick .User.Globalname .User.Username}}
 
-{{if or (targetHasRoleID .User.ID 967188575005315132) (targetHasRoleID .User.ID 1079418386511040572)}}
-  {{if targetHasRoleID .User.ID 967188575005315132}} {{$ptsToDonate = $dailyVIPlv1}}
-  {{else if targetHasRoleID .User.ID 1079418386511040572}} {{$ptsToDonate = $dailyVIPlv2}} {{end}}
-  {{if not (dbGet .User.ID "VIPdailyPoints")}}
-    {{if $UsrBA := dbGet .User.ID "Points"}}
-      {{$UsrPS = $UsrBA.Value}}
-      {{$UsrN = or .Member.Nick .User.Globalname .User.Username}}
-      {{dbSet .User.ID "Points" (add $UsrPS $ptsToDonate)}}
-      {{dbSetExpire .User.ID "VIPdailyPoints" "cooldown" $dailyInvLmt}}
-    {{else}}
-      {{if lt .Message.Timestamp.Parse.Unix 1704063600}}
-        {{$UsrBALeg := dbGet .User.ID "points"}}
-        {{if $UsrBALeg}} {{$UsrPS = index $UsrBALeg.Value 0}} {{end}}
-        {{$UsrN = or .Member.Nick .User.Globalname .User.Username}}
-        {{dbSet .User.ID "points" (cslice (add $UsrPS $ptsToDonate) .Message.Timestamp.Parse.Unix)}}
-        {{dbSetExpire .User.ID "VIPdailyPoints" "cooldown" $dailyInvLmt}}
-        {{$MigrMessage = "\n\n⚠️ **ATTENTION !** Vous n'avez pas encore migré vos points. À partir du 01 Janvier 2024, 00h00 UTC,\nvous ne pourrez plus récupérer votre bonus quotidien à moins de migrer vos Points.\n\nPour migrer vos points, envoyez un message sur le <#496010398848253965>"}}
+{{$Mbr := getMember ($UID := .User.ID)}}
+{{range $ID, $r := (cslice 0 967188575005315132 1079418386511040572)}} {{if in $Mbr.Roles $r}} {{$PremLv = $ID}} {{end}} {{end}}
+
+{{$IsLv10orHigher := ""}}
+{{range (cslice 925745243180118034 925745253087076392 925756577510748210 925758251662987264 925761123695886376 925745256207618139 925766056650362991 925767790034583552 925769441747296316 1054107222856192172 1106395328447533077)}}
+  {{if in $Mbr.Roles .}} {{$IsLv10orHigher = .}} {{end}}
+{{end}}
+
+{{if $IsLv10orHigher}}
+  {{if $PremLv}}
+    {{$IsFrozen := false}}
+    {{if $FrzSld := ((dbGet $UID "SancProfile").Value).ActiveWarns.FrzSld}} {{$IsFrozen = lt currentTime.Unix $FrzSld.ExpiresAt}} {{end}}
+
+    {{if not $IsFrozen}}
+      {{if not ($Cldw := dbGet $UID "VIPdailyPoints")}}
+        {{$PtSld := or (toInt (dbGet $UID "Points").Value) 0}}
+        {{dbSet .User.ID "Points" (add $PtSld (index $PremRwd $PremLv))}}
+        {{dbSetExpire $UID "VIPdailyPoints" 0 $DUseLmt}}
+        {{sendMessage nil (print "## <:GoldenXP:1080314290449420368> · Vous venez de récupérer votre bonus journalier de **" (index $PremRwd $PremLv) " Points**.\n> " $UsrN " · **" (reReplace "," (print (humanizeThousands $PtSld) " › " (humanizeThousands (add $PtSld (index $PremRwd $PremLv)))) " ") "**.\n> Revenez dans **" (reReplace "day" (humanizeDurationSeconds (mult $DUseLmt 1000000000)) "jour") "** pour récupérer votre prochain bonus journalier.")}}
+
       {{else}}
-        {{sendMessage nil ">>> **Erreur :**\nImpossible de créditer les Points : le système V2 n'est plus supporté."}}
-        {{return}}
+        {{$RdblDur := humanizeDurationSeconds ($Cldw.ExpiresAt.Sub currentTime)}}
+        {{range $Bfr, $Aft := (sdict "nd" "nde"  "hour" "heure"  "day" "jour"  "and" "et")}} {{$RdblDur = split $RdblDur $Bfr | joinStr $Aft}} {{end}}
+
+        {{sendMessage nil (print "## <:GoldenXP:1080314290449420368> · Vous ne pouvez pas récupérer votre bonus quotidien pour l'instant.\n> Vous pourrez le récupérer dans **" $RdblDur "**.")}}
       {{end}}
-    {{end}}
-    {{sendMessage nil (print "## <:GoldenXP:1080314290449420368> · Vous venez de récupérer votre bonus journalier de **" $ptsToDonate " Points**.\n> " $UsrN " · **" (reReplace "," (humanizeThousands ($UsrPS)) " ") " › " (reReplace "," (humanizeThousands (add $UsrPS $ptsToDonate)) " ") "**.\n> Revenez dans **" (reReplace "day" (humanizeDurationSeconds (mult $dailyInvLmt 1000000000)) "jour") "** pour récupérer votre prochain bonus journalier." $MigrMessage)}}
-  {{else}} {{sendMessage nil (print "## <:GoldenXP:1080314290449420368> · Vous ne pouvez pas récupérer votre bonus quotidien pour l'instant.\n> Vous pourrez le récupérer dans **" (reReplace "second" (reReplace "hour" (reReplace "and" (humanizeDurationSeconds ((dbGet .User.ID "VIPdailyPoints").ExpiresAt.Sub currentTime)) "et") "heure") "seconde") "**.")}} {{end}}
-{{else}} {{sendMessage nil (print "**Désolé " (or .Member.Nick .User.Globalname .User.Username) ", mais il semblerait que vous n'êtes pas <:VIP1_v2:1080311093785788507> VIP <:VIP2_v2:1080311144285229106>.**\nSi vous voulez devenir VIP, vous avez les instructions dans le salon <#1079830707423154227>.")}} {{end}}
+
+    {{else}} {{$EC = 3}} {{end}}
+  {{else}} {{$EC = 2}} {{end}}
+{{else}} {{$EC = 1}} {{end}}
+
+{{$EMText := cslice
+  "Err0"
+  "Vous n'avez pas le rank requis (Niveau 10+)"
+  "Vous n'êtes pas <:VIP1_v2:1080311093785788507> VIP <:VIP2_v2:1080311144285229106>.\nSi vous voulez devenir VIP, vous avez les instructions dans le salon <#1079830707423154227>"
+  "Votre compte est actuellement gelé"
+}}
+{{if $EC}} {{sendMessage nil (print ">>> **Erreur :**\nAction refusée : " (index $EMText $EC) ".\n-# *Erreur " $EC "*")}} {{end}}
