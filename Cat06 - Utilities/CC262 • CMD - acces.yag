@@ -1,10 +1,31 @@
 {{$args := parseArgs 1 "`-acces ‹@MentionOrID›`" (carg "userid" "UID")}}
+{{$ImDB := (dbGet 0 "ImmunDB").Value}}
 {{$UID := $args.Get 0}}
 
+{{$GSBan := $ImDB.GSBan}}
+
+{{$EC := 0}}
+
 {{if getMember $UID}}
-  {{if not (targetHasRoleID $UID 506417754878902272)}}
-    {{giveRoleID $UID 1165268999437824111}}
-    {{takeRoleID $UID 1165268999437824111 3600}}
-    {{sendDM (print "Un accès d'une heure a été accordé à <@" $UID ">")}}
-  {{else}} {{sendDM ">>> **Erreur :**\nImpossible d'accorder la permission : La personne mentionnée se trouve au Goulag."}} {{end}}
-{{else}} {{sendDM ">>> **Erreur :**\nID fourni invalide."}} {{end}}
+  {{if and (not ($IsInvokerBanned := in $GSBan .User.ID)) (not ($IsUserBanned := in $GSBan $UID))}}
+
+      {{if not (targetHasRole $UID 506417754878902272) (targetHasRole $UID 1276161103168274504)}}
+        {{giveRoleID $UID 1165268999437824111}}
+        {{takeRoleID $UID 1165268999437824111 3600}}
+        {{sendDM (print "Un accès d'une heure a été accordé à <@" $UID ">")}}
+      {{else}} {{$EC = 4}} {{end}}
+
+  {{else}}
+    {{if $IsInvokerBanned}} {{$EC = 2}}
+    {{else if $IsUserBanned}}  {{$EC = 3}} {{end}}
+  {{end}}
+{{else}} {{$EC = 1}} {{end}}
+
+{{$EMText := cslice
+  "Err0"
+  (print "Indentifiant fourni (`" $UID "`) invalide")
+  "Vous n'avez pas la permission d'utiliser cette commande"
+  "Cette personne est bannie du salon"
+  "La personne mentionnée se trouve au Goulag"
+}}
+{{if ne $EC 0}} {{sendMessage nil (print ">>> **Erreur :**\nAction refusée : " (index $EMText $EC) ".\n-# *Erreur " $EC "*")}} {{end}}
