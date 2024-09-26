@@ -43,7 +43,7 @@
       {{if $DUv2}} {{dbDel $DUsr "points"}} {{end}}
 
       {{$embed := cembed
-        "title" (print "✓ Le transfert a été effectué avec succès")
+        "title" "✓ Le transfert a été effectué avec succès"
         "color" 0x00b04f
         "fields" (cslice
           (sdict "name" (or .User.Globalname .User.Username) "value" (reReplace "," (print "> ~~" (humanizeThousands $PtsFU) "~~ › **" (humanizeThousands (sub $PtsFU $VirAmt)) "**") " ") "inline" true)
@@ -66,17 +66,18 @@
       {{if $FUv2}} {{sendMessage 1180340984626806884 (print $FMbr.User.Mention " (`" (or $FMbr.Member.Nick $FMbr.User.Globalname $FMbr.User.String) " - " $FUsr "`) a migré son solde de Points · Solde au moment de la migration : " (reReplace "," (humanizeThousands (sub $PtsFU $VirAmt)) " ") " Points **(via -transfer)**")}} {{end}}
       {{if $DUv2}} {{sendMessage 1180340984626806884 (print $DMbr.User.Mention " (`" (or $DMbr.Member.Nick $DMbr.User.Globalname $DMbr.User.String) " - " $DUsr "`) a migré son solde de Points · Solde au moment de la migration : " (reReplace "," (humanizeThousands (add $PtsDU $VirAmt)) " ") " Points **(via -transfer)**")}} {{end}}
 
-    {{else}} {{$EC = 12}} {{end}}
+    {{else}} {{$EC = 13}} {{end}}
   {{else}}
     {{if eq $DUsr $FUsr}} {{$EC = 3}}
     {{else if le ($args.Get 1) 0}} {{$EC = 4}}
     {{else if lt $PtsFU ($args.Get 1)}} {{$EC = 5}}
-    {{else if not $FUsrIsLv10orHigher}} {{$EC = 6}}
-    {{else if not $DUsrIsLv10orHigher}} {{$EC = 7}}
-    {{else if $FrozAcFU}} {{$EC = 8}}
-    {{else if $FrozAcDU}} {{$EC = 9}}
-    {{else if and $FUv2 $DUv2}} {{$EC = 10}}
-    {{else if $IsBot}} {{$EC = 11}} {{end}}
+    {{else if and (not $FUsrIsLv10orHigher) (not $DUsrIsLv10orHigher)}} {{$EC = 6}}
+    {{else if not $FUsrIsLv10orHigher}} {{$EC = 7}}
+    {{else if not $DUsrIsLv10orHigher}} {{$EC = 8}}
+    {{else if $FrozAcFU}} {{$EC = 9}}
+    {{else if $FrozAcDU}} {{$EC = 10}}
+    {{else if and $FUv2 $DUv2}} {{$EC = 11}}
+    {{else if $IsBot}} {{$EC = 12}} {{end}}
   {{end}}
 {{else}}
   {{if not $FMbr}} {{$EC = 1}}
@@ -90,6 +91,7 @@
   "Les ID des comptes débiteur et créditeur sont identiques (tu voulais vraiment essayer, hein ?)"
   "Le montant du transfert est invalide (Margoulin va !)"
   "Solde de Points insuffisant"
+  "Le rank des deux partis est insuffisant (Niveau 10+)"
   "Rank insuffisant (Niveau 10+)"
   "Le destinataire n'a pas le rank requis (Niveau 10+)"
   "Le compte débiteur est gelé"

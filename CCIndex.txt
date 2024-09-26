@@ -855,7 +855,7 @@ DISCLAIMER : Elements in ‹quotation marks› are variable arguments (IE: User 
           › Roles     : Not limited
           › Channels  : Limited (02) › "Commandes Bots", "Gestion Bots"
 
-          › Revision  : 4.00.2
+          › Revision  : 4.01
 
         • 313 - COMMAND
           › Trigger   : -daily
