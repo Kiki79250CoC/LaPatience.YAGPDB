@@ -1,11 +1,12 @@
+{{$ImDB := (dbGet 0 "ImmunDB").Value}}
+
 {{$TaxQSlc := cslice (cslice 7000 0.20) (cslice 13000 0.35) (cslice 20000 0.50)}}
 {{$1stPSld := 150}}
 {{$TimeGap := 120}}
 {{$PtToAdd := 1}}
 
 {{$PtSld := ($TaxAmnt := ($PremLv := 0))}}
-{{$ImDB := (dbGet 0 "ImmunDB").Value}}
-{{$IDS := toString ($UID := .User.ID)}}
+{{$IDS := str ($UID := .User.ID)}}
 
 {{if $Mbr := getMember $UID}}
   {{$SancProfile := (dbGet $UID "SancProfile").Value}}
@@ -14,11 +15,11 @@
   {{$PtPlaf := toInt (index $ImDB.PlafLmt $PremLv)}}
 
   {{$IsLv10orHigher := ""}}
+
   {{$GlgRl := cslice}}
-  {{if in $Mbr.Roles 506417754878902272}}
-    {{$Val := (dbGet $UID "SancRoles").Value}}
-    {{if eq (printf "%T" $Val) "*templates.SDict"}} {{$GlgRl = or $Val.Roles (cslice )}}
-    {{else}} {{$GlgRl = $Val}} {{end}}
+  {{if or (in $Mbr.Roles 506417754878902272) (in $Mbr.Roles 1276161103168274504)}}
+    {{range (cslice 45 50)}} {{if ($Val := dbGet . "BatchGoulag").Value}} {{$GlgRl = $Val.Get (str $UID)}} {{end}} {{end}}
+    {{if $GlR := (dbGet $UID "SancRoles").Value}} {{$GlgRl = $GlR.Roles}} {{end}}
   {{end}}
 
   {{range (cslice 925745243180118034 925745253087076392 925756577510748210 925758251662987264 925761123695886376 925745256207618139 925766056650362991 925767790034583552 925769441747296316 1054107222856192172 1106395328447533077)}}
@@ -32,7 +33,7 @@
     {{if $PtSldDB := dbGet $UID "Points"}}
       {{if not $IsFrozen}}
         {{if ge (sub currentTime.Unix $PtSldDB.UpdatedAt.Unix) $TimeGap}}
-          {{if or (lt (toInt $PtSldDB.Value) $PtPlaf) (in ($ImDB.Get "NoPlaf") $UID)}} {{$PtSld = toInt (dbIncr $UID "Points" $PtToAdd)}}
+          {{if or (lt (toInt $PtSldDB.Value) $PtPlaf) (in $ImDB.NoPlaf $UID)}} {{$PtSld = toInt (dbIncr $UID "Points" $PtToAdd)}}
           {{else}} {{$PtSld = toInt (dbIncr 531170764183830528 "Points" $PtToAdd)}} {{end}}
         {{end}}
       {{end}}
@@ -46,14 +47,14 @@
         {{sendMessage 1180340984626806884 (print .User.Mention " (`" (or .Member.Nick .User.Globalname .User.String) " - " .User.ID "`) a migré son solde de Points · Solde au moment de la migration : " (reReplace "," (humanizeThousands $PtSld) " ") " Points")}}
       {{else}}
         {{if not $IsFrozen}}
-          {{if and (eq (or $SancProfile.Stats.Ban 0) 0) (in $Mbr.Roles 925745243180118034)}} {{dbSet $UID "Points" $1stPSld}}
+          {{if and (or $SancProfile.Stats.Ban $SancProfile.Stats.FrzSld) (in $Mbr.Roles 925745243180118034)}} {{dbSet $UID "Points" $1stPSld}}
           {{else}} {{dbSet $UID "Points" $PtToAdd}} {{end}}
         {{end}}
       {{end}}
     {{end}}
 
     {{/* Taxes */}}
-    {{if eq ($TaxSTgl := (dbGet 0 "TaxToggle").Value) "1"}}
+    {{if $ImDB.TaxToggle}}
       {{$TaxPM := ""}}
       {{range $TaxQSlc}} {{if ge $PtSld (index . 0)}} {{$TaxPM = (index . 1)}} {{end}} {{end}}
 
