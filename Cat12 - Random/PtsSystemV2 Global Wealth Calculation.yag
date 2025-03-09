@@ -1,0 +1,17 @@
+{{$Count := dbCount "points"}}
+
+{{$Offset := or .ExecData.Offset 0}}
+{{$Index := or .ExecData.Index 0}}
+{{$Total := or .ExecData.Total 0}}
+{{$MsgID := or .ExecData.MsgID 0}}
+
+{{if eq $Offset 0}} {{$MsgID = sendMessageRetID nil (print "Traitement en cours… (0-99 / " $Count ")")}}
+{{else}} {{editMessage nil $MsgID (print "Traitement en cours… (" $Offset "-" (add $Offset 99) " / " $Count ")")}} {{end}}
+
+{{range dbTopEntries "points" 100 $Offset}}
+  {{$Total = add $Total (index .Value 0)}}
+  {{$Index = add $Index 1}}
+{{end}}
+
+{{if lt $Index $Count}} {{execCC .CCID nil 2 (sdict "Offset" (add $Offset 100) "Index" $Index "Total" $Total "MsgID" $MsgID)}}
+{{else}} {{editMessage nil $MsgID (print "## Terminé !\n**Données traitées :** " $Count "\n**Total :** " (reReplace "," (humanizeThousands $Total) " ") " Points")}} {{end}}
