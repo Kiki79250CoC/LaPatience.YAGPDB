@@ -230,15 +230,15 @@ DISCLAIMER : Elements in ‹quotation marks› are variable arguments (IE: User 
           › Revision  : 1.05
 
         • 290 - NONE
-          › Trigger   : buyvip1p1
+          › Trigger   : Buy_BatchGoulag
           › Arguments : n/a
 
           › Enabled   : Yes
-          › Name      : BuyVIP 1 Custom triple-Goulag command
+          › Name      : Boutique · Batch Goulag
           › Roles     : Not limited
           › Channels  : Not limited
 
-          › Revision  : 1.12
+          › Revision  : 2.30
 
         • 291 - NONE
           › Trigger   : n/a

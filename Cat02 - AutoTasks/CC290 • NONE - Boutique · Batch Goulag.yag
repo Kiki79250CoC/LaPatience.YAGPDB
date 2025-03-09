@@ -1,0 +1,73 @@
+{{$rGulg := 1276161103168274504}}
+{{$rSanc := 506417754878902272}}
+
+{{$RoleList := cslice 496010501990645799 931351059455164477 496010603601854464 507301458853625879 1106395328447533077 1054107222856192172 925769441747296316 925767790034583552 925766056650362991 925745256207618139 925761123695886376 925758251662987264 925756577510748210 925745253087076392 925745243180118034 925745259290460210 784090664580415508 1030956478384832664}}
+{{$UURRList := cslice 1165268999437824111 967187787260518440}}
+{{$SancList := or .ExecData.SancList (dbGet (toInt .ExecData.DataLoc) "Buy").Value (cslice )}}
+
+{{$SancRoles := sdict "OGList" $SancList}}
+{{$SUURRoles := sdict}}
+
+{{$BuyerID := toInt .ExecData.Buyer}}
+{{$BID := or (toInt .ExecData.FromBID) 0}}
+{{$TS := currentTime.Unix}}
+
+{{$ViPingList := ""}}
+{{$VictimList := cslice}}
+
+{{$MsgID := ""}}
+{{$MsgHdr := print "## <@" $BuyerID "> vient d'atomiser le tchat d'un Buy " $BID "."}}
+{{if (in (cslice 45 50) $BID)}}
+  {{dbDel (toInt .ExecData.DataLoc) "Buy"}}
+  {{dbDel $BID "Buy"}}
+  {{$MsgID = sendMessageRetID 496010398848253965 (print $MsgHdr "\n-# <a:ldr:1344599880378617856> Calcul en cours du nombre de personnes à Goulag…")}}
+{{end}}
+
+{{if len $SancList}}
+  {{range $SancList}}
+    {{if and ($Mbr := or (getMember ($UIDS := str ($UID := .))) (sdict )) (not (in ($UsrRoles := or $Mbr.Roles (cslice )) $rGulg)) (not (in $UsrRoles $rSanc))}}
+      {{$rMbr := cslice}} {{range $RoleList}} {{if in $UsrRoles .}} {{$rMbr = $rMbr.Append .}} {{end}} {{end}}
+      {{$rUUR := cslice}} {{range $UURRList}} {{if in $UsrRoles .}} {{$rUUR = $rUUR.Append .}} {{end}} {{end}}
+
+      {{$SancRoles.Set $UIDS $rMbr}}
+      {{$SUURRoles.Set $UIDS $rUUR}}
+
+      {{$VictimList = $VictimList.Append $UID}}
+      {{if and (eq $BID 50) (not (in $UsrRoles ($r := 1232695284128288788)))}} {{giveRole $UID $r}} {{end}}
+
+    {{end}}
+  {{end}}
+
+  {{$SancRoles.Set "SancList" $VictimList}}
+  {{$BGDB := or (dbGet 0 "BatchGoulag").Value (sdict )}} {{$BGDB.Set (str $BID) $SancRoles}} {{dbSet 0 "BatchGoulag" $BGDB}}
+
+  {{scheduleUniqueCC 291 nil (toInt .ExecData.SancDur) 0 (sdict "BatchGoulag" $SancRoles "BID" $BID)}}
+{{end}}
+
+{{if len $VictimList}}
+  {{range $ID, $Usr := $VictimList}}
+    {{if (in (cslice 45 50) $BID)}} {{editMessage 496010398848253965 $MsgID (print $MsgHdr "\n-# <a:ldr:1344599880378617856> Application des Goulags en cours… (" (add $ID 1) "/" (len $VictimList) ")")}} {{end}}
+    {{$ViPingList = print $ViPingList " <@" $Usr ">"}}
+
+    {{$UsrRoles := $SancRoles.Get ($UIDS := str ($UID := $Usr))}}
+    {{$UURRoles := $SUURRoles.Get $UIDS}}
+
+    {{giveRole $UID $rGulg}}
+    {{range $UURRoles}} {{takeRole $UID .}} {{end}}
+    {{range $UsrRoles}} {{takeRole $UID .}} {{end}}
+
+  {{end}}
+{{end}}
+
+{{$BuyRes := print "Buy " $BID}} {{if gt $BID 100}} {{$BuyRes = print "BuyVIP " (sub $BID 100)}} {{end}}
+{{$s := ""}} {{if gt (len $VictimList) 1}} {{$s = "s"}} {{end}}
+
+{{if (in (cslice 45 50) $BID)}}
+  {{$Text := print "a envoyé **" (or (len $VictimList) 0) " personne" $s "**"}} {{if eq (len $VictimList) 0}} {{$Text = "n'a envoyé **personne**"}} {{end}}
+  {{editMessage 496010398848253965 $MsgID (print $MsgHdr "\n-# Ceci " $Text " au Goulag.")}}
+{{end}}
+
+{{$Dur := print (reReplace "day" (reReplace "hour" (reReplace "and" (humanizeDurationSeconds (toDuration (print .ExecData.SancDur "s"))) "et") "heure") "jour")}}
+
+{{sendMessage 1168339319124131871 (print $BuyRes " :\n>>> **· Acheteur :** <@" $BuyerID ">\n**· Victimes :**" $ViPingList)}}
+{{range (cslice 925172096252936223 1276160927095328828)}} {{sendMessage . (print ">>> **Pseudo" $s " :**" $ViPingList "\n**Sanction :** Goulag\n**Raison :** " (or $.ExecData.ForceReason $BuyRes) "\n**Durée :** " $Dur)}} {{end}}
