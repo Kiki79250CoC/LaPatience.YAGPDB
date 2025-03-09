@@ -1,75 +1,67 @@
-{{$PtsToAdd := 1}}
-{{$PtsTGS := 120}}
-{{$WcFund := 150}}
-
 {{$ImDB := (dbGet 0 "ImmunDB").Value}}
-{{$Mbr := getMember ($IDS := str ($UID := .User.ID))}}
+{{$PSSt := $ImDB.PtsSysSettings}}
 
+{{$PtsToAdd := toInt (index $PSSt 0)}}
+{{$PtsTGS := toInt (index $PSSt 1)}}
+{{$WcFund := toInt (index $PSSt 2)}}
+
+{{$Mbr := getMember ($IDS := str ($UID := .User.ID))}}
 {{$SancProfile := (dbGet $UID "SancProfile").Value}}
 
 {{$PtSld := ($TaxAmnt := ($PremLv := 0))}}
-{{range $ID, $r := (cslice 0 967188575005315132 1079418386511040572)}} {{if in $Mbr.Roles $r}} {{$PremLv = $ID}} {{end}} {{end}}
+{{range $ID, $r := (cslice 967188575005315132 1079418386511040572)}} {{if in $Mbr.Roles $r}} {{$PremLv = add $ID 1}} {{break}} {{end}} {{end}}
 {{$PtPlaf := toInt (index $ImDB.PlafLmt $PremLv)}}
 
 
-  {{/* Lv10 check */}}
-  {{$IsLv10orHigher := ""}}
-
-  {{$GlgRl := cslice}}
-  {{if or (in $Mbr.Roles 506417754878902272) (in $Mbr.Roles 1276161103168274504)}}
-    {{range (cslice 45 50)}} {{if ($Val := dbGet . "BatchGoulag").Value}} {{$GlgRl = $Val.Get (str $UID)}} {{end}} {{end}}
-    {{if $GlR := (dbGet $UID "SancRoles").Value}} {{$GlgRl = $GlR.Roles}} {{end}}
-  {{end}}
-
-  {{range (cslice 925745243180118034 925745253087076392 925756577510748210 925758251662987264 925761123695886376 925745256207618139 925766056650362991 925767790034583552 925769441747296316 1054107222856192172 1106395328447533077)}}
-    {{if or (in $Mbr.Roles .) (in $GlgRl .)}} {{$IsLv10orHigher = .}} {{end}}
-  {{end}}
+{{$IsLv10orHigher := ""}} {{$GlgRl := cslice}}
+{{if or (in $Mbr.Roles 506417754878902272) (in $Mbr.Roles 1276161103168274504)}}
+  {{$BGDB := (dbGet 0 "BatchGoulag").Value}}
+  {{range (cslice 21 45 50 101)}} {{if $Val := $BGDB.Get (str .)}} {{if $Val.HasKey (str $UID)}} {{$GlgRl = $Val.Get (str $UID)}} {{break}} {{end}} {{end}} {{end}}
+  {{if not $GlgRl}} {{if $GlR := (dbGet $UID "SancRoles").Value}} {{$GlgRl = $GlR.Roles}} {{end}} {{end}}
+{{end}}
+{{range (cslice 925745243180118034 925745253087076392 925756577510748210 925758251662987264 925761123695886376 925745256207618139 925766056650362991 925767790034583552 925769441747296316 1054107222856192172 1106395328447533077)}}
+  {{if or (in $Mbr.Roles .) (in $GlgRl .)}} {{$IsLv10orHigher = .}} {{break}} {{end}}
+{{end}}
 
 
 {{if $IsLv10orHigher}}
   {{$IsFrozen := false}}
   {{if $FrzSld := $SancProfile.ActiveWarns.FrzSld}} {{$IsFrozen = lt currentTime.Unix $FrzSld.ExpiresAt}} {{end}}
 
-  {{if $PtSldDB := dbGet $UID "Points"}}
-    {{if and (not $IsFrozen) (ge (sub currentTime.Unix $PtSldDB.UpdatedAt.Unix) $TimeGap)}}
-      {{if or (lt (toInt $PtSldDB.Value) $PtPlaf) (in $ImDB.NoPlaf $UID)}} {{$PtSld = toInt (dbIncr $UID "Points" $PtToAdd)}}
-      {{else}} {{$PtSld = toInt (dbIncr 531170764183830528 "Points" $PtToAdd)}} {{end}}
-    {{end}}
+  {{if not $IsFrozen}}
+    {{if $PtSldDB := dbGet $UID "Points"}}
+      {{if ge (sub currentTime.Unix $PtSldDB.UpdatedAt.Unix) $PtsTGS}}
+        {{if or (lt (toInt $PtSldDB.Value) $PtPlaf) (in $ImDB.NoPlaf $UID)}} {{$PtSld = toInt (dbIncr $UID "Points" $PtsToAdd)}}
+        {{else}} {{$PtSld = toInt (dbIncr 531170764183830528 "Points" $PtsToAdd)}} {{end}}
+      {{end}}
 
-  {{else}}
-    {{if not $IsFrozen}}
-      {{if and (or $SancProfile.Stats.Ban $SancProfile.Stats.FrzSld) (in $Mbr.Roles 925745243180118034)}} {{dbSet $UID "Points" $1stPSld}}
-      {{else}} {{dbSet $UID "Points" $PtToAdd}} {{end}}
-    {{end}}
-
+    {{else}} {{dbSet $UID "Points" $PtsToAdd}} {{end}}
   {{end}}
 
+  {{if $ImDB.TaxToggle}}
+    {{$TaxPM := 0.00}}
+    {{$TaxTh := sort $ImDB.TaxThreshold (sdict "reverse" true)}}
+    {{range $TaxTh}} {{$CurTh := split . ":"}} {{if ge $PtSld (toInt (index $CurTh 0))}} {{$TaxPM = index $CurTh 1}} {{break}} {{end}} {{end}}
 
-    {{/* Taxes */}}
-    {{$TaxSlc := cslice (cslice 7000 0.20) (cslice 13000 0.35) (cslice 20000 0.50)}}
-    {{if $ImDB.TaxToggle}}
-      {{$TaxPM := ""}}
-      {{range $TaxQSlc}} {{if ge $PtSld (index . 0)}} {{$TaxPM = (index . 1)}} {{end}} {{end}}
+    {{if $TaxPM}}
+      {{$TaxAmt := toInt (mult (toFloat $PtSld) $TaxPM)}}
 
-      {{if $TaxPM}}
-        {{$TaxAmnt := toInt (mult (toFloat $PtSld) $TaxPM)}}
+      {{if $TaxDB := dbGet 0 "Taxes"}}
+        {{$TaxData := $TaxDB.Value}}
+        {{if and (not ($TaxData.Get $IDS)) (not $Mbr.User.Bot) (not (in $ImDB.PatrolActs $UID))}} {{$TaxData.Set $IDS (cslice $TaxAmt 0)}} {{dbSet 0 "Taxes" $TaxData}} {{end}}
 
-        {{if $TaxDB := dbGet 0 "Taxes"}}
-          {{$TaxSlice := $TaxDB.Value}}
-          {{if not ($TaxSlice.Get $IDS)}} {{$TaxSlice.Set $IDS (cslice $TaxAmnt 0)}} {{dbSet 0 "Taxes" $TaxSlice}} {{end}}
-        {{else}} {{if and (not ((getMember $UID).User.Bot)) (not (in ($ImDB.Get "NoPlaf") $UID))}} {{dbSet 0 "Taxes" (sdict $IDS (cslice $TaxAmnt 0))}} {{end}} {{end}}
+      {{else}} {{if and (not $Mbr.User.Bot) (not (in $ImDB.PatrolActs $UID))}} {{dbSet 0 "Taxes" (sdict $IDS (cslice $TaxAmt 0))}} {{end}} {{end}}
 
-      {{end}}
     {{end}}
-
+  {{end}}
 
 {{else}}
-  {{$WipedPts := 0}}
+  {{$PtClr := 0}}
   {{if $PtSldDB := dbGet $UID "Points"}}
-    {{$a := toInt (dbIncr 531170764183830528 "Points" ($WipedPts = toInt $PtSldDB.Value))}}
+    {{$a := toInt (dbIncr 531170764183830528 "Points" ($PtClr = toInt $PtSldDB.Value))}}
     {{dbDel $UID "Points"}}
 
   {{end}}
-  {{if $WipedPts}} {{sendMessage 1168339319124131871 (print "**[PTS_SYS · Niv. < 10]** Solde de <@" $UID "> transféré au Trésor Public : " (reReplace "," (humanizeThousands $WipedPts) " ") " Points.")}} {{end}}
+  {{if $PtClr}} {{sendMessage 1168339319124131871 (print "**[PTS_SYS · Niv. < 10]** Solde de <@" $UID "> transféré au Trésor Public : " (reReplace "," (humanizeThousands $PtClr) " ") " Points.")}} {{end}}
 
 {{end}}
