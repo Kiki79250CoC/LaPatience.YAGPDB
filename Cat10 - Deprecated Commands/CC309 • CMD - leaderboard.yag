@@ -14,10 +14,14 @@
     {{- with (getMember .UserID)}} {{$User = print (or .User.Globalname .User.Username)}} {{end}}
     {{- $TopList = print $TopList "\n**⋄  `" $inTxt "`\t · " $User " :** " $Sld " Points"}}
   {{- end}}
+
+  {{$Msg := "À compter du 1er mars 2025, 00h00 (UTC+1), le système de Score\nsera complètement abandonné. Après cette date, il ne sera plus\npossible de récupérer de Points de Score après un achat Boutique."}}
+  {{if gt currentTime.Unix 1740783600}} {{$Msg = "Depuis le 1er mars 2025, 00h00 (UTC+1), il n'est plus possible\nde récupérer de Points de Score lors d'un achat Boutique."}} {{end}}
+  
   {{$embed := cembed "color" 0xa10aee
     "title" "Points · Leaderboard des Scores"
     "fields" (cslice (sdict "name" " " "value" " " "inline" false) (sdict "name" " " "value" $TopList "inline" false) (sdict "name" " " "value" " " "inline" false))
-    "footer" (sdict "text" ((print "Entrées " $MEntry " - " $index " sur " (reReplace "," (humanizeThousands $PgLmt) " "))))
+    "footer" (sdict "text" ((print "Entrées " $MEntry " - " $index " sur " (reReplace "," (humanizeThousands $PgLmt) " ") "\n\n⚠️ " $Msg )))
   }} {{sendMessage nil $embed}}
 
 {{else}} {{sendMessage nil (print ">>> **Erreur :**\nLa page " $PgNbr " n'existe pas.")}} {{end}}

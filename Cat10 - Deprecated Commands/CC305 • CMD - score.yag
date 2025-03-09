@@ -10,10 +10,13 @@
 {{$ScoreTxt := "Votre score"}}
 {{if ne .User.ID $UID}} {{$ScoreTxt = print "Le score de " $usrDN}} {{end}}
 
+{{$Msg := "À compter du 1er mars 2025, 00h00 (UTC+1), le système de Score\nsera complètement abandonné. Après cette date, il ne sera plus\npossible de récupérer de Points de Score après un achat Boutique."}}
+{{if gt currentTime.Unix 1740783600}} {{$Msg = "Depuis le 1er mars 2025, 00h00 (UTC+1), il n'est plus possible\nde récupérer de Points de Score lors d'un achat Boutique."}} {{end}}
+
 {{sendMessage nil (cembed "color" 0xa10aee
   "author" (sdict "name" $usrDN "icon_url" $iURL)
   "title" (print $ScoreTxt " est de **" (reReplace "," (humanizeThousands (or (dbGet $UID "score").Value 0)) " ") "** Points")
-  "footer" (sdict "text" (print "Lorsque vous utilisez la Boutique, la somme de votre dépense\nvous est reversée en score (à l'exception de certains buys)."))
+  "footer" (sdict "text" (print "⚠️ " $Msg "\n\nLorsque vous utilisez la Boutique, la somme de votre dépense\nvous est reversée en score (à l'exception de certains buys)."))
 )}}
 
 {{$a := dbIncr $UID "ScoreExCt" 1}}
