@@ -1,51 +1,37 @@
-{{$IsImmun := cslice 531170764183830528 369101917659332611}}
-{{$TaxMinA := 7000}}
-{{$TaxMinB := 13000}}
-{{$TaxMinC := 20000}}
-{{$TaxT2PM := 0.35}}
-{{$TaxT3PM := 0.50}}
-{{$TaxPM := 0.20}}
+{{$ImDB := (dbGet 0 "ImmunDB").Value}}
 {{$UM := print "<@" ($IDS := toString ($UID := .User.ID)) ">"}}
 
 {{if $BuyData := (dbGet $UID "Buy").Value}}
-  {{$isBVIP := $BuyData.Get "IsBVIP"}}
-  {{$uPts := toInt ($BuyData.Get "UserPts")}}
-  {{$BID := toInt ($BuyData.Get "ItemID")}}
-  {{$pr := toInt ($BuyData.Get "Price")}}
+  {{$PtSld := toInt $BuyData.UserPts}}
+  {{$BID := toInt $BuyData.ItemID}}
+  {{$Mbr := getMember $UID}}
 
-  {{if (eq (toInt (dbIncr $UID "BuyCt" 1)) 500)}} {{giveRoleID $UID 1159813369587564655}} {{end}}
+  {{$X := dbIncr 531170764183830528 "Points" ($pr := toInt $BuyData.Price)}}
+  {{if and (ge (dbIncr $UID "BuyCt" 1) 300.0) (not (hasRole ($r := 1159813369587564655)))}} {{giveRole $r}} {{end}}
 
-  {{if or (and (not $isBVIP) (not (in (cslice 1 4 6 16 21 22 29 30) $BID))) (and $isBVIP (not (in (cslice 2) $BID)))}}
-    {{$em := toInt (sub ($e := toInt (dbIncr $UID "score" $pr)) $pr)}}
-
-    {{if and (lt $em 1000) (ge $e 1000)}} {{giveRoleID $UID 1060949245433229373}} {{end}}
-    {{if and (lt $em 5000) (ge $e 5000)}} {{giveRoleID $UID 1060949252601294940}} {{end}}
-    {{if and (lt $em 15000) (ge $e 15000)}} {{giveRoleID $UID 1060949258917924934}} {{end}}
-    {{if and (lt $em 25000) (ge $e 25000)}} {{giveRoleID $UID 1060949256170643558}} {{end}}
-    {{if and (lt $em 40000) (ge $e 40000)}} {{giveRoleID $UID 1060949819302084678}} {{end}}
-
-    {{if gt ($nPal := (roundFloor (div $e 5000))) (roundFloor (div $em 5000))}} {{sendMessage 1060966843667460166 (print "Bien joué " $UM ", tu viens de passer au **Palier " $nPal "** !")}} {{end}}
-
-    {{if (ge (add ($BLA := index ($sl := (dbGet 0 "Buy").Value) 0) $pr) ($BLT := index $sl 1))}}
-      {{dbSet 0 "Buy" (cslice (sub (add $BLA $pr) $BLT) (randInt 55000 60000))}} {{dbSetExpire 21 "Buy" 0 900}}
-      {{sendMessage 783725584336420906 "🔥 Allez piailler vos points bande de rats… ⭐\nBref… **Buy Légendaire activé**."}} {{sendMessage 1168339319124131871 (print "# Activ.BL : " $UM)}}
-      {{editChannelName 496010398848253965 "【🔥】général"}} {{scheduleUniqueCC 300 nil 900 "EndBL" "#"}}
+  {{if not (in (cslice 1 4 11 12 13 14 15 16 17 102) $BID)}}
+    {{if ge (add ($BLA := index ($sl := (dbGet 0 "Buy").Value) 0) $pr) ($BLT := index $sl 1)}}
+      {{dbSet 0 "Buy" (cslice (sub (add $BLA $pr) $BLT) (randInt 55000 60001))}} {{dbSetExpire 4 "Buy" 0 900}}
+      {{sendMessage 783725584336420906 "🔥 Allez piailler vos points bande de rats… ⭐\nBref… **Buy Légendaire activé**."}}
+      {{sendMessage 1168339319124131871 (print "# " $UM "\n-# a activé la Boutique Légendaire !")}}
+      {{editChannelName ($ChG := 496010398848253965) (reReplace "⏳" (getChannel $ChG).Name "🔥")}} {{execCC 266 nil 900 (dict "M" 10)}}
     {{else}} {{dbSet 0 "Buy" (cslice (add $BLA $pr) $BLT)}} {{end}}
 
-    {{if ge $uPts $TaxMinB}} {{$TaxPM = $TaxT2PM}} {{end}}
-    {{/* if ge $uPts $TaxMinC}} {{$TaxPM = $TaxT3PM}} {{end */}}
-    {{$TaxAmnt := toInt (mult (toFloat $uPts) $TaxPM)}}
+    {{if $ImDB.TaxToggle}}
+      {{$TaxPM := 0.00}}
+      {{$TaxTh := sort $ImDB.TaxThreshold (sdict "reverse" true)}}
+      {{range $TaxTh}} {{$CurTh := split . ":"}} {{if ge $PtSld (toInt (index $CurTh 0))}} {{$TaxPM = index $CurTh 1}} {{break}} {{end}} {{end}}
 
-    {{if eq ($TaxSTgl := (dbGet 0 "TaxToggle").Value) "1"}}
-      {{if $TaxDB := dbGet 0 "Taxes"}}
-        {{$TaxSlice := $TaxDB.Value}}
-        {{if $TaxAcct := $TaxSlice.Get $IDS}}
-          {{$CurTaxProg := toInt (or (index $TaxAcct 1) 0)}}
-          {{$TaxAmnt = toInt (index $TaxAcct 0)}}
-          {{$TaxSlice.Set $IDS (cslice $TaxAmnt (add $CurTaxProg $pr))}}
-          {{dbSet 0 "Taxes" $TaxSlice}}
-        {{else}} {{if ge $uPts $TaxMinA}} {{$TaxSlice.Set $IDS (cslice $TaxAmnt $pr)}} {{dbSet 0 "Taxes" $TaxSlice}} {{end}} {{end}}
-      {{else}} {{if and (ge $uPts $TaxMinA) (not (getMember $UID).User.Bot) (not (in $IsImmun $UID))}} {{dbSet 0 "Taxes" (sdict $IDS (cslice $TaxAmnt $pr))}} {{end}} {{end}}
+      {{if $TaxPM}}
+        {{$TaxAmt := toInt (mult (toFloat $PtSld) $TaxPM)}}
+
+        {{if $TaxDB := dbGet 0 "Taxes"}}
+          {{$TaxData := $TaxDB.Value}}
+          {{if and (not ($TaxData.Get $IDS)) (not $Mbr.User.Bot) (not (in $ImDB.PatrolActs $UID))}} {{$TaxData.Set $IDS (cslice $TaxAmt $pr)}} {{dbSet 0 "Taxes" $TaxData}} {{end}}
+
+        {{else}} {{if and (not $Mbr.User.Bot) (not (in $ImDB.PatrolActs $UID))}} {{dbSet 0 "Taxes" (sdict $IDS (cslice $TaxAmt $pr))}} {{end}} {{end}}
+
+      {{end}}
     {{end}}
   {{end}}
 

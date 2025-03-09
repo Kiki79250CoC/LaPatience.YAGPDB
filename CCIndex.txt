@@ -833,7 +833,7 @@ DISCLAIMER : Elements in ‹quotation marks› are variable arguments (IE: User 
           › Roles     : Not limited
           › Channels  : Limited (02) › "Boutique", "Gestion Bots"
 
-          › Revision  : 1.02
+          › Revision  : 1.10
 
         • 265 - COMMAND
           › Trigger   : -mise
