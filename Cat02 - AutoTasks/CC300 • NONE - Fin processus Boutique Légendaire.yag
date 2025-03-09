@@ -1,1 +1,2 @@
-{{editChannelName 496010398848253965 "【⏳】général"}}
+{{editChannelName ($ChG := 496010398848253965) (reReplace "⏳" (getChannel $ChG).Name "🔥")}}
+{{dbDel 401 "Buy"}}
