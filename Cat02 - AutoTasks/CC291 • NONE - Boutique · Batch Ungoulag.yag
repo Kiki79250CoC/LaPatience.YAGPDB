@@ -1,0 +1,9 @@
+{{$BatchSanc := .ExecData.BatchGoulag}}
+
+{{range $BatchSanc.SancList}}
+  {{$rMbr := $BatchSanc.Get (str ($UID := .))}}
+  {{range $rMbr}} {{giveRoleID $UID .}} {{end}}
+  {{takeRoleID $UID 1276161103168274504}}
+{{end}}
+
+{{$BGDB := (dbGet 0 "BatchGoulag").Value}} {{$BGDB.Del (str .ExecData.BID)}} {{dbSet 0 "BatchGoulag" $BGDB}}

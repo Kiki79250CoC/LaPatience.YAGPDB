@@ -241,15 +241,15 @@ DISCLAIMER : Elements in ‹quotation marks› are variable arguments (IE: User 
           › Revision  : 2.30
 
         • 291 - NONE
-          › Trigger   : n/a
+          › Trigger   : Buy_BatchUngoulag
           › Arguments : n/a
 
           › Enabled   : Yes
-          › Name      : BuyVIP 1 Custom triple-Ungoulag command
+          › Name      : Boutique · Batch Ungoulag
           › Roles     : Not limited
           › Channels  : Not limited
 
-          › Revision  : 1.09
+          › Revision  : 2.11
 
         • 300 - NONE
           › Trigger   : n/a
