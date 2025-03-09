@@ -1,86 +1,93 @@
 {{deleteTrigger 0}}
-{{$args := parseArgs 1 "`-buy ‹#› ‹\"Text\" or @UserOrID›`" (carg "int" "BuyID") (carg "string" "Arg")}}
-{{$BIDS := toString ($BID := $args.Get 0)}}
-{{$UTS := .Message.Timestamp.Parse.Unix}}
+{{$args := parseArgs 1 (print "`" .ServerPrefix .CCTrigger " ‹#› ‹\"Text\" or @UserOrID›`") (carg "int" "BuyID") (carg "string" "Arg")}}
+{{$ImDB := (dbGet 0 "ImmunDB").Value}}
+{{$BIDD := reReplace " " ($BIDC := print "Buy " ($BID := $args.Get 0)) ""}}
+{{$UTS := currentTime.Unix}}
 {{$Arg := or ($args.Get 1) ""}}
 {{$ChG := 496010398848253965}}
-{{$RLB := 967187787260518440}}
 {{$ChB := 1168339319124131871}}
-{{$MEB := 1159817155567681577}}
-{{$UM := ($BM := print "<@" ($IDS := toString ($UID := .User.ID)) ">")}}
-{{$DM := ($EM := ($VIP := ($BOKCldw := ($PRM := ($r := ($ME := ""))))))}}
-{{$PtPlaf := 25000}}
+{{$RB := 967187787260518440}}
+{{$RG := 1276161103168274504}}
+{{$RS := 506417754878902272}}
+{{$UM :=  print "<@" ($IDS := str ($UID := .User.ID)) ">"}}
+{{$DM := ($EC := ($VIP := ($BOKCldw := ($a := ($b := ($c := ($r := ($GMsg := ($BMsg := "")))))))))}}
+{{$SldS := (or (dbGet $UID "SancProfile").Value (sdict )).ActiveWarns.FrzSld}}
 
-{{$prLst := sdict "1" 2 "2" 15 "3" 15 "4" 25 "5" 50 "6" 50 "7" 150 "8" 150 "9" 200 "10" 190 "11" 300 "12" 400 "13" 450 "14" 500 "15" 700 "16" 600 "17" 700 "18" 700 "19" 900 "20" 1200 "21" 1000 "22" 1200 "23" 3000 "24" 2000 "25" 5000 "26" 10000 "27" 50 "28" 250 "29" 150 "30" 200 "31" 200 "32" 300 "33" 600 "34" 500}}
-{{$prx := reReplace "," (humanizeThousands ($pr := or ($prLst.Get $BIDS) 0)) " "}}
+{{$prLst := dict 1 1  2 200  3 200  4 1000  11 25  12 50  13 1200  14 100  15 200  16 600  17 1000  18 50  21 150  22 15  23 150  24 200  25 500  26 1500  27 800  31 15  32 100  33 50  34 400  35 1200  36 700  41 150  42 150  43 300  44 500  45 700  46 900  47 1000  48 3000  49 5000  50 10000}}
+{{$pr := or ($prLst.Get $BID) -1}}
 
 {{$uPts := or (toInt (dbGet $UID "Points").Value) 0}}
 
-{{$BOKReduc := not (in (cslice 4 6 16 22) $BID)}}
-{{if in (cslice 9 15 16 19 22 32 34) $BID}} {{$BOKCldw = dbGet $UID (print "Buy" $BID)}} {{end}}
-
-{{if hasRoleID 1079418386511040572}} {{$PtPlaf = 50000}} {{if and $BOKReduc (ge $pr 150)}} {{$PRM = 0.85}} {{$VIP = print " **(<:VIP2_v2:1080311144285229106> VIP2 · " $prx " -15%)**"}} {{end}}
-{{else if hasRoleID 967188575005315132}} {{$PtPlaf = 35000}} {{if and $BOKReduc (ge $pr 150)}} {{$PRM = 0.93}} {{$VIP = print " **(<:VIP1_v2:1080311093785788507> VIP1 · " $prx " -7%)**"}} {{end}} {{end}}
-{{$prx = reReplace "," (humanizeThousands ($pr = toInt (mult (toFloat $pr) (or $PRM 1)))) " "}}
-
-{{if and (ge $BID 1) (le $BID 33) (ne $BID 15) (le $pr $uPts) (not ($AcFreeze := dbGet $UID "AcctFreeze")) (le $uPts $PtPlaf) (not $BOKCldw)}}
-  {{if and ($b13 := toInt (dbGet 13 "Buy").Value) (ne $BID 1) (not (in (cslice 223894107016134656 369101917659332611) $UID))}}
-    {{$DM = "Désolé, la Boutique a été piégée… Du coup tu finis au Goulag, dépouillé des points de ton achat."}}
-    {{$b13msg := print " et que " $UM " en a payé les frais."}} {{if eq $b13 $UID}} {{$b13msg = "… sauf que le Karma l'a rattrapé."}} {{end}}
-    {{sendMessage $ChG (print "Tiens, on dirait que <@" $b13 "> a piégé la Boutique" $b13msg "\nEt les **" $prx "** Points de son achat ? Boh ! Aux oubliettes bien évidemment…")}}
-    {{sendMessage $ChB (print "Buy 13 : <@" $b13 "> (Piégeur) · " $UM " (Piégé) · " $prx " (Somme perdue)")}}
-    {{dbDel 13 "Buy"}} {{dbSet $UID "Points" (sub $uPts $pr)}} {{execCC 320 nil 0 (sdict "sancUsr" $UID "sancRes" "AutoSanc.Buy" "sancDur" (toDuration "5m") "sancMod" 0)}}
-
-  {{else}}
-    {{$DM = "Achat effectué avec succès !"}}
-
-    {{if eq $BID 1}} {{if not (dbGet 1 "Buy")}} {{if $ME = eq (randInt 100) 30}} {{$DM = "Oups… Suite à un malentendu, tu repars avec le mauvais badge."}} {{else}} {{addRoleID 985645140699918356}} {{$DM = "Bravo ! Tu repars avec le badge du Buy 1 🎲."}} {{end}} {{sendMessage $ChB (print "Buy 1 : " $UM " · Malentendu : " $ME)}} {{dbSetExpire 1 "Buy" 0 (randInt 237600 388800)}} {{end}}
-    {{else if and (eq $BID 4) (eq (randInt 150) 69)}} {{$r = "B"}} {{$r2 := "Points"}} {{if $ME = eq (randInt 150) 69}} {{$a := dbIncr $UID "score" 1500}} {{$r = print "Il semblerait qu'il y a eu un petit malentendu, donc b"}} {{$r2 = "de Score"}} {{else}} {{$uPts = add $uPts 1525}} {{end}} {{sendMessage $ChG (print $r "ien joué " $UM ", tu viens de gagner **1 500 " $r2 "** à la Loterie !")}}
-    {{else if eq $BID 5}} {{$BM = "**Quelqu'un**"}} {{if $Arg}} {{range $k, $v := cslice $ChB 693795482639794276}} {{sendMessage . (print "Buy 5 : " $UM " · " $Arg)}} {{end}} {{sendMessage $ChG (reReplace .LinkRegex $Arg "<Lien supprimé>")}} {{else}} {{$EM = "Aucun message défini"}} {{end}}
-    {{else if eq $BID 6}} {{$uPts = add $uPts ($loto := randInt 101)}} {{$DM = print "Tu as gagné " $loto " Points."}}
-    {{else if eq $BID 16}} {{if not (dbGet 16 "Buy")}} {{dbSetExpire $UID "Buy16" 0 2700}} {{dbSet 16 "Buy" (cslice $IDS (add $UTS 30))}} {{$DM = print $DM "\nLa magie opérera dans 30 secondes…"}} {{else}} {{$EM = "Un Buy 16 est déjà en attente"}} {{end}}
-    {{else if eq $BID 21}} {{if (dbGet 21 "Buy")}} {{if not ($ME = eq (randInt 10) 5)}} {{if hasRoleID ($r = 1098981009774628886)}} {{$EM = "Vous avez déjà le rôle"}} {{else}} {{addRoleID $r}} {{end}} {{end}} {{else}} {{$EM = "L'item n'est actuellement pas actif"}} {{end}}
-    {{else if and (eq $BID 22) (eq (randInt 2) 1)}} {{$uPts = add $uPts 2200}} {{sendMessage $ChG (print "Bien joué " $UM ", tu viens de gagner **1 000 Points** avec le Buy 22 !")}}
-    {{else if eq $BID 27}} {{if hasRoleID ($r = 1165268999437824111)}} {{$EM = "Vous avez déjà le rôle"}} {{else}} {{addRoleID $r}} {{removeRoleID $r 86400}} {{end}}
-
-    {{end}}
-
-    {{if in (cslice 2 10 12) $BID}} {{addRoleID ($r = (sdict "2" 784090664580415508 "10" 1030956478384832664 "12" 998383449008246824).Get $BIDS)}} {{if eq $BID 12}} {{removeRoleID $r 259200}} {{end}}
-    {{else if in (cslice 9 19 22 34) $BID}} {{dbSetExpire $UID (print "Buy" $BID) 0 (or ((sdict "22" 1800 "34" 3600).Get $BIDS) 86400)}}
-    {{else if in (cslice 11 13 14 28 33) $BID}} {{dbSet $BID "Buy" (or ((sdict "13" $IDS "14" 3 "33" $IDS).Get $BIDS) 0)}} {{if eq $BID 14}} {{sendMessage $ChG "C'est l'heure de faire boom-boom ! (Buy 14)"}} {{end}}
-    {{else if in (cslice 17 26) $BID}} {{dbSetExpire $BID "Buy" 0 ((sdict "17" 60 "26" 600).Get $BIDS)}}
-    {{else if in (cslice 31 32) $BID}} {{if $Arg}} {{if eq $BID 31}} {{takeRoleID (toInt (dbGet 31 "Buy").Value) ($r = 1187580089064509611)}} {{giveRoleID ($a := (getMember $Arg).User.ID) $r}} {{dbSet 31 "Buy" (toString $a)}} {{else}} {{if and (not (targetHasRoleID ($a := (getMember $Arg).User.ID) 1078386211472805998)) (not (targetHasRoleID $a 666687114326441989)) (not (targetHasRoleID $a 687019136240451638))}} {{giveRoleID $a 735813110224388118}} {{range (cslice 496010501990645799 931351059455164477 496010603601854464 507301458853625879 1078386211472805998 1106395328447533077 1054107222856192172 925769441747296316 925767790034583552 925766056650362991 925745256207618139 925761123695886376 925758251662987264 925756577510748210 925745253087076392 925745243180118034 925745259290460210 589455096795103273)}} {{if targetHasRoleID $a .}} {{$r = (joinStr "-" $r .)}} {{takeRoleID $a .}} {{end}} {{end}} {{dbSet $a "Buy32" $r}} {{scheduleUniqueCC 266 $ChB 1200 $a (dict "UID" (toString (getMember $Arg).User.ID))}} {{dbSetExpire $UID "Buy32" 0 1800}} {{else}} {{$EM = "Cible immunisée"}} {{end}} {{end}} {{else}} {{$EM = "Aucune cible définie"}} {{end}}
-
-    {{end}}
-
-    {{if in (cslice 3 7 29 30) $BID}} {{if $Bomb := (dbGet 0 "bomb").Value}} {{$BoTID := index $Bomb 0}} {{$BoTTS := index $Bomb 1}} {{$BoTST := index $Bomb 2}}
-      {{if gt (sub $BoTTS $UTS) 0}}
-        {{if eq $BID 3}} {{if $Arg}} {{if not (targetHasRoleID ($BoTID = (getMember $Arg).User.ID) 506417754878902272)}} {{takeRoleID (index $Bomb 0) $RLB}} {{$r = print "relayée à <@" $BoTID ">"}} {{giveRoleID $BoTID $RLB}} {{else}} {{$EM = "La cible est déjà au Goulag"}} {{end}} {{else}} {{$EM = "Aucune cible définie"}} {{end}}
-        {{else if eq $BID 29}} {{$BoTTS = sub $BoTTS 60}} {{$r = "dépéchée de 1 minute"}}
-        {{else if eq $BID 30}} {{$BoTST = add $BoTST 10}} {{$r = "renforcée de 10 minutes"}}
-        {{else}} {{$EM = "Une bombe est déjà active"}} {{end}} {{if ne $BID 7}} {{dbSet 0 "bomb" (cslice $BoTID $BoTTS $BoTST)}} {{if le (sub $BoTTS $UTS) 0}} {{$r = print $r " par " $UM ".\nSon explosion est désormais **imminente** !"}} {{else}} {{$r = print $r " par " $UM ".\nElle explosera dans " (reReplace "second" (reReplace "and" (humanizeDurationSeconds (mult (sub $BoTTS $UTS) 1000000000)) "et") "seconde")}} {{end}} {{end}}
-      {{else}} {{$EM = "La bombe ne peut être relayée car elle s'apprête à exploser"}} {{end}}
-    {{else}} {{if eq $BID 7}} {{if $Arg}} {{$BoTID := (getMember $Arg).User.ID}} {{if not (targetHasRoleID $BoTID $RLB)}} {{giveRoleID $BoTID $RLB}} {{end}} {{$r = print "larguée sur <@" $BoTID "> par " $UM}} {{dbSet 0 "bomb" (cslice $BoTID (add $UTS (randInt 300 900)) 5)}} {{else}} {{$EM = "Aucune cible définie"}} {{end}} {{else}} {{$EM = "Aucune bombe n'est en cours"}} {{end}}
-    {{end}} {{if $r}} {{sendMessage $ChG (print "💣 **La Sainte Bombe** a été " $r ".")}} {{end}} {{end}}
-
-    {{if $ME}} {{if not (hasRoleID $MEB)}} {{addRoleID $MEB}} {{end}} {{$DM = print $DM "\nMais il semblerait qu'un truc n'a pas fonctionné comme prévu… Un malentendu peut-être ?"}} {{end}}
-
-    {{if not $EM}}
-      {{dbSet $UID "Points" (sub $uPts $pr)}} {{$a := dbIncr 531170764183830528 "Points" $pr}}
-
-      {{sendMessage 783745583785181214 (print $BM " vient d'acheter l'élément " $BID (or ((sdict "8" " 🔵" "9" " 🟣" "18" " 🟣" "19" " 🔴" "20" " 🟣" "23" "﻿﻿ ⚙️" "24" " 🟣" "25" " 🔴").Get $BIDS) "") " pour la modique somme de **" $prx " Points**." $VIP)}}
-
-      {{dbSet $UID "Buy" (sdict "IsBVIP" false "UserPts" $uPts "ItemID" $BID "Price" $pr)}}
-    {{end}}
-
+{{$PtPlaf := index $ImDB.PlafLmt 0}}
+{{range $ID, $r := (cslice 967188575005315132 1079418386511040572)}}
+  {{if in $.Member.Roles $r}}
+    {{$PtPlaf = index $ImDB.PlafLmt (add $ID 1)}}
+    {{if and (not (in (seq 11 18) $BID)) (ge $pr 150)}} {{$VIP = print " **(" (index (cslice "<:VIP1_v2:1080311093785788507> VIP1" "<:VIP2_v2:1080311144285229106> VIP2") $ID) " · " (humanizeThousands $pr) " -" (index (cslice 7 15) $ID) " %)**"}} {{$pr = toInt (mult (toFloat $pr) (index (cslice 0.93 0.85) $ID))}} {{end}} {{break}}
   {{end}}
-{{else}}
-  {{if gt $pr $uPts}} {{$EM = "Solde insuffisant"}}
-  {{else if $AcFreeze}} {{$EM = "Compte en banque gelé"}}
-  {{else if gt $uPts $PtPlaf}} {{$EM = "Solde de points trop élevé"}}
-  {{else if $BOKCldw}} {{$EM = print "Item soumis à un cooldown. Vous pourrez l'utiliser dans **" (reReplace "second" (reReplace "and" (humanizeDurationSeconds (mult (sub $BOKCldw.ExpiresAt.Unix $UTS) 1000000000)) "et") "seconde") "**"}}
-  {{else}} {{$EM = print "L'item sélectionné (" $BID ") n'existe pas"}} {{end}}
 {{end}}
 
-{{if $EM}} {{$DM = print ">>> **Erreur :**\nImpossible de procéder à l'achat : " $EM "."}} {{end}}
+{{$Cldw := cslice 1 2 13 16 17 42 46}}
+{{if in $Cldw $BID}} {{$BOKCldw = dbGet $UID $BIDD}} {{end}}
+
+{{if in (cslice 3 14 21 22 33 42 47) $BID}} {{if $Arg}} {{if $a = getMember (or $Arg 0)}} {{if not $a.User.Bot}} {{$b = $a.Roles}} {{if eq $BID 14}} {{if $BOKCldw = dbGet ($a = $a.User.ID) (print $BIDD "1")}} {{$EC = 21}} {{end}} {{end}} {{if in (cslice 14 21 22) $BID}} {{if or (in $b $RG) (in $b $RS)}} {{$EC = 12}} {{end}} {{end}} {{else}} {{$EC = 11}} {{end}} {{else}} {{if ne $BID 33}} {{$EC = 11}} {{end}} {{end}} {{else}} {{$EC = 10}} {{if eq $BID 33}} {{$EC = 15}} {{end}} {{end}}
+{{else if in (cslice 4 18 31 32 34) $BID}} {{if hasRole ($r = (dict 4 1098981009774628886 18 1236668311517925376 31 784090664580415508 32 1030956478384832664 34 998383449008246824).Get $BID)}} {{$EC = 14}} {{end}}
+{{else if in (cslice 15 16 25 43 44 45 50) $BID}} {{if dbGet $BID "Buy"}} {{$EC = 9}} {{end}}
+{{else if eq $BID 17}} {{if dbGet $UID "MsgLuck"}} {{$EC = 9}} {{end}}
+{{end}}
+
+{{if and (not (eq $pr -1)) (not (in ($UItems := $ImDB.BUItems) $BID)) (not (in ($DItems := $ImDB.BDItems) $BID)) (le $pr $uPts) (not ($AcFrz := lt $UTS (toInt $SldS.ExpiresAt))) (or (in $ImDB.NoPlaf $UID) (le $uPts $PtPlaf)) (not $BOKCldw) (not $EC)}}
+  {{$DM = "Achat effectué avec succès !"}}
+
+  {{if eq $BID 1}} {{if not (dbGet $BID "Buy")}} {{addRole 985645140699918356}} {{$DM = print "Bravo ! Tu repars avec le badge du " $BIDC " 🎲."}} {{$BMsg = $UM}} {{dbSetExpire $BID "Buy" 0 (randInt 237600 388800)}} {{end}}
+  {{else if eq $BID 3}} {{takeRole (toInt (dbGet $BID "Buy").Value) ($r = 1187580089064509611)}} {{giveRole $a $r}} {{dbSet $BID "Buy" (str $a)}}
+  {{else if eq $BID 4}} {{if dbGet $BID "Buy"}} {{addRole $r}} {{else}} {{$EC = 13}} {{end}}
+
+  {{else if and (eq $BID 11) (eq (randInt 150) 69)}} {{$uPts = add $uPts 1525}} {{$GMsg = print "Bien joué " $UM ", tu viens de gagner **1 500 Points** à la Loterie !"}}
+  {{else if eq $BID 12}} {{$uPts = add $uPts ($loto := randInt 101)}} {{$DM = print "Tu as gagné " $loto " Points."}}
+  {{else if and (eq $BID 13) (eq (randInt 2) 1)}} {{$uPts = add $uPts 2200}} {{$GMsg = print "Bien joué " $UM ", tu viens de gagner **1 000 Points** avec le " $BIDC " !"}}
+  {{else if eq $BID 14}} {{$Text := print "fié <@" $a ">"}} {{if $r = eq $UID $a}} {{$Text = "cidé de jouer pour son compte"}} {{end}} {{$Rslt := "gagné 100 Points ! Pfiou !"}} {{if eq (randInt 6) 4}} {{$Rslt = "perdu. À dans 2 heures donc."}} {{execCC 320 $ChG 0 (sdict "SancUsr" $a "SancRes" $BIDC "SancDur" "2h" "IsTroll" true)}} {{else}} {{if $r}} {{$uPts = add $uPts 100}} {{else}} {{$p := dbIncr $a "Points" 100}} {{end}} {{end}} {{$GMsg = print $UM " a dé" $Text " à la roulette russe.\n<@" $a "> presse la détente et… a " $Rslt}} {{dbSetExpire $a (print $BIDD "1") 0 86400}}
+  {{else if eq $BID 16}} {{dbSet $BID "Buy" (cslice $UID ($a = 30))}} {{$DM = print $DM "\nLa magie opérera dans " $a " secondes…"}}
+  {{else if eq $BID 17}} {{$MsgIDs := cslice (randInt 1 4) 0 0 0}} {{sendMessage $ChG (print "## " $BIDC " · Alors " $UM ", c'est lequel le bon message ?")}} {{range (seq 1 4)}} {{$MsgIDs.Set . ($Msg := sendMessageRetID $ChG (print "Message " .))}} {{addMessageReactions $ChG $Msg "✅"}} {{end}} {{dbSetExpire $UID "MsgLuck" $MsgIDs 86400}}
+  {{else if in (cslice 18 31 32 34) $BID}} {{addRole $r}} {{removeRole $r (or ((dict 18 86400 34 259200).Get $BID) 0)}}
+
+  {{else if in (seq 21 28) $BID}}
+    {{if $Bomb := (dbGet 0 "Bomb").Value}}
+      {{with $Bomb}} {{if gt (sub .TrigTS $UTS) 0}}
+        {{if eq $BID 22}} {{$UL := .Usr}} {{giveRole $a $RB}} {{if .UsrStk}} {{if not (in .Usr $a)}} {{$r = print "propagée à <@" $a ">"}} {{$UL = $UL.Append $a}} {{$UL.Set 0 (sub (len $UL) 1)}} {{else}} {{$EC = 20}} {{end}} {{else}} {{$r = print "relayée à <@" $a ">"}} {{takeRole (toInt (index $UL 1)) $RB}} {{$UL.Set 1 $a}} {{end}} {{.Set "Usr" $UL}}
+        {{else if eq $BID 23}} {{$r = "dépéchée de 1 minute"}} {{.Set "TrigTS" (sub .TrigTS 60)}}
+        {{else if eq $BID 24}} {{$r = "renforcée de 10 minutes"}} {{.Set "ScTime" (add .ScTime 600)}}
+        {{else if in (cslice 25 26 27) $BID}} {{if or (and (ne $BID 27) (not .TrailS) (not ($u := .UsrStk))) (and (eq $BID 27) (not .TrAUsr) $u)}} {{$r = print "améliorée par " $BIDC}} {{.Set ((dict 25 "TrailS" 26 "UsrStk" 27 "TrAUsr").Get $BID) true}} {{else}} {{$EC = 19}} {{end}} {{end}}
+        {{if ne $BID 21}} {{dbSet 0 "Bomb" .}} {{$c = print "-# Elle se verrouillera dans " (reReplace "nd" (reReplace "and" (humanizeDurationSeconds (mult (sub .TrigTS $UTS) 1000000000)) "et") "nde") "."}} {{if le (sub .TrigTS $UTS) 0}} {{$c = "-# Bombe **verrouillée** !"}} {{end}} {{else}} {{$EC = 16}} {{end}}
+      {{else}} {{$EC = 18}} {{end}} {{end}}
+    {{else}} {{if eq $BID 21}} {{giveRole $a $RB}} {{$br = print "larguée sur <@" $a "> par " $UM}} {{dbSet 0 "Bomb" (sdict "Usr" (cslice 1 $a) "TrigTS" (add $UTS (randInt 300 901)) "ScTime" 300)}} {{else}} {{$EC = 17}} {{end}} {{end}}
+    {{if not $EC}} {{$GMsg = print "## 💣 **La Sainte Bombe** a été **" $r "** par " $UM ".\n" $c}} {{end}}
+
+  {{else if eq $BID 33}} {{$GMsg = reReplace .LinkRegex $Arg "[###]"}} {{range (cslice $ChB 693795482639794276)}} {{sendMessage . (print $BIDC " : " $UM " · " $Arg)}} {{end}} {{$UM = "**Quelqu'un**"}}
+  {{else if eq $BID 42}} {{execCC 266 $ChB 0 (dict "M" 0 "UID" $a "By" $UID)}}
+  {{else if eq $BID 43}} {{if dbGet 4 "Buy"}} {{dbSet $BID "Buy" $IDS}} {{else}} {{$EC = 13}} {{end}}
+  {{else if eq $BID 44}} {{dbSet $BID "Buy" 3}} {{$GMsg = print "C'est l'heure de faire boom-boom ! (" $BIDC ")"}}
+  {{else if in (cslice 45 50) $BID}} {{dbSet $BID "Buy" (cslice $UID ($a = toInt (print $BID "001")))}} {{scheduleUniqueCC 290 $ChB ((dict 45 60  50 600).Get $BID) $UTS (dict "Buyer" $UID "DataLoc" $a "FromBID" $BID "SancDur" ((dict 45 120  50 3600).Get $BID))}}
+  {{else if eq $BID 47}} {{dbSet $a $BIDD 900}} {{$GMsg = print $UM " a décidé de réduire <@" $a "> au silence 15 minutes."}} {{$BMsg = print $UM " (Acheteur) · <@" $a "> (Victime)"}}
+  {{end}}
+
+  {{if $GMsg}} {{sendMessage $ChG $GMsg}} {{end}}
+  {{if $BMsg}} {{sendMessage $ChB (print $BMsg "\n-#" $BIDC)}} {{end}}
+
+  {{if in $Cldw $BID}} {{dbSetExpire $UID $BIDD 0 (or ((dict 1 3600  13 1800  16 7200  42 1800  46 1800).Get $BID) 86400)}} {{end}}
+
+  {{if not $EC}}
+    {{dbSet $UID "Points" (sub $uPts $pr)}}
+    {{$s := ""}} {{if gt $pr 1}} {{$s = "s"}} {{end}}
+    {{sendMessage 783745583785181214 (reReplace "," (print (or ((dict 2 "🟣" 35 "🟣" 36 "🟣" 41 "🔴" 46 "🔴" 48 "⚙️" 49 "🔴").Get $BID) "⚪") " Item : **" $BID "** · Acheteur : " $UM "\n-# Prix : **" (humanizeThousands $pr) " Point" $s "**" $VIP) " ")}}
+    {{dbSet $UID "Buy" (sdict "UserPts" $uPts "ItemID" $BID "Price" $pr)}}
+  {{end}}
+
+{{else}}
+  {{if not $EC}} {{range $ID, $C := (cslice (eq $pr -1) (in $UItems $BID) (in $DItems $BID) (gt $pr $uPts) $AcFrz (gt $uPts $PtPlaf) $BOKCldw)}} {{if $C}} {{$EC = add $ID 1}} {{break}} {{end}} {{end}} {{end}}
+  {{if in (cslice 7 21) $EC}} {{$a = reReplace "our" (reReplace "ond" (reReplace "and" (humanizeDurationSeconds (print (sub $BOKCldw.ExpiresAt.Unix $UTS) "s")) "et") "onde") "eure"}} {{end}}
+{{end}}
+
+{{$EMList := cslice "" (print "Item **#" $BID "** inexistant") "Item indisponible" "Item désactivé" "Solde insuffisant" "Compte en banque gelé" "Solde de points trop élevé" (print "Item soumis à un cooldown. Vous pourrez l'utiliser dans **" $a "**") 0 (print "Un " $BIDC " est déjà actif") "Aucune cible définie" "ID fourni invalide" "La cible est Sanctionnée/au Goulag" "La Boutique Légendaire n'est pas active" "Vous avez déjà le rôle" "Aucun message défini" "Bombe déjà active" "Aucune bombe en cours" "Bombe sur le point d'exploser, aucune action possible" "Amélioration inapplicable" "Cible déjà affectée par la bombe" (print "Cible immunisée. Fin de l'immunité dans **" $a "**")}}
+
+{{if $EC}} {{$DM = print ">>> **Erreur :**\nImpossible de procéder à l'achat : " (index $EMList $EC) ".\n-# *Erreur " $EC "*"}} {{end}}
 {{sendDM $DM}}
