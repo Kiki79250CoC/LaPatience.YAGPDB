@@ -1,24 +1,64 @@
-{{$SPBk := ($SancProfile := (dbGet .User.ID "SancProfile").Value)}}
+{{$SPBk := ($SancProfile := or (dbGet ($UID := .User.ID) "SancProfile").Value (sdict ))}}
 {{$ImDB := (dbGet 0 "ImmunDB").Value}}
+{{$UTS := currentTime.Unix}}
 
-{{/* ---------- Mine ---------- */}}
+{{define "TStD"}}
+  {{$DStr := ((timestampToTime .TS).In (loadLocation "Europe/Paris")).Format (or .Style "02 January 2006 15:04:05")}}
+  {{if .TR}} {{range $k, $v := sdict "uary" "vier" "ebruary" "évrier" "ch" "s" "pr" "vr" "ay" "ai" "une" "uin" "uly" "uillet" "ugus" "oû" "ber" "bre" "Dec" "Déc"}} {{$DStr = split $DStr $k | joinStr $v}} {{end}} {{end}}
+  {{.Set "FTime" $DStr}}
+{{end}}
+
+{{$IsLv10orHigher := ""}}
+{{$Mbr := getMember $UID}}
+{{range (cslice 925745243180118034 925745253087076392 925756577510748210 925758251662987264 925761123695886376 925745256207618139 925766056650362991 925767790034583552 925769441747296316 1054107222856192172 1106395328447533077)}}
+  {{if in $Mbr.Roles .}} {{$IsLv10orHigher = .}} {{break}} {{end}}
+{{end}}
+
+{{/* ---- Vocal log ---- */}}
+{{if and (eq .Channel.ParentID 496010398848253966) (not (eq .Channel.ID 759887737838370837 550055899302068226))}}
+  {{$MC := .Message.Content}} {{$LogCID := 1346907576326946866}} {{template "TStD" ($TC := sdict "TS" $UTS "Style" "02/01/2006 15:04:05")}}
+  {{$Spr := "\n-# ————————————————————————————————————————"}}
+
+  {{if gt (len $MC) ($len := 2000)}}
+    {{$MsgContent := ""}} {{range (split $MC " ")}}
+      {{if le (add (len $MsgContent) (len (print . 0))) $len}} {{$MsgContent = print $MsgContent " " .}}
+      {{else}} {{sendMessage $LogCID $MsgContent}} {{$MsgContent = .}} {{end}}
+    {{end}} {{sendMessage $LogCID $MsgContent}}
+  {{else}} {{sendMessage $LogCID (or $MC "-# *Aucun texte*")}} {{end}}
+
+  {{$AttachText := ""}}
+  {{if .Message.Attachments}}
+    {{range $.Message.Attachments}} {{$AttachText = print $AttachText "\n-# [" .Filename "](" .URL ")"}} {{end}}
+    {{sendMessage $LogCID (print "### *(Ce message vient avec des fichiers joints)*\n" $AttachText $Spr)}}
+  {{end}}
+
+  {{sendMessage $LogCID (print "-# [" .Channel.Name "](https://discord.com/channels/" .Guild.ID "/" .Message.ChannelID ") · " .User " (" $UID ") · " $TC.FTime $Spr)}}
+{{end}}
+
+{{/* ---- Mine ---- */}}
 {{if $IsMined := $SancProfile.ActiveWarns.IsMined}}
-  {{sendMessage nil "Oups… On dirait qu'un truand vient de marcher sur quelque chose de relativement explosif… <:gros_jesus:1054705212910211144>"}}
-  {{execCC 320 nil 0 (sdict "SancUsr" .User.ID "SancRes" $IsMined.Reason "sancDur" $IsMined.Duration "SancMod" $IsMined.ModID)}}
-  {{$SancProfile.ActiveWarns.Del "IsMined"}}
-  {{dbSet .User.ID "SancProfile" $SancProfile}}
-  {{return}}
+  {{if not (and (eq (len ($MsgEmbeds := or .Message.Embeds (cslice (sdict "Type" "")))) 1) (eq (index $MsgEmbeds 0).Type "poll_result"))}}
+    {{with $IsMined}}
+      {{$Msg := "Oups… On dirait qu'un truand vient de marcher sur quelque chose de relativement explosif… <:gros_jesus:1054705212910211144>"}}
+      {{if gt (sub $UTS .UpdatedAt) 2628000}} {{$Msg = print $Msg "\n-# Les rapports indiquent que cette mine daterait de Mathusalem (<t:" .UpdatedAt ">)"}} {{end}}
+      {{sendMessage nil $Msg}}
+      {{execCC 320 nil 0 (sdict "SancUsr" $UID "SancRes" .Reason "SancDur" .Duration "SancMod" .ModID)}}
+      {{$SancProfile.ActiveWarns.Del "IsMined"}}
+      {{dbSet $UID "SancProfile" $SancProfile}}
+    {{end}}
+    {{return}}
+  {{end}}
 
 {{else}}
   {{if $LegacyMine := dbGet .User.ID "gulag"}}
-    {{sendMessage nil "Oups… On dirait qu'un truand vient de marcher sur quelque chose de relativement explosif… <:gros_jesus:1054705212910211144>"}}
+    {{sendMessage nil (print "🚨 **ALERTE GÉNÉRALE !**\nUne mine datant du néolithique (<t:" $LegacyMine.UpdatedAt.Unix ">) vient de péter !")}}
 
     {{if eq (printf "%T" $LegacyMine.Value) "*templates.Slice"}}
       {{$Val := index $LegacyMine.Value 0}}
-      {{execCC 320 nil 0 (sdict "sancUsr" .User.ID "sancRes" $Val.Reason "sancDur" $Val.Duration "sancMod" $Val.ModID "OptArgs" $Val.ArgRelay     "SancUsr" .User.ID "SancRes" $Val.Reason "SancDur" $Val.Duration "SancMod" $Val.ModID)}}
+      {{execCC 320 nil 0 (sdict "SancUsr" .User.ID "SancRes" $Val.Reason "SancDur" $Val.Duration "SancMod" $Val.ModID)}}
     {{else}}
       {{$slice := split ($LegacyMine.Value) "™"}}
-      {{execCC 320 nil 0 (sdict "sancUsr" .User.ID "sancRes" (index $slice 1) "sancDur" (index $slice 2) "sancMod" (toInt (index $slice 3)) "OptArgs" (index $slice 0))     "SancUsr" .User.ID "SancRes" (index $slice 1) "SancDur" (index $slice 2) "SancMod" (toInt (index $slice 3))}}
+      {{execCC 320 nil 0 (sdict "SancUsr" .User.ID "SancRes" (index $slice 1) "SancDur" (index $slice 2) "SancMod" (toInt (index $slice 3)))}}
     {{end}}
     {{dbDel .User.ID "gulag"}}
     {{return}}
@@ -26,84 +66,97 @@
 
 {{end}}
 
-{{/* ---------- Active Warns Cleanup ---------- */}}
-{{if $FrzSld := $SancProfile.ActiveWarns.FrzSld}} {{if gt currentTime.Unix $FrzSld.ExpiresAt}} {{$SancProfile.ActiveWarns.Del "FrzSld"}} {{end}} {{end}}
-{{if $PreBan := $SancProfile.ActiveWarns.PreBan}} {{if gt currentTime.Unix $PreBan.ExpiresAt}} {{$SancProfile.ActiveWarns.Del "PreBan"}} {{end}} {{end}}
-{{if not (eq (str $SancProfile) (str $SPBk))}} {{dbSet .User.ID "SancProfile" $SancProfile}} {{end}}
+{{/* ---- Active Warns Cleanup ---- */}}
+{{if $FrzSld := $SancProfile.ActiveWarns.FrzSld}} {{if gt $UTS (toInt $FrzSld.ExpiresAt)}} {{$SancProfile.ActiveWarns.Del "FrzSld"}} {{end}} {{end}}
+{{if $PreBan := $SancProfile.ActiveWarns.PreBan}} {{if gt $UTS (toInt $PreBan.ExpiresAt)}} {{$SancProfile.ActiveWarns.Del "PreBan"}} {{end}} {{end}}
+{{if not (eq (str $SancProfile) (str $SPBk))}} {{dbSet $UID "SancProfile" $SancProfile}} {{return}} {{end}}
 
-{{/* ---------- Bad Links Filter ---------- */}}
+{{/* ---- Bad Links Filter ---- */}}
 {{$BadLInvitesList := ($BadLSteamList := "")}}
-
 {{range $ImDB.BadLInvites}} {{$BadLInvitesList = joinStr "|" $BadLInvitesList .}} {{end}}
 {{range $ImDB.BadLSteam}} {{$BadLSteamList = joinStr "|" $BadLSteamList .}} {{end}}
 
 {{if reFind (print `(\[(.+)?(steamcommunity|` $BadLSteamList `).com.+\]\(.+\)|((https?:\/\/)?(discord.com\/invite\/|discord.gg\/)(` $BadLInvitesList `)))`) ($Msg := $.Message.Content)}}
   {{deleteTrigger 0}}
-  {{if not (dbGet .User.ID "FlaggedBadLink")}}
-    {{$s := execAdmin "timeout" .User.ID "MATCH REGEX · Lien vérolé" "12h"}}
-    {{dbSetExpire .User.ID "FlaggedBadLink" 0 43200}}
+  {{if not (dbGet $UID "FlaggedBadLink")}}
+    {{$s := execAdmin "timeout" $UID "MATCH REGEX · Lien vérolé" "12h"}} {{template "TStD" ($TC := sdict "TS" (add $UTS 43195) "TR" true)}}
+    {{dbSetExpire $UID "FlaggedBadLink" 0 43200}}   
 
-    {{$ModChn := "【🔴】tchat-modération"}}
-
-    {{$DStr := ((timestampToTime (add currentTime.Unix 43190)).In (loadLocation "Europe/Paris")).Format (or .Style "02 January 2006 15:04:05")}}
-    {{range $k, $v := sdict "uary" "vier" "ebruary" "évrier" "ch" "s" "pr" "vr" "ay" "ai" "une" "uin" "uly" "uillet" "ugus" "oû" "ber" "bre" "Dec" "Déc"}} {{$DStr = split $DStr $k | joinStr $v}} {{end}}
-
-    {{$MsgID := sendMessageRetID $ModChn (cembed
+    {{$MsgID := sendMessageRetID ($ModChn := "【🔴】tchat-modération") (cembed
       "color" 0xda373c
-      "title" (print "⚠️ Message suspect détecté")
-      "description" (print "Message suspect posté par l'utilisateur <@" .User.ID ">\nL'utilisateur a été mute le temps qu'un modérateur prenne une décision.\n\n**Contenu du message :**\n" $Msg)
+      "title" "⚠️ Message suspect détecté"
+      "description" (print "Message suspect posté par l'utilisateur <@" $UID ">\nL'utilisateur a été mute le temps qu'un modérateur prenne une décision.\n\n**Contenu du message :**\n" $Msg)
       "fields" (cslice ($eLine := (sdict "name" " " "value" " ")) (sdict "name" "Options disponibles" "value" "🔨 · Bannir la personne\n❌ · Relâcher (faux positif, etc.)"))
-      "footer" (sdict "text" (print "Si aucune action n'est prise avant le " $DStr ", la personne actuellement exclue sera automatiquement bannie 14 jours du serveur.")
+      "footer" (sdict "text" (print "Si aucune action n'est prise avant le " $TC.FTime ", la personne actuellement exclue sera automatiquement bannie 14 jours du serveur.")
                       "icon_url" "https://cdn.discordapp.com/emojis/1142991749984292914.gif?quality=lossless")
     )}}
     {{addMessageReactions $ModChn $MsgID (cslice "🔨" "❌")}}
 
-    {{dbSetExpire $MsgID "SusMbr" (sdict "UserID" .User.ID "WarnMsgID" $MsgID) 43195}}
-    {{scheduleUniqueCC 329 $ModChn 43200 (print "SusCase_" .User.ID) (dict "SancUID" .User.ID "SancDur" "14d" "SancRes" "BAN AUTO · Correspondance lien vérolé" "SancMod" 204255221017214977 "RemReact" $MsgID "WipePoints" true)}}
+    {{dbSetExpire $MsgID "SusMbr" (sdict "UserID" $UID "WarnMsgID" $MsgID) 43195}}
+    {{scheduleUniqueCC 329 $ModChn 43200 (print "SusCase_" $UID) (dict "SancUID" $UID "SancDur" "14d" "SancRes" "BAN AUTO · Correspondance lien vérolé" "SancMod" 204255221017214977 "RemReact" $MsgID "WipePoints" true)}}
 
   {{end}}
   {{return}}
 {{end}}
 
-{{/* ---------- Général ---------- */}}
-{{if eq .Message.ChannelID 496010398848253965}}
-  {{$IsImmun := cslice 223894107016134656 369101917659332611}}
+{{/* ---- Général ---- */}}
+{{if eq ($ChID := .Message.ChannelID) 496010398848253965}}
 
-  {{/* ---------- Buy 44 ---------- */}}
-  {{if and ($buy44 := dbGet 44 "Buy") (gt (toInt $buy44.Value) 0) (not (in $IsImmun .User.ID))}}
-    {{if gt (sub (toInt $buy44.Value) 1) 0}} {{dbSet 44 "Buy" (sub (toInt $buy44.Value) 1)}} {{else}} {{dbDel 44 "Buy"}} {{end}}
-    {{sendMessage 1168339319124131871 (print "Buy 44 : " .User.Mention)}}
-    {{sendDM "Tu viens de te faire Goulag par le Buy 44 ! On se revoit dans 5 minutes !"}}
-    {{execCC 320 nil 0 (sdict "sancUsr" .User.ID "sancRes" "AutoSanc" "sancDur" "5m")}}
+  {{/* ---- Buy 44 ---- */}}
+  {{if and ($bVal := dbGet ($a := 44) "Buy") (gt (toInt $bVal.Value) 0) (not (in $ImDB.BanImmun $UID))}}
+    {{if gt (sub (toInt $bVal.Value) 1) 0}} {{$a := dbIncr $a "Buy" -1}} {{else}} {{dbDel $a "Buy"}} {{end}}
+    {{sendMessage 1168339319124131871 (print "Buy " $a " : <@" $UID ">")}}
+    {{sendDM (print "Tu viens de te faire Goulag par le Buy " $a " ! On se revoit dans 5 minutes !")}}
+    {{execCC 320 nil 0 (sdict "SancUsr" $UID "IsTroll" true "SancRes" (print "Buy " $a) "SancDur" "5m")}}
     {{return}}
   {{end}}
 
-  {{/* ---------- Buy 45 ---------- */}}
-  {{if and (dbGet 45 "Buy") (not (in $IsImmun .User.ID))}}
-    {{sendMessage 1168339319124131871 (print "Buy 45 : " .User.Mention)}}
-    {{sendDM "Oups… Tu as été assommé et transporté au Goulag par un Buy 45. On se revoit dans 2 minutes !"}}
-    {{execCC 320 nil 0 (sdict "sancUsr" .User.ID "sancRes" "AutoSanc" "sancDur" "2m")}}
-    {{return}}
+  {{/* ---- Buy 45/50 ---- */}}
+  {{range (cslice 45 50)}}
+    {{if and ($a := (dbGet . "Buy").Value) (not (in $ImDB.BanImmun $UID))}}
+      {{$UsrList := or (dbGet (toInt (index $a 1)) "Buy").Value (cslice )}}
+      {{if not (in $UsrList $UID)}}
+        {{sendMessage 1168339319124131871 (print "Buy " . " : <@" $UID ">")}}
+        {{dbSet (toInt (index $a 1)) "Buy" ($UsrList.Append $UID)}}
+      {{end}}
+    {{end}}
   {{end}}
 
-  {{/* ---------- Buy 50 ---------- */}}
-  {{if and (dbGet 50 "Buy") (not (in $IsImmun .User.ID))}}
-    {{sendMessage 1168339319124131871 (print "Buy 50 : " .User.Mention)}}
-    {{sendDM "Oups… Tu as été assommé et transporté au Goulag par un Buy 50. On se revoit dans 1 heure !"}}
-    {{execCC 320 nil 0 (sdict "sancUsr" .User.ID "sancRes" "AutoSanc" "sancDur" "1h")}}
-    {{return}}
+  {{/* ---- BuyVIP 4 ---- */}}
+  {{if $bVal := (dbGet 104001 "Buy").Value}} {{$a := 4}}
+    {{if lt $bVal $UTS}}
+      {{$Rnd := randInt 2}}
+
+      {{$Msg := "as obtenu 300 Points"}}
+      {{if eq $Rnd 1}}
+        {{if $IsLv10orHigher}} {{$a := dbIncr $UID "Points" 300}}
+        {{else}} {{$Msg = "échappes au goulag\n-# (normalement ici c'est 300 Points mais t'es pas lv10 donc t'as rien)"}} {{end}}
+      {{else}}
+        {{$Msg = "as obtenu 10 Minutes de Goulag"}}
+        {{execCC 320 nil 0 (sdict "SancUsr" $UID "IsTroll" true "SancRes" (print "BuyVIP " $a) "SancDur" "10m")}}
+      {{end}}
+
+      {{sendMessage nil (print "BuyVIP " $a " : <@" $UID ">, tu " $Msg ".")}}
+      {{sendMessage 1168339319124131871 (print "BuyVIP " $a " : <@" $UID "> · Résultat : " (index (cslice "Goulag" "Points") $Rnd))}}
+      {{return}}
+
+    {{else}} {{dbDel 104001 "Buy"}} {{end}}
   {{end}}
 
-{{end}} {{/* --- End --- */}}
+{{/* ---- Humour noir ---- */}}
+{{else if (eq $ChID 506544049763909634 828011798086418513)}} 
+  {{deleteMessage nil (toInt (dbGet $ChID "HNWarn").Value)}}
+  {{$MsgID := sendMessageRetID nil (cembed "color" 0xAC0000 "title" "⚠️ RAPPEL" "fields" (cslice (sdict "name" " " "value" (print "Les canaux d'Humour noir __**NE SONT PAS** des canaux NSFW__, ce qui signifie que tout contenu gore, sexuellement explicite ou violent est __**FORMELLEMENT INTERDIT**__."))))}}
+  {{dbSet $ChID "HNWarn" (str $MsgID)}}
 
-{{/* ---------- Livre d'Argent ---------- */}}
-{{if eq .Message.ChannelID 783725584336420906}} {{removeRoleID 784090664580415508 300}} {{end}}
+{{/* ---- Livre d'or ---- */}}
+{{else if eq $ChID 783725584336420906}}
+  {{removeRole 784090664580415508 300}}
 
-{{/* ---------- Livre Platine ---------- */}}
-{{if eq .Message.ChannelID 1030950947993702451}}
-  {{removeRoleID 1030956478384832664 300}}
-  {{if $platine := dbGet 0 "platinium"}} {{deleteMessage 1030950947993702451 (toInt $platine.Value)}} {{end}}
+{{/* ---- Livre Platine ---- */}}
+{{else if eq $ChID 1030950947993702451}}
+  {{removeRole 1030956478384832664 300}}
+  {{if $PlatMsg := dbGet 0 "platinium"}} {{deleteMessage $ChID (toInt $PlatMsg.Value)}} {{end}}
   {{dbSet 0 "platinium" (toString .Message.ID)}}
-{{end}}
 
-{{/* --- REGEX END ---*/}}
+{{end}}
