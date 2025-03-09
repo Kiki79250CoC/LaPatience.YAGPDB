@@ -2,6 +2,15 @@
 {{$PtsBL := cslice}}
 {{$PtsToAdd := 150}}
 
+{{/* HN warning trollreac automatic deletion */}}
+{{if eq ($ChID := .ReactionMessage.ChannelID) 506544049763909634 828011798086418513}}
+  {{$MsgID := toInt (dbGet $ChID "HNWarn").Value}}
+  {{if eq .ReactionMessage.ID $MsgID}}
+    {{deleteAllMessageReactions $ChID $MsgID}}
+    {{return}}
+  {{end}}
+{{end}}
+
 {{/* MOD · Action Liens inappropriés */}}
 {{if $SusMbr := (dbGet .ReactionMessage.ID "SusMbr").Value}}
   {{if or (eq .Reaction.Emoji.Name "🔨") (eq .Reaction.Emoji.Name "❌")}}
@@ -9,7 +18,7 @@
     {{dbDel $SusMbr.UserID "FlaggedBadLink"}}
     {{dbDel .ReactionMessage.ID "SusMbr"}}
   {{end}}
-  {{if eq .Reaction.Emoji.Name "🔨"}} {{execCC 329 nil 0 (dict "SancUID" $SusMbr.UserID "SancDur" "14d" "SancRes" "Lien NSFW" "SancMod" .User.ID "CancelScheduledCC" true "ScheduledCCName" (print "SusCase_" $SusMbr.UserID))}}
+  {{if eq .Reaction.Emoji.Name "🔨"}} {{execCC 329 nil 0 (dict "SancUID" $SusMbr.UserID "SancDur" "14d" "SancRes" "Lien NSFW" "SancMod" .User.ID "CancelScheduledCC" true "ScheduledCCName" (print "SusCase_" $SusMbr.UserID) "WipePoints" true)}}
   {{else if eq .Reaction.Emoji.Name "❌"}} {{cancelScheduledUniqueCC 329 (print "SusCase_" $SusMbr.UserID)}} {{execAdmin "untimeout" $SusMbr.UserID}} {{end}}
   {{return}}
 {{end}}
@@ -37,17 +46,16 @@
 {{end}}
 
 {{/*Buy 17 - Réactions*/}}
-{{if $b17 := dbGet $UID "MsgLuck"}}
-  {{$MsgIDs := $b17.Value}}
-  {{range (cslice 0 1 2)}}
-    {{if eq $.ReactionMessage.ID (index $MsgIDs .)}}
-      {{if eq . (toInt (index $MsgIDs 3))}}
+{{if $bVal := (dbGet $UID "MsgLuck").Value}}
+  {{range (cslice 1 2 3)}}
+    {{if eq $.ReactionMessage.ID (index $bVal .)}}
+      {{if eq . ($i := index $bVal 0)}}
         {{sendMessage nil (print "🎉 GG <@" $UID ">, tu repars avec 2 500 Points !")}} {{$a := dbIncr $UID "Points" 3500}}
-        {{sendMessage 1168339319124131871 (print "Buy 17 : <@" $UID "> · Résultat : Victoire · Message N°" (add (index $MsgIDs 3) 1))}}
+        {{sendMessage 1168339319124131871 (print "Buy 17 : <@" $UID "> · Résultat : Victoire · Message choisi : N°" .)}}
       {{else}}
         {{sendMessage nil (print "💣 Désolé <@" $UID ">, ce n'était pas le bon, donc tu files 10 minutes au Goulag. Allez, salut !")}}
-        {{execCC 320 nil 0 (sdict "sancUsr" $UID "sancRes" "AS" "sancDur" "10m")}}
-        {{sendMessage 1168339319124131871 (print "Buy 17 : <@" $UID "> · Résultat : Perdu · Message Gagnant : N°" (add (index $MsgIDs 3) 1))}}
+        {{sendMessage 1168339319124131871 (print "Buy 17 : <@" $UID "> · Résultat : Perdu · Message choisi : N°" . " · Message gagnant : N°" $i)}}
+        {{execCC 320 nil 0 (sdict "SancUsr" $UID "SancRes" "Buy 17" "SancDur" "10m" "IsTroll" true)}}
       {{end}}
     {{end}}
   {{end}}
