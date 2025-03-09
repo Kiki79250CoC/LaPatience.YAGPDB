@@ -870,7 +870,7 @@ DISCLAIMER : Elements in ‹quotation marks› are variable arguments (IE: User 
 
 
 
-    • CATEGORY 10 - SCORE
+    • CATEGORY 10 - DEPRECATED COMMANDS
 
         • 305 - COMMAND
           › Trigger   : -score
