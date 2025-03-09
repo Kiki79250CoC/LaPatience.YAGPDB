@@ -1,111 +1,142 @@
+{{$ImDB := (dbGet 0 "ImmunDB").Value}}
 {{$UTS := currentTime.Unix}}
 
-{{if and (reFind `(\[.+\]\(.+\))` ($Msg := $.Message.Content)) (not (or (in (cslice 223894107016134656 369101917659332611) .User.ID) (hasRoleID 496010603601854464)))}}
-  {{deleteTrigger 0}} {{sendDM "Les hyperliens sont prohibés sur le serveur pour des raisons de sécurité."}}
-  {{sendMessage 1168339319124131871 (print "Message de <@" .User.ID "> sur le <#" .Message.ChannelID "> contenant un hyperlien intercepté. Contenu du message :\n\n" $Msg)}}
+{{$IsLv10orHigher := ""}}
+{{$Mbr := getMember ($UID := .User.ID)}}
+{{range (cslice 925745243180118034 925745253087076392 925756577510748210 925758251662987264 925761123695886376 925745256207618139 925766056650362991 925767790034583552 925769441747296316 1054107222856192172 1106395328447533077)}}
+  {{if in $Mbr.Roles .}} {{$IsLv10orHigher = .}} {{break}} {{end}}
 {{end}}
 
-{{/* -------------------- */}}
+{{/* ---- Anti-hyperlien ---- */}}
+{{if and (reFind `(\[.+\]\(.+\))` ($Msg := $.Message.Content)) (not (or (in $ImDB.BanImmun $UID) (hasRole 496010603601854464)))}}
+  {{if not (dbGet $UID "FlaggedBadLink")}}
+    {{deleteTrigger 0}} {{sendDM "Les hyperliens\\* sont prohibés sur le serveur pour des raisons de sécurité.\n-# \\* Ou « liens masqués »."}}
+    {{sendMessage 1168339319124131871 (print "Message de <@" $UID "> sur le <#" .Message.ChannelID "> contenant un hyperlien intercepté. Contenu du message :\n\n" $Msg)}}
+    {{return}}
+  {{end}}
+{{end}}
 
+{{/* ---- Buy 47 ---- */}}
+{{if $bVal := dbGet $UID ($a := "Buy47")}}
+  {{if lt $UTS (add $bVal.UpdatedAt.Unix (toInt $bVal.Value))}} {{deleteTrigger 0}}
+  {{else}} {{dbDel $UID $a}} {{end}}
+  {{return}}
+{{end}}
+
+{{/* ---- Général ---- */}}
 {{if eq .Message.ChannelID 496010398848253965}}
 
-  {{/* ---------- Buy 16 ---------- */}}
-  {{if $b16 := (dbGet 16 "Buy").Value}}
-    {{$ThiefID := toInt (index $b16 0)}}
-    {{if and (lt (sub (index $b16 1) $UTS) 1) (not (eq $ThiefID .User.ID))}}
-      {{dbDel 16 "Buy"}}
-
-      {{$MsgP1 := print "Tiens, on dirait que <@" $ThiefID "> a tenté de faire les poches de " .User.Mention}} {{$MsgP2 := ($MsgP3 := ($ResSt := ""))}}
-      {{$ThScr := eq (randInt 30) 15}} {{$ViAct := or (toInt (dbGet .User.ID "Points").Value) 0}} {{$r := 1159817155567681577}} {{$b33 := toInt (dbGet 33 "Buy").Value}}
-
-      {{if $ThScr}} {{$ViAct = or (toInt (dbGet .User.ID "score")) 0}} {{end}}
-
-      {{if or (lt $ViAct 600) (hasRoleID 1165268999437824111) $ThScr $b33}}
-        {{$MsgP2 = ", sauf qu'un flic l'a vu…\n"}} {{$ResSt = "raté"}}
-        {{if $ThScr}} {{$MsgP3 = print "Suite à un malentendu avec l'autre là, bin pour l'emmerder je lui pique du Score. " .User.Mention ", c'est cadeau."}} {{$a := dbIncr $ThiefID "score" -300}} {{$a := dbIncr .User.ID "score" 300}} {{if not (targetHasRoleID $ThiefID $r)}} {{giveRoleID $ThiefID $r}} {{end}}
-        {{else}} {{$MsgP3 = print "Du coup sur les **600 points**, 300 se sont envolés vers les cieux et le reste vont dans la poche de " .User.Mention ". 💸"}} {{$a := dbIncr .User.ID "Points" 300}} {{end}}
-        {{if and $b33 (ge $ViAct 600)}} {{$a := dbIncr $b33 "Points" 600}} {{dbDel 33 "Buy"}} {{$MsgP3 = print $MsgP3 "\n\n*Au passage, si ce buy a raté, c'est à cause de <@" $b33 "> et de son Buy 33.\nBuy 33 qui est donc remboursé.*"}} {{end}}
+  {{/* ---- Buy 16 ---- */}}
+  {{if $bVal := (dbGet ($a := 16) "Buy")}}
+    {{$BuyerID := toInt (index $bVal.Value 0)}}
+    {{if and (gt $UTS (add $bVal.UpdatedAt.Unix (toInt (index $bVal.Value 1)))) (not (eq $BuyerID $UID)) $IsLv10orHigher}}
+      {{dbDel $a "Buy"}}
+      {{$Reslt := ($ResSt := "")}} {{$ViAct := or (toInt (dbGet $UID "Points").Value) 0}}
+      {{if or (lt $ViAct 600) (hasRole 1236668311517925376)}}
+        {{$Reslt = print ", sauf qu'un flic l'a vu…\nDu coup sur les **600 points**, 300 se sont envolés vers les cieux et le reste vont dans la poche de <@" $UID ">. 💸"}} {{$ResSt = "raté"}}
+        {{$a := dbIncr $UID "Points" 300}}
       {{else}}
-        {{$MsgP2 = " et a trouvé "}} {{$ResSt = "réussi"}}
-        {{if $ThScr}} {{$MsgP3 = "quelque chose dans l'une d'elles.\nÉtonamment ce n'était pas 600 Points, mais… **600 de Score** ?! <:jesus_what:1054829025161388063>"}} {{$a := dbIncr .User.ID "score" -600}} {{$a := dbIncr $ThiefID "score" 600}} {{if not (targetHasRoleID $ThiefID $r)}} {{giveRoleID $ThiefID $r}} {{end}}
-        {{else}} {{$MsgP3 = "**600 Points** dans l'une d'elles… 💸"}} {{$a := dbIncr .User.ID "Points" -600}} {{$a := dbIncr $ThiefID "Points" 1200}} {{end}}
+        {{$Reslt = " et a trouvé **600 Points** dans l'une d'elles… 💸"}} {{$ResSt = "réussi"}}
+        {{$a := dbIncr $UID "Points" -600}} {{$a := dbIncr $BuyerID "Points" 1200}}
+      {{end}}
+      {{sendMessage nil (print "Tiens, on dirait que <@" $BuyerID "> a tenté de faire les poches de <@" $UID ">" $Reslt)}}
+      {{sendMessage 808035430410092544 (print "Buy " $a " **" $ResSt "** : <@" $BuyerID "> (Voleur) · <@" $UID "> (Victime)")}}
+      {{return}}
+    {{end}}
+  {{end}}
+
+  {{/* ---- BuyVIP 5 ---- */}}
+  {{if $bVal := (dbGet 105001 "Buy").Value}} {{$a := 5}}
+    {{if and (lt (sub (index $bVal 1) $UTS) 1) (not (eq .User.ID (toInt (index $bVal 0)))) $IsLv10orHigher}}
+      {{dbDel 105001 "Buy"}} {{$r := 1158197672071680083}}
+      {{sendMessage nil (print "Tiens, on dirait que <@" $UID "> viens de se faire voler 200 points par… une bombe ?!")}}
+      {{sendMessage 1168339319124131871 (print "BuyVIP " $a " : <@" $UID ">")}}
+      {{$a := dbIncr $UID "Points" -200}}
+      {{if and (lt (toInt $a) 0) (not (hasRole $r))}} {{addRole $r}} {{end}}
+      {{return}}
+    {{end}}
+  {{end}}
+
+  {{/* ---- Buy 4/BL ---- */}}
+  {{if dbGet 4 "Buy"}}
+    {{$Pt := 250}} {{$UsrList := or (dbGet 401 "Buy").Value (cslice )}}
+    {{if or (dbGet 400 "Buy") (le (len $UsrList) 2)}} {{if and (not (in $UsrList (str $UID))) (not $IsLv10orHigher)}} {{dbSet 401 "Buy" ($UsrList.Append (str $UID))}} {{end}}
+    {{else}}
+      {{$PWin := toInt (index (shuffle $UsrList) (randInt 0 (len $UsrList)))}}
+      {{if $BGlg := dbGet ($a := 43) "Buy"}}
+        {{dbDel $a "Buy"}}
+        {{sendMessage nil (print "🔥 <@" $PWin ">, tu gagnes 1 aller-retour au Goulag gratuitement comme ça.\n-# *(Offert par <@" (toInt $BGlg.Value) "> au passage)*.")}}
+        {{execCC 320 nil 0 (sdict "SancUsr" $PWin "IsTroll" true "SancRes" (print "Buy " $a) "SancDur" "15m")}}
+      {{else}}
+        {{sendMessage nil (print "🔥 <@" $PWin ">, tu gagnes " $Pt " Points gratuitement comme ça.")}}
+        {{$a := dbIncr $PWin "Points" $Pt}}
+      {{end}}
+      {{dbDel 401 "Buy"}} {{dbSetExpire 400 "Buy" 0 (randInt 55 80)}}
+      {{return}}
+    {{end}}
+  {{end}}
+
+  {{/* ---- Bombe ---- */}}
+  {{if $Bomb := (dbGet 0 "Bomb").Value}}
+    {{if and (or (and (not $Bomb.TrAUsr) (eq (index $Bomb.Usr 1) $UID)) (and $Bomb.TrAUsr $Bomb.UsrStk (in $Bomb.Usr $UID))) (le (sub $Bomb.TrigTS $UTS) 0)}}
+      {{dbDel 0 "Bomb"}}
+      {{$SDur := reReplace "day" (reReplace "hour" (reReplace "and" (humanizeDurationSeconds (toDuration ($SDurD := print $Bomb.ScTime "m"))) "et") "heure") "jour"}}
+      {{$Msg := print "Désolé " .User.Mention ", mais il semblerait que 💣 **La Sainte Bombe** vient de te péter à la tronche… <a:risitas_boom:1056315066653364346>\n-# À dans " $SDur "…"}}
+
+      {{if $Bomb.UsrStk}} {{$a := 26}}
+        {{$Msg = print $Msg "\n\nIl semblerait aussi qu'un paquet de monde va le suivre…"}}
+        {{execCC 290 1168339319124131871 0 (sdict "FromBID" 21 "ForceReason" (print "Bombe (avec supplément « Buy " $a " »)") "SancList" $Bomb.Usr "SancDur" $Bomb.ScTime)}}
+
+      {{else if $Bomb.TrailS}} {{$a := 25}}
+        {{$Msg = print $Msg "\n\nIl semblerait aussi que les 3 personnes précédentes à avoir parlé doivent le suivre…"}}
+        {{execCC 290 1168339319124131871 0 (sdict "FromBID" 21 "ForceReason" (print "Bombe (avec supplément « Buy " $a " »)") "SancList" $Bomb.TrailL "SancDur" $Bomb.ScTime)}}
+
+      {{else}}
+        {{removeRole 967187787260518440}}
+        {{execCC 320 nil 0 (sdict "SancUsr" .User.ID "IsTroll" true "SancRes" "Bombe" "SancDur" (print $Bomb.ScTime "m"))}}
+        {{sendDM "Tu es la personne élue ! 💣 **La Sainte Bombe** vient de péter sur toi !\n-# Un sincère merci (de la part des autres) pour le sacrifice.\n-# Allez, on se revoit dans " $SDur "."}}
+
       {{end}}
 
-      {{sendMessage nil (print $MsgP1 $MsgP2 $MsgP3)}}
-      {{$SC := "🟡"}} {{if $ThScr}} {{$SC = "🟣"}} {{end}} {{sendMessage 808035430410092544 (print $SC " · Buy 16 **" $ResSt "** : <@" $ThiefID "> (Voleur) · " .User.Mention " (Victime)")}}
+      {{sendMessage nil $Msg}}
       {{return}}
-    {{end}}
-  {{end}}
 
-  {{/* ---------- BuyVIP 5 ---------- */}}
-  {{if $bvip5 := (dbGet 10005 "Buy").Value}}
-    {{if and (lt (sub (index $bvip5 1) $UTS) 1) (not (eq .User.ID (toInt (index $bvip5 0))))}}
-      {{dbDel 10005 "Buy"}} {{$r := 1158197672071680083}}
-      {{sendMessage nil (print "Tiens, on dirait que " .User.Mention " viens de se faire voler 200 points par… une bombe ?!")}}
-      {{$a := dbIncr .User.ID "Points" -200}}
-      {{if and (lt (toInt $a) 0) (not (hasRoleID $r))}} {{addRoleID $r}} {{end}}
-      {{return}}
-		{{end}}
-  {{end}}
-
-  {{/* ---------- Boutique Légendaire ---------- */}}
-  {{if dbGet 21 "Buy"}}
-    {{$pt := 250}} {{$entries := cslice}}
-    {{if $DBentry := dbGet 211 "Buy"}} {{$entries = $DBentry.Value}} {{end}}
-    {{if or (dbGet 210 "Buy") (le (len $entries) 2)}} {{if not (in $entries (toString .User.ID))}} {{dbSet 211 "Buy" ($entries.Append (toString .User.ID))}} {{end}}
     {{else}}
-      {{$win := toInt (index (shuffle $entries) (randInt 0 (len $entries)))}}
-      {{sendMessage nil (print "🔥 <@" $win ">, tu gagnes " $pt " Points gratuitement comme ça.")}}
-      {{$a := dbIncr $win "Points" $pt}} {{dbDel 211 "Buy"}} {{dbSetExpire 210 "Buy" "#" (randInt 55 80)}}
-      {{return}}
+      {{if $Bomb.TrailS}}
+        {{$TrUL := or $Bomb.TrailL (cslice)}}
+        {{if eq (len $TrUL) 4}} {{if not (in $TrUL $UID)}} {{$TrUL = cslice (index $TrUL 1) (index $TrUL 2) (index $TrUL 3) $UID}} {{end}}
+        {{else}} {{if not (in $TrUL $UID)}} {{$TrUL = $TrUL.Append $UID}} {{end}} {{end}}
+        {{$Bomb.Set "TrailL" $TrUL}}
+        {{dbSet 0 "Bomb" $Bomb}}
+
+      {{end}}
     {{end}}
   {{end}}
 
-{{else if eq .Message.ChannelID 496012807045644288}}
-
-  {{if and (dbGet 28 "Buy") (reFind `(?i)\A(?:-|<@!?204255221017214977>)(points)\b` $.Message.Content)}}
-    {{execCC 320 nil 0 (sdict "sancUsr" .User.ID "sancRes" "AutoSanc.Buy" "sancDur" (toDuration "5m") "sancMod" 0)}}
-    {{dbDel 28 "Buy"}}
-    {{return}}
-  {{end}}
-
 {{end}}
 
-{{/* ---------- Bombe ---------- */}}
-{{if $bomb := (dbGet 0 "bomb").Value}}
-  {{if and (eq (index $bomb 0) .User.ID) (lt (sub (index $bomb 1) $UTS) 0)}}
-    {{dbDel 0 "bomb"}}
-    {{removeRoleID 967187787260518440}}
-    {{sendMessage nil (print "Désolé " .User.Mention ", mais il semblerait que 💣 **La Sainte Bombe** viens de t'exploser à la gueule… À dans " ($dur := (reReplace "hour" (reReplace "and" (humanizeDurationSeconds (toDuration (print (index $bomb 2) "m"))) "et") "heure")) ". <a:risitas_boom:1056315066653364346>")}}
-    {{execCC 320 nil 0 (sdict "sancUsr" .User.ID "sancRes" "AutoSanc.Bomb" "sancDur" (toDuration (print (index $bomb 2) "m")) "sancMod" 0)}}
-    {{sendDM "Tu es l'élu(e) ! 💣 **La Sainte Bombe** vient de péter sur toi !\nUn sincère merci (de la part des autres) pour le sacrifice.\nAllez, on se revoit dans " $dur "."}}
+{{/* ---- Banword Boutique ---- */}}
+{{if $ImDB.BWToggle}} {{$a := 48}}
+  {{if and ($r := reFind (print `(?i)(\b(` $ImDB.BWRegex `)\b|b(an)?(-)?\s*w(ord)?(s|ed)?|mot?s?\s*(de)?\s*((1|in)terdit?s?|bann?i?e?s?))`) $.Message.Content) (not (in $ImDB.BanImmun $UID))}}
+    {{execCC 320 nil 0 (sdict "SancUsr" $UID "IsTroll" true "SancRes" "Banword" "SancDur" "5m")}}
+    {{sendDM (print "Tu viens de te faire avoir par un Banword (Buy " $a "\\*). On se revoit dans 5 minutes ! <:esso:1054716569449668609>\n-# \\* Le **Buy " $a "** permet à quiconque de \"bannir\" un mot pendant 15 heures, et toute personne qui prononce ce mot est transporté au Goulag pendant 5 minutes.")}}
+    {{sendMessage 1168339319124131871 (print "Buy " $a " : <@" $UID "> · Mot déclencheur : **" $r "**.")}}
     {{return}}
   {{end}}
 {{end}}
 
-{{/* ---------- Banword Boutique ---------- */}}
-{{if $banwordToggle := true}}
-  {{if and ($r := reFind `(?i)(\b(mais)\b|b(an)?(-)?\s*w(ord)?(s|ed)?)` $.Message.Content) (not (in (cslice 223894107016134656 369101917659332611) .User.ID))}}
-    {{execCC 320 nil 0 (sdict "sancUsr" .User.ID "sancRes" "AutoSanc" "sancDur" "5m")}}
-    {{sendDM "Tu viens de te faire avoir par un Banword (Buy 48*). On se revoit dans 5 minutes <:esso:1054716569449668609>\n\n\\* Le Buy 48 permet à quiconque de \"bannir\" un mot pendant 15 heures, et toute personne qui prononce ce mot est transporté au Goulag pendant 5 minutes."}}
-    {{sendMessage 1168339319124131871 (print .User.Mention " s'est mangé un Banword Boutique (**" $r "**).")}}
-    {{return}}
+{{/* ---- BuyVIP 3 ---- */}}
+{{if $bVal := dbGet 103001 "Buy"}} {{$a := 3}}
+  {{$ChList := $bVal.Value}}
+  {{if and (in $ChList .Message.ChannelID) (not (dbGet .User.ID "gulag"))}}
+    {{$NewList := cslice}} {{range $ChList}} {{if ne . $.Message.ChannelID}} {{$NewList = $NewList.Append .}} {{end}} {{end}}
+    {{if not (eq (len $NewList) 0)}} {{dbSet 103001 "Buy" $NewList}}
+    {{else}} {{dbDel 103001 "Buy"}} {{end}}
+
+    {{sendDM (print "Désolé, tu as noclip au Goulag à cause du BuyVIP " $a ". On se revoit dans 10 minutes !")}}
+    {{execCC 320 nil 0 (sdict "SancUsr" $UID "IsTroll" true "SancRes" (print "BuyVIP " $a) "SancDur" "10m")}}
+    {{sendMessage 1168339319124131871 (print "BuyVIP " $a " : Mine déclenchée par <@" $UID "> sur le channel <#" .Message.ChannelID ">.")}}
   {{end}}
 {{end}}
 
-{{/* ---------- BuyVIP 3 ---------- */}}
-{{if $buyvip3 := dbGet 10003 "Buy"}}
-  {{$channelList := $buyvip3.Value}}
-  {{if and (in $channelList .Message.ChannelID) (not (dbGet .User.ID "gulag"))}}
-    {{sendMessage 1168339319124131871 (print "BuyVIP 3 : Mine déclenchée par <@" .User.ID "> sur le channel <#" .Message.ChannelID ">.")}}
-    {{sendDM "Désolé, tu as noclip au Goulag à cause du BuyVIP 3.  On se revoit dans 10 minutes !"}}
-    {{execCC 320 nil 0 (sdict "sancUsr" .User.ID "sancRes" "AutoSanc.BuyVIP" "sancDur" (toDuration "10m") "sancMod" 0)}}
-    {{$newList := cslice}}
-    {{range $channelList}} {{if ne . $.Message.ChannelID}} {{$newList = $newList.Append .}} {{end}} {{end}}
-    {{if not (eq (len $newList) 0)}} {{dbSet 10003 "Buy" $newList}}
-    {{else}} {{dbDel 10003 "Buy"}}
-    {{end}}
-  {{end}}
-{{end}}
-
-{{/* --- REGEX END ---*/}}
+{{/* ---- REGEX END ---- */}}
