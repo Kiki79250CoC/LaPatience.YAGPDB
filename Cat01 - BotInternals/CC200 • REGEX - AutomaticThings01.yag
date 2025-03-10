@@ -113,7 +113,7 @@
 
   {{/* ---- Buy 45/50 ---- */}}
   {{range (cslice 45 50)}}
-    {{if and ($a := (dbGet . "Buy").Value) (not (in $ImDB.BanImmun $UID))}}
+    {{if and ($a := (dbGet . "Buy").Value) (not (in $ImDB.BanImmun $UID)) 0}}
       {{$UsrList := or (dbGet (toInt (index $a 1)) "Buy").Value (cslice )}}
       {{if not (in $UsrList $UID)}}
         {{sendMessage 1168339319124131871 (print "Buy " . " : <@" $UID ">")}}
