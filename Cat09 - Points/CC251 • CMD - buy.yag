@@ -26,10 +26,10 @@
   {{end}}
 {{end}}
 
-{{$Cldw := cslice 1 2 13 16 17 42 46}}
+{{$Cldw := cslice 1 2 13 16 17 42 46}} {{$TCld := cslice 14 42}}
 {{if in $Cldw $BID}} {{$BOKCldw = dbGet $UID $BIDD}} {{end}}
 
-{{if in (cslice 3 14 21 22 33 42 47) $BID}} {{if $Arg}} {{if $a = getMember (or $Arg 0)}} {{if not $a.User.Bot}} {{$b = $a.Roles}} {{if eq $BID 14}} {{if $BOKCldw = dbGet ($a = $a.User.ID) (print $BIDD "1")}} {{$EC = 21}} {{end}} {{end}} {{if in (cslice 14 21 22) $BID}} {{if or (in $b $RG) (in $b $RS)}} {{$EC = 12}} {{end}} {{end}} {{else}} {{$EC = 11}} {{end}} {{else}} {{if ne $BID 33}} {{$EC = 11}} {{end}} {{end}} {{else}} {{$EC = 10}} {{if eq $BID 33}} {{$EC = 15}} {{end}} {{end}}
+{{if in (cslice 3 14 21 22 33 42 47) $BID}} {{if $Arg}} {{if $a = getMember (or $Arg 0)}} {{if not $a.User.Bot}} {{$b = $a.Roles}} {{$a = $a.User.ID}} {{if in $TCld $BID}} {{if $BOKCldw = dbGet $a $BIDD}} {{$EC = 21}} {{end}} {{end}} {{if in (cslice 14 21 22) $BID}} {{if or (in $b $RG) (in $b $RS)}} {{$EC = 12}} {{end}} {{end}} {{else}} {{$EC = 11}} {{end}} {{else}} {{if ne $BID 33}} {{$EC = 11}} {{end}} {{end}} {{else}} {{$EC = 10}} {{if eq $BID 33}} {{$EC = 15}} {{end}} {{end}}
 {{else if in (cslice 4 18 31 32 34) $BID}} {{if hasRole ($r = (dict 4 1098981009774628886 18 1236668311517925376 31 784090664580415508 32 1030956478384832664 34 998383449008246824).Get $BID)}} {{$EC = 14}} {{end}}
 {{else if in (cslice 15 16 25 43 44 45 50) $BID}} {{if dbGet $BID "Buy"}} {{$EC = 9}} {{end}}
 {{else if eq $BID 17}} {{if dbGet $UID "MsgLuck"}} {{$EC = 9}} {{end}}
@@ -45,7 +45,7 @@
   {{else if and (eq $BID 11) (eq (randInt 150) 69)}} {{$uPts = add $uPts 1525}} {{$GMsg = print "Bien joué " $UM ", tu viens de gagner **1 500 Points** à la Loterie !"}}
   {{else if eq $BID 12}} {{$uPts = add $uPts ($loto := randInt 101)}} {{$DM = print "Tu as gagné " $loto " Points."}}
   {{else if and (eq $BID 13) (eq (randInt 2) 1)}} {{$uPts = add $uPts 2200}} {{$GMsg = print "Bien joué " $UM ", tu viens de gagner **1 000 Points** avec le " $BIDC " !"}}
-  {{else if eq $BID 14}} {{$Text := print "fié <@" $a ">"}} {{if $r = eq $UID $a}} {{$Text = "cidé de jouer pour son compte"}} {{end}} {{$Rslt := "gagné 100 Points ! Pfiou !"}} {{if eq (randInt 6) 4}} {{$Rslt = "perdu. À dans 2 heures donc."}} {{execCC 320 $ChG 0 (sdict "SancUsr" $a "SancRes" $BIDC "SancDur" "2h" "IsTroll" true)}} {{else}} {{if $r}} {{$uPts = add $uPts 100}} {{else}} {{$p := dbIncr $a "Points" 100}} {{end}} {{end}} {{$GMsg = print $UM " a dé" $Text " à la roulette russe.\n<@" $a "> presse la détente et… a " $Rslt}} {{dbSetExpire $a (print $BIDD "1") 0 86400}}
+  {{else if eq $BID 14}} {{$Text := print "fié <@" $a ">"}} {{if $r = eq $UID $a}} {{$Text = "cidé de jouer pour son compte"}} {{end}} {{$Rslt := "gagné 100 Points ! Pfiou !"}} {{if eq (randInt 6) 4}} {{$Rslt = "perdu. À dans 2 heures donc."}} {{execCC 320 $ChG 0 (sdict "SancUsr" $a "SancRes" $BIDC "SancDur" "2h" "IsTroll" true)}} {{else}} {{if $r}} {{$uPts = add $uPts 100}} {{else}} {{$p := dbIncr $a "Points" 100}} {{end}} {{end}} {{$GMsg = print $UM " a dé" $Text " à la roulette russe.\n<@" $a "> presse la détente et… a " $Rslt}}
   {{else if eq $BID 16}} {{dbSet $BID "Buy" (cslice $UID ($a = 30))}} {{$DM = print $DM "\nLa magie opérera dans " $a " secondes…"}}
   {{else if eq $BID 17}} {{$MsgIDs := cslice (randInt 1 4) 0 0 0}} {{sendMessage $ChG (print "## " $BIDC " · Alors " $UM ", c'est lequel le bon message ?")}} {{range (seq 1 4)}} {{$MsgIDs.Set . ($Msg := sendMessageRetID $ChG (print "Message " .))}} {{addMessageReactions $ChG $Msg "✅"}} {{end}} {{dbSetExpire $UID "MsgLuck" $MsgIDs 86400}}
   {{else if in (cslice 18 31 32 34) $BID}} {{addRole $r}} {{removeRole $r (or ((dict 18 86400 34 259200).Get $BID) 0)}}
@@ -73,7 +73,8 @@
   {{if $GMsg}} {{sendMessage $ChG $GMsg}} {{end}}
   {{if $BMsg}} {{sendMessage $ChB (print $BMsg "\n-#" $BIDC)}} {{end}}
 
-  {{if in $Cldw $BID}} {{dbSetExpire $UID $BIDD 0 (or ((dict 1 3600  13 1800  16 7200  42 1800  46 1800).Get $BID) 86400)}} {{end}}
+  {{if in $TCld $BID}} {{dbSetExpire $a $BIDD 0 (or ((dict 42 1800).Get $BID) 86400)}} {{end}}
+  {{if in $Cldw $BID}} {{dbSetExpire $UID $BIDD 0 (or ((dict 1 3600  13 1800  16 7200  46 1800).Get $BID) 86400)}} {{end}}
 
   {{if not $EC}}
     {{dbSet $UID "Points" (sub $uPts $pr)}}
